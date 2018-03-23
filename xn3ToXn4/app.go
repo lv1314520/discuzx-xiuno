@@ -19,7 +19,7 @@ func (this *App) Init() {
 	xn3db, err := db3.Connect()
 	if err != nil {
 		fmt.Println(err)
-		log.Fatalln("Xiuno3 数据库配置错误")
+		log.Fatalln("\r\nXiuno3 数据库配置错误")
 	}
 
 	err = xn3db.Ping()
@@ -27,7 +27,7 @@ func (this *App) Init() {
 		log.Fatalln("\r\nXiuno3: " + err.Error())
 	}
 
-	fmt.Println("")
+	fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 	db4 := lib.Database{}
 	fmt.Println("正在配置 Xiuno4 数据库")
@@ -35,7 +35,7 @@ func (this *App) Init() {
 
 	xn4db, err := db4.Connect()
 	if err != nil {
-		log.Fatalln("Xiuno4 数据库配置错误")
+		log.Fatalln("\r\nXiuno4 数据库配置错误")
 	}
 
 	err = xn4db.Ping()
@@ -43,5 +43,7 @@ func (this *App) Init() {
 		log.Fatalln("\r\nXiuno4: " + err.Error())
 	}
 
-	fmt.Println(xn3db.Ping(), xn4db.Ping())
+	if db3.DBHost == db4.DBHost && db3.DBName == db4.DBName {
+		log.Fatalln("\r\n不能在同一个数据库里升级，否则数据会被清空！请将新论坛安装到其他数据库。")
+	}
 }

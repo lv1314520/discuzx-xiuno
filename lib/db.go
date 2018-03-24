@@ -3,6 +3,7 @@ package lib
 import (
 	"bufio"
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"os"
@@ -15,7 +16,8 @@ type Database struct {
 	DBPassword,
 	DBName,
 	DBPort,
-	DBChar string
+	DBChar,
+	DSN string
 }
 
 func (this *Database) Setting() {
@@ -92,7 +94,7 @@ func (this *Database) Setting() {
 /**
   连接数据库
 */
-func (this *Database) Connect() (db *sql.DB, err error) {
+func (this *Database) MakeDSN() {
 	if this.DBHost == "" {
 		this.DBHost = "127.0.0.1"
 	}
@@ -109,20 +111,27 @@ func (this *Database) Connect() (db *sql.DB, err error) {
 		this.DBChar = "utf8"
 	}
 
+	host := ""
 	if this.DBHost != "" {
-		this.DBHost = "tcp(" + this.DBHost + ":" + this.DBPort + ")"
+		host = "tcp(" + this.DBHost + ":" + this.DBPort + ")"
 	}
 
-	dbStr := fmt.Sprintf("%s:%s@%s/%s?%s",
+	this.DSN = fmt.Sprintf("%s:%s@%s/%s?%s",
 		this.DBUser,
 		this.DBPassword,
-		this.DBHost,
+		host,
 		this.DBName,
 		this.DBChar,
 	)
+}
 
-	db, err = sql.Open("mysql", dbStr)
-	return
+func (this *Database) Connect() (db *sql.DB, err error) {
+	this.MakeDSN()
+	if this.DSN != "" {
+		return sql.Open("mysql", this.DSN)
+	}
+
+	return nil, errors.New("数据库连接失败")
 }
 
 /**
@@ -139,4 +148,15 @@ func (this *Database) FieldAddPrev(prev, fieldStr string) string {
 	newFieldStr := strings.Join(newFieldArr, ",")
 
 	return newFieldStr
+}
+
+func (this *Database) FieldMakeQmark(str string) string {
+	strArr := strings.Split(str, ",")
+	strLen := len(strArr)
+
+	arr := make([]string, strLen)
+	for i := 0; i < strLen; i++ {
+		arr[i] = "?"
+	}
+	return strings.Join(arr, ",")
 }

@@ -74,12 +74,18 @@ func (this *App) Init() {
 		log.Fatalln("\r\n不能在同一个数据库里升级，否则数据会被清空！请将新论坛安装到其他数据库。")
 	}
 
-	//tables := [...]string{"group", "user", "post"}
 	tables := [...]string{
-		//"group",
-		//"user",
-		"post",}
-		//"forum_access"}
+		"group",
+		"user",
+		"user_open_plat",
+		"forum",
+		"forum_access",
+		"attach",
+		"modlog",
+		"friendlink",
+		"thread",
+		"post",
+	}
 
 	for i, table := range tables {
 		fmt.Println(string(i) + "正在转换表: " + table)
@@ -101,8 +107,24 @@ func (this *App) Init() {
 			do.update()
 			break
 
+		case "user_open_plat":
+			do := user_open_plat{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
 		case "post":
 			do := post{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
+		case "forum":
+			do := forum{}
 			do.db3str = db3str
 			do.db4str = db4str
 
@@ -116,6 +138,48 @@ func (this *App) Init() {
 
 			do.update()
 			break
+
+		case "thread":
+			do := thread{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
+		case "attach":
+			do := attach{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
+		case "modlog":
+			do := modlog{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
+		case "friendlink":
+			do := friendlink{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
 		}
 	}
+
+	fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	fmt.Println(`
+:::
+::: 已将 Xinno3 升级至 Xiuno4
+::: 您还需要将 xiuno3 下的 upload 移动到 xiuno4 下 
+::: 本程序开源地址: https://github.com/skiy/xiuno-tools
+::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
+:::
+`)
 }

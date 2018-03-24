@@ -1,7 +1,6 @@
 package xn3ToXn4
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -14,7 +13,7 @@ type forum_access struct {
 }
 
 type forum_accessFields struct {
-	fid,gid,allowread,allowthread,allowpost,allowattach,allowdown string
+	fid, gid, allowread, allowthread, allowpost, allowattach, allowdown string
 }
 
 func (this *forum_access) update() {
@@ -35,7 +34,7 @@ func (this *forum_access) toUpdate() (count int, err error) {
 	xn3 := fmt.Sprintf("SELECT %s FROM %sforum_access", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sforum_access (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-	xn3db, err := sql.Open("mysql", this.db3str.DSN)
+	xn3db, _ := this.db3str.Connect()
 	data, err := xn3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
@@ -66,12 +65,12 @@ func (this *forum_access) toUpdate() (count int, err error) {
 		var field = this.fields
 		err = data.Scan(
 			&field.fid,
-&field.gid,
-&field.allowread,
-&field.allowthread,
-&field.allowpost,
-&field.allowattach,
-&field.allowdown)
+			&field.gid,
+			&field.allowread,
+			&field.allowthread,
+			&field.allowpost,
+			&field.allowattach,
+			&field.allowdown)
 
 		_, err = stmt.Exec(
 			&field.fid,

@@ -1,10 +1,10 @@
 package xn3ToXn4
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"time"
 )
 
 type post struct {
@@ -35,7 +35,7 @@ func (this *post) toUpdate() (count int, err error) {
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-	xn3db, err := sql.Open("mysql", this.db3str.DSN)
+	xn3db, err := this.db3str.Connect()
 	data, err := xn3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
@@ -93,6 +93,8 @@ func (this *post) toUpdate() (count int, err error) {
 		} else {
 			count++
 		}
+
+		xn4db.SetConnMaxLifetime(time.Second * 10)
 	}
 
 	if err = data.Err(); err != nil {

@@ -1,7 +1,6 @@
 package xn3ToXn4
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -35,7 +34,7 @@ func (this *user) toUpdate() (count int, err error) {
 	xn3 := fmt.Sprintf("SELECT %s FROM %suser", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %suser (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-	xn3db, err := sql.Open("mysql", this.db3str.DSN)
+	xn3db, _ := this.db3str.Connect()
 	data, err := xn3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())

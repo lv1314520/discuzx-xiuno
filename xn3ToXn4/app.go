@@ -74,7 +74,13 @@ func (this *App) Init() {
 		log.Fatalln("\r\n不能在同一个数据库里升级，否则数据会被清空！请将新论坛安装到其他数据库。")
 	}
 
-	tables := [...]string{"group", "user"}
+	//tables := [...]string{"group", "user", "post"}
+	tables := [...]string{
+		//"group",
+		//"user",
+		"post",}
+		//"forum_access"}
+
 	for i, table := range tables {
 		fmt.Println(string(i) + "正在转换表: " + table)
 
@@ -89,6 +95,22 @@ func (this *App) Init() {
 
 		case "user":
 			do := user{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
+		case "post":
+			do := post{}
+			do.db3str = db3str
+			do.db4str = db4str
+
+			do.update()
+			break
+
+		case "forum_access":
+			do := forum_access{}
 			do.db3str = db3str
 			do.db4str = db4str
 

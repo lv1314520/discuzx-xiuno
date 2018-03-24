@@ -110,7 +110,7 @@ func (this *group) toUpdate() (count int, err error) {
 			&field.allowviewip)
 
 		if err != nil {
-			fmt.Printf("导入数据失败(%s)，ID: %s \r\n", err.Error(), field.gid)
+			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 		} else {
 			count++
 		}

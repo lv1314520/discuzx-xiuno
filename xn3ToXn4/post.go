@@ -122,7 +122,7 @@ func (this *post) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	xn3db, err := this.db3str.Connect()
-	query, err := xn3db.Query("select * from %spost")
+	query, err := xn3db.Query("select * from " + xn3pre + "post")
 	if err != nil {
 		fmt.Println("查询数据库失败", err.Error())
 		return

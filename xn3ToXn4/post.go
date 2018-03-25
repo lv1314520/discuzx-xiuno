@@ -218,8 +218,6 @@ func (this *post) toUpdate() (count int, err error) {
 			dataArr = append(dataArr, sqlStr)
 			start++
 
-			fmt.Println(dataArr)
-
 			if start%offset == 0 {
 				fmt.Println("clear", start)
 
@@ -244,7 +242,7 @@ func (this *post) toUpdate() (count int, err error) {
 		sqlStr = xn5 + strings.Join(v, ",")
 		_, err = xn4db.Exec(sqlStr)
 		fmt.Println("insertdb", k)
-		fmt.Println(sqlStr)
+		fmt.Println("/r/n", sqlStr, "/r/n")
 		if err != nil {
 			fmt.Printf("%d.导入数据失败(%s) \r\n", k, err.Error())
 			continue

@@ -20,6 +20,7 @@ func main() {
 :::
 ::: 本程序开源地址: https://github.com/skiy/xiuno-tools
 ::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
+::: Version:1.0.1   Updated:2018-03-25
 `)
 
 	inputVal := lib.Input(buf)

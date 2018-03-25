@@ -166,11 +166,12 @@ func (this *post) toUpdate() (count int, err error) {
 
 	var dataArr []string
 	var longDataArr [][]string
-	var sqlStr string
+	var sqlStr,message_fmt string
 
 	start := 0
 	offset := 30
 	aa := 1
+
 	for data.Next() {
 		if msgFmtExist {
 			err = data.Scan(
@@ -202,23 +203,27 @@ func (this *post) toUpdate() (count int, err error) {
 		} else {
 			fmt.Println(aa, &field.message_fmt, field.message_fmt)
 			if field.message_fmt == "" {
-				&field.message_fmt = &field.message
+				message_fmt = field.message
+			} else {
+				message_fmt = field.message_fmt
 			}
 
 			sqlStr = "(" + fmt.Sprintf(qmark,
-				&field.tid,
-				&field.pid,
-				&field.uid,
-				&field.isfirst,
-				&field.create_date,
-				&field.userip,
-				&field.images,
-				&field.files,
-				&field.message,
-				&field.message_fmt) + ")"
+				field.tid,
+				field.pid,
+				field.uid,
+				field.isfirst,
+				field.create_date,
+				field.userip,
+				field.images,
+				field.files,
+				field.message,
+				message_fmt) + ")"
 
 			dataArr = append(dataArr, sqlStr)
 			start++
+
+			fmt.Println(dataArr)
 
 			if start%offset == 0 {
 				fmt.Println("clear", start)
@@ -228,6 +233,7 @@ func (this *post) toUpdate() (count int, err error) {
 				dataArr = nil
 			}
 
+			message_fmt = ""
 			aa++
 		}
 	}

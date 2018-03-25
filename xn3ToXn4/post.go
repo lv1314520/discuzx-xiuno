@@ -168,6 +168,7 @@ func (this *post) toUpdate() (count int, err error) {
 	var sqlStr string
 
 	start := 0
+	times := 0
 	offset := 30
 	for data.Next() {
 		var field postFields
@@ -219,7 +220,24 @@ func (this *post) toUpdate() (count int, err error) {
 			start++
 
 			if start%offset == 0 {
+				times++
 				longDataArr = append(longDataArr, dataArr)
+
+				if times > 100 {
+					for k, v := range longDataArr {
+						sqlStr = xn5 + strings.Join(v, ",")
+						_, err = xn4db.Exec(sqlStr)
+						if err != nil {
+							fmt.Printf("%d.导入数据失败(%s) \r\n", k, err.Error())
+							continue
+						}
+						count += len(v)
+					}
+
+					times = 0
+					longDataArr = nil
+				}
+
 				start = 0
 				dataArr = nil
 			}
@@ -232,18 +250,12 @@ func (this *post) toUpdate() (count int, err error) {
 	}
 
 	if dataArr != nil {
-		longDataArr = append(longDataArr, dataArr)
-		dataArr = nil
-	}
-
-	for k, v := range longDataArr {
-		sqlStr = xn5 + strings.Join(v, ",")
+		sqlStr = xn5 + strings.Join(dataArr, ",")
 		_, err = xn4db.Exec(sqlStr)
 		if err != nil {
-			fmt.Printf("%d.导入数据失败(%s) \r\n", k, err.Error())
-			continue
+			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 		}
-		count += len(v)
+		count += len(dataArr)
 	}
 
 	return count, err

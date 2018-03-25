@@ -35,7 +35,7 @@ func (this *user_open_plat) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "uid,platid,openid"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %suser_open_plat", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %suser_open_plat (%s) VALUES (%s)", xn4pre, fields, qmark)
 
@@ -88,8 +88,9 @@ CREATE TABLE IF NOT EXISTS %suser_open_plat (
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %suser_open_plat 表\r\n", xn4pre)
+
+	var field user_open_platFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.uid,
 			&field.platid,

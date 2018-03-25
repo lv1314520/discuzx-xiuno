@@ -39,7 +39,7 @@ func (this *friendlink) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "linkid,type,rank,create_date,name,url"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %sfriendlink", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sfriendlink (%s) VALUES (%s)", xn4pre, fields, qmark)
 
@@ -95,8 +95,9 @@ CREATE TABLE IF NOT EXISTS %sfriendlink (
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %sfriendlink 表\r\n", xn4pre)
+
+	var field friendlinkFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.linkid,
 			&field.ftype,

@@ -35,7 +35,7 @@ func (this *attach) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "aid,tid,pid,uid,filesize,width,height,filename,orgfilename,filetype,create_date,comment,downloads"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %sattach", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sattach (%s,credits,golds,rmbs) VALUES (%s, 0, 0, 0)", xn4pre, fields, qmark)
 
@@ -66,8 +66,9 @@ func (this *attach) toUpdate() (count int, err error) {
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %sattach 表\r\n", xn4pre)
+
+	var field attachFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.aid,
 			&field.tid,

@@ -150,13 +150,17 @@ func (this *Database) FieldAddPrev(prev, fieldStr string) string {
 	return newFieldStr
 }
 
-func (this *Database) FieldMakeQmark(str string) string {
+func (this *Database) FieldMakeQmark(str string, symbol string) string {
 	strArr := strings.Split(str, ",")
 	strLen := len(strArr)
 
+	if symbol == "" {
+		symbol = "?"
+	}
+
 	arr := make([]string, strLen)
 	for i := 0; i < strLen; i++ {
-		arr[i] = "?"
+		arr[i] = symbol
 	}
 	return strings.Join(arr, ",")
 }

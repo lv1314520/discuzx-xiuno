@@ -35,7 +35,7 @@ func (this *modlog) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "logid,uid,tid,pid,subject,comment,create_date,action"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %smodlog", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %smodlog (%s) VALUES (%s)", xn4pre, fields, qmark)
 
@@ -66,8 +66,9 @@ func (this *modlog) toUpdate() (count int, err error) {
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %smodlog 表\r\n", xn4pre)
+
+	var field modlogFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.logid,
 			&field.uid,

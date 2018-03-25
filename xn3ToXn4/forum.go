@@ -35,7 +35,7 @@ func (this *forum) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "fid,name,rank,threads,todayposts,todaythreads,brief,accesson,orderby,icon,moduids,seo_title,seo_keywords"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %sforum", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sforum (%s,announcement) VALUES (%s, '')", xn4pre, fields, qmark)
 
@@ -66,8 +66,9 @@ func (this *forum) toUpdate() (count int, err error) {
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %sforum 表\r\n", xn4pre)
+
+	var field forumFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.fid,
 			&field.name,

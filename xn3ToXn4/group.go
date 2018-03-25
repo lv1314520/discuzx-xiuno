@@ -48,7 +48,7 @@ func (this *group) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "gid,name,allowread,allowthread,allowpost,allowattach,allowdown,allowtop,allowupdate,allowdelete,allowmove,allowbanuser,allowdeleteuser,allowviewip"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %sgroup", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sgroup (%s) VALUES (%s)", xn4pre, fields, qmark)
 
@@ -79,8 +79,9 @@ func (this *group) toUpdate() (count int, err error) {
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %sgroup 表\r\n", xn4pre)
+
+	var field groupFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.gid,
 			&field.name,

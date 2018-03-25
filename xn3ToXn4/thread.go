@@ -36,7 +36,7 @@ func (this *thread) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "fid,tid,top,uid,subject,create_date,last_date,views,posts,images,files,mods,closed,firstpid,lastuid,lastpid"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %sthread", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sthread (%s) VALUES (%s)", xn4pre, fields, qmark)
 	xn4_1 := fmt.Sprintf("INSERT INTO %sthread_top SET fid=?, tid=?, top=?", xn4pre)
@@ -94,8 +94,9 @@ func (this *thread) toUpdate() (count int, err error) {
 	}
 
 	fmt.Printf("正在升级 %sthread 表\r\n", xn4pre)
+
+	var field threadFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.fid,
 			&field.tid,

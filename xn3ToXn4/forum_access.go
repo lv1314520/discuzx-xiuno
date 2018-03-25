@@ -35,7 +35,7 @@ func (this *forum_access) toUpdate() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "fid,gid,allowread,allowthread,allowpost,allowattach,allowdown"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %sforum_access", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sforum_access (%s) VALUES (%s)", xn4pre, fields, qmark)
 
@@ -66,8 +66,9 @@ func (this *forum_access) toUpdate() (count int, err error) {
 	defer stmt.Close()
 
 	fmt.Printf("正在升级 %sforum_access 表\r\n", xn4pre)
+
+	var field forum_accessFields
 	for data.Next() {
-		var field = this.fields
 		err = data.Scan(
 			&field.fid,
 			&field.gid,

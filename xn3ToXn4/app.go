@@ -95,8 +95,8 @@ func (this *App) Init() {
 		"post",
 	}
 
-	for i, table := range tables {
-		fmt.Println(string(i) + "正在转换表: " + table)
+	for _, table := range tables {
+		fmt.Println("正在转换表: " + table)
 
 		switch table {
 		case "group":

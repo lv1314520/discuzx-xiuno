@@ -5,7 +5,7 @@
 MIT
 
 ### TODO
-- ✔<del>XiunoBBS 3.x 升级 XiunoBBS 4.x</del>
+- ✔XiunoBBS 3.x 升级 XiunoBBS 4.x
 - Discuz!X 3.x 转换 XiunoBBS 4.x
 
 ### 使用教程

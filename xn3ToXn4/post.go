@@ -37,7 +37,7 @@ func (this *post) toUpdateLess() (count int, err error) {
 	xn4pre := this.db4str.DBPre
 
 	fields := "tid,pid,uid,isfirst,create_date,userip,images,files,message,message_fmt"
-	qmark := this.db3str.FieldMakeQmark(fields)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
@@ -200,7 +200,7 @@ func (this *post) toUpdate() (count int, err error) {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
 			if field.message_fmt == "" {
-				&field.message_fmt = &field.message
+				field.message_fmt = field.message
 			}
 
 			sqlStr = "(" + fmt.Sprintf(qmark,

@@ -42,7 +42,7 @@ func AutoUpdate(in bool, tb string) bool {
 			auto = false
 			break
 		}
-		fmt.Println("只能输入 Y 或 N ,请重新输入")
+		fmt.Println("只能输入 Y 或 N,请重输")
 	}
 
 	return auto

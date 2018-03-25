@@ -170,6 +170,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 	start := 0
 	offset := 30
+	aa := 1
 	for data.Next() {
 		if msgFmtExist {
 			err = data.Scan(
@@ -199,9 +200,9 @@ func (this *post) toUpdate() (count int, err error) {
 		if err != nil {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
-			fmt.Println(field.message_fmt)
+			fmt.Println(aa, &field.message_fmt, field.message_fmt)
 			if field.message_fmt == "" {
-				field.message_fmt = field.message
+				&field.message_fmt = &field.message
 			}
 
 			sqlStr = "(" + fmt.Sprintf(qmark,
@@ -227,7 +228,7 @@ func (this *post) toUpdate() (count int, err error) {
 				dataArr = nil
 			}
 
-			fmt.Println(1)
+			aa++
 		}
 	}
 

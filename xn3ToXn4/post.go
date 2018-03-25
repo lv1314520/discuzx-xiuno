@@ -143,7 +143,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost", oldField, xn3pre)
 	xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
-	qmark := this.db3str.FieldMakeQmark(fields, "%s")
+	qmark := this.db3str.FieldMakeValue(fields)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {

@@ -164,3 +164,14 @@ func (this *Database) FieldMakeQmark(str string, symbol string) string {
 	}
 	return strings.Join(arr, ",")
 }
+
+func (this *Database) FieldMakeValue(str string) string {
+	strArr := strings.Split(str, ",")
+	strLen := len(strArr)
+
+	arr := make([]string, strLen)
+	for i := 0; i < strLen; i++ {
+		arr[i] = "'%s'"
+	}
+	return strings.Join(arr, ",")
+}

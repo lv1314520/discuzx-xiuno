@@ -67,8 +67,8 @@ func (this *modlog) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %smodlog 表\r\n", xn4pre)
 
-	var field modlogFields
 	for data.Next() {
+		var field modlogFields
 		err = data.Scan(
 			&field.logid,
 			&field.uid,

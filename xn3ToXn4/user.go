@@ -67,8 +67,8 @@ func (this *user) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %suser 表\r\n", xn4pre)
 
-	var field userFields
 	for data.Next() {
+		var field userFields
 		err = data.Scan(
 			&field.uid,
 			&field.gid,

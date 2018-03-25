@@ -67,8 +67,8 @@ func (this *forum) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %sforum 表\r\n", xn4pre)
 
-	var field forumFields
 	for data.Next() {
+		var field forumFields
 		err = data.Scan(
 			&field.fid,
 			&field.name,

@@ -161,18 +161,16 @@ func (this *post) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %spost 表\r\n", xn4pre)
 
-	var field postFields
 	//dataArr := make([]postFields, ...)
 
 	var dataArr []string
 	var longDataArr [][]string
-	var sqlStr,message_fmt string
+	var sqlStr string
 
 	start := 0
 	offset := 30
-	aa := 1
-
 	for data.Next() {
+		var field postFields
 		if msgFmtExist {
 			err = data.Scan(
 				&field.tid,
@@ -201,11 +199,8 @@ func (this *post) toUpdate() (count int, err error) {
 		if err != nil {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
-			fmt.Println(aa, &field.message_fmt, field.message_fmt)
 			if field.message_fmt == "" {
-				message_fmt = field.message
-			} else {
-				message_fmt = field.message_fmt
+				field.message_fmt = field.message
 			}
 
 			sqlStr = "(" + fmt.Sprintf(qmark,
@@ -218,7 +213,7 @@ func (this *post) toUpdate() (count int, err error) {
 				field.images,
 				field.files,
 				field.message,
-				message_fmt) + ")"
+				field.message_fmt) + ")"
 
 			dataArr = append(dataArr, sqlStr)
 			start++
@@ -233,8 +228,6 @@ func (this *post) toUpdate() (count int, err error) {
 				dataArr = nil
 			}
 
-			message_fmt = ""
-			aa++
 		}
 	}
 

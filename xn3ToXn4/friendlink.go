@@ -96,8 +96,8 @@ CREATE TABLE IF NOT EXISTS %sfriendlink (
 
 	fmt.Printf("正在升级 %sfriendlink 表\r\n", xn4pre)
 
-	var field friendlinkFields
 	for data.Next() {
+		var field friendlinkFields
 		err = data.Scan(
 			&field.linkid,
 			&field.ftype,

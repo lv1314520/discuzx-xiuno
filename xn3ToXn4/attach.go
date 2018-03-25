@@ -67,8 +67,8 @@ func (this *attach) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %sattach 表\r\n", xn4pre)
 
-	var field attachFields
 	for data.Next() {
+		var field attachFields
 		err = data.Scan(
 			&field.aid,
 			&field.tid,

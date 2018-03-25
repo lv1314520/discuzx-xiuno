@@ -9,7 +9,7 @@ MIT
 - Discuz!X 3.x 转换 XiunoBBS 4.x
 
 ### 使用教程
-- 拉取依赖库 ```ggo get -v github.com/skiy/xiuno-tools```   
+- 拉取依赖库 ```go get -v github.com/skiy/xiuno-tools```   
 - 编译程序 ```go install```
 - 完成，文件在 ```$GOPATH/bin``` 里
 

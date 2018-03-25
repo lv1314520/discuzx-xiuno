@@ -18,7 +18,7 @@ type userFields struct {
 }
 
 func (this *user) update() {
-	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"group") {
+	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"user") {
 		return
 	}
 

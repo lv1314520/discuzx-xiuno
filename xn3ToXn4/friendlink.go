@@ -22,7 +22,7 @@ type friendlinkFields struct {
 }
 
 func (this *friendlink) update() {
-	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"user_open_plat") {
+	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"friendlink") {
 		return
 	}
 

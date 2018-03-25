@@ -18,7 +18,7 @@ type forum_accessFields struct {
 }
 
 func (this *forum_access) update() {
-	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"user_open_plat") {
+	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"forum_access") {
 		return
 	}
 

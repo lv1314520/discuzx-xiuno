@@ -19,7 +19,7 @@ type postFields struct {
 }
 
 func (this *post) update() {
-	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"user_open_plat") {
+	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"post") {
 		return
 	}
 

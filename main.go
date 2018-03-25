@@ -12,14 +12,16 @@ func main() {
 	buf := bufio.NewReader(os.Stdin)
 
 	fmt.Println(`
-::: 请选择主菜单...
 :::
+::: 本程序开源地址: https://github.com/skiy/xiuno-tools
+::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
+::::::::::::::::::::::::::
+::: 请选择主菜单::::::::::::
+::::::::::::::::::::::::::
 ::: 1. Xiuno 3.x 升级到 Xiuno 4.x
 :::
 ::: 执行过程中按"Q", 再按"回车键"退出本程序...
 :::
-::: 本程序开源地址: https://github.com/skiy/xiuno-tools
-::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
 ::: Version:1.0.1   Updated:2018-03-25
 `)
 

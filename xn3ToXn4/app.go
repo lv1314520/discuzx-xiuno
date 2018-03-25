@@ -18,7 +18,7 @@ type dbstr struct {
 }
 
 func (this *App) Init() {
-	fmt.Println("\r\n===您选择了“1. Xiuno3 升级到 Xiuno4”===\r\n")
+	fmt.Println("\r\n===您选择了: 1. Xiuno3 升级到 Xiuno4\r\n")
 
 	db3str := dbstr{}
 	fmt.Println("正在配置 Xiuno3 数据库")

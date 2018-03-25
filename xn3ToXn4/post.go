@@ -219,8 +219,6 @@ func (this *post) toUpdate() (count int, err error) {
 			start++
 
 			if start%offset == 0 {
-				fmt.Println("clear", start)
-
 				longDataArr = append(longDataArr, dataArr)
 				start = 0
 				dataArr = nil
@@ -241,15 +239,11 @@ func (this *post) toUpdate() (count int, err error) {
 	for k, v := range longDataArr {
 		sqlStr = xn5 + strings.Join(v, ",")
 		_, err = xn4db.Exec(sqlStr)
-		fmt.Println("insertdb", k)
-		fmt.Println("/r/n", sqlStr, "/r/n")
 		if err != nil {
 			fmt.Printf("%d.导入数据失败(%s) \r\n", k, err.Error())
 			continue
 		}
 		count += len(v)
-
-		fmt.Println(count)
 	}
 
 	return count, err

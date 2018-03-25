@@ -226,6 +226,8 @@ func (this *post) toUpdate() (count int, err error) {
 				start = 0
 				dataArr = nil
 			}
+
+			fmt.Println(1)
 		}
 	}
 

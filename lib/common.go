@@ -30,7 +30,7 @@ func AutoUpdate(in bool, tb string) bool {
 		return true
 	}
 
-	fmt.Println("是否更新数据表 (" + tb + "): Y/N")
+	fmt.Println("是否更新数据表 " + tb + ": (Y/N)")
 	var auto bool
 	buf := bufio.NewReader(os.Stdin)
 	for {
@@ -42,6 +42,7 @@ func AutoUpdate(in bool, tb string) bool {
 			auto = false
 			break
 		}
+		fmt.Println("只能输入 Y 或 N ,请重新输入")
 	}
 
 	return auto

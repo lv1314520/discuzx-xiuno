@@ -24,3 +24,25 @@ func Input(r *bufio.Reader) string {
 
 	return s
 }
+
+func AutoUpdate(in bool, tb string) bool {
+	if in {
+		return true
+	}
+
+	fmt.Println("是否更新数据表 (" + tb + "): Y/N")
+	var auto bool
+	buf := bufio.NewReader(os.Stdin)
+	for {
+		s := Input(buf)
+		if strings.EqualFold(s, "Y") {
+			auto = true
+			break
+		} else if strings.EqualFold(s, "N") {
+			auto = false
+			break
+		}
+	}
+
+	return auto
+}

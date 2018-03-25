@@ -14,6 +14,7 @@ type App struct {
 type dbstr struct {
 	lib.Database
 	DBPre string
+	Auto  bool
 }
 
 func (this *App) Init() {
@@ -72,6 +73,13 @@ func (this *App) Init() {
 
 	if db3str.DBHost == db4str.DBHost && db3str.DBName == db4str.DBName {
 		log.Fatalln("\r\n不能在同一个数据库里升级，否则数据会被清空！请将新论坛安装到其他数据库。")
+	}
+
+	buf = bufio.NewReader(os.Stdin)
+	fmt.Println("全自动更新所有表(Y/N):(默认为 Y)")
+	s = lib.Input(buf)
+	if s == "Y" {
+		db4str.Auto = true
 	}
 
 	tables := [...]string{

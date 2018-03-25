@@ -3,6 +3,7 @@ package xn3ToXn4
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/skiy/xiuno-tools/lib"
 	"log"
 )
 
@@ -21,6 +22,10 @@ type friendlinkFields struct {
 }
 
 func (this *friendlink) update() {
+	if !lib.AutoUpdate(this.db4str.Auto, this.db4str.DBPre+"user_open_plat") {
+		return
+	}
+
 	count, err := this.toUpdate()
 	if err != nil {
 		log.Fatalln("转换 " + this.db3str.DBPre + "friendlink 失败: " + err.Error())

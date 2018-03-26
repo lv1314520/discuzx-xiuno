@@ -166,7 +166,7 @@ func (this *post) toUpdate() (count int, err error) {
 	var dataArr []string
 	var sqlStr string
 
-	offset := 50
+	offset := 30
 
 	for data.Next() {
 		var field postFields

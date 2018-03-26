@@ -220,8 +220,8 @@ func (this *post) toUpdate() (count int, err error) {
 				sqlStr = xn5 + strings.Join(dataArr, ",")
 				_, err = xn4db.Exec(sqlStr)
 				if err != nil {
-					fmt.Println(len(dataArr), offset)
-					fmt.Printf("当前执行语句：\r\n%s\r\n\r\n", sqlStr)
+					//fmt.Println(len(dataArr), offset)
+					//fmt.Printf("当前执行语句：\r\n%s\r\n\r\n", sqlStr)
 					fmt.Printf("当前已导入数量(%d), 导入数据失败(%s) \r\n", count, err.Error())
 					continue
 				}

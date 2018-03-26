@@ -164,12 +164,10 @@ func (this *post) toUpdate() (count int, err error) {
 	//dataArr := make([]postFields, ...)
 
 	var dataArr []string
-	var longDataArr [][]string
 	var sqlStr string
 
-	start := 0
-	times := 0
-	offset := 30
+	offset := 50
+
 	for data.Next() {
 		var field postFields
 		if msgFmtExist {
@@ -217,28 +215,16 @@ func (this *post) toUpdate() (count int, err error) {
 				field.message_fmt) + ")"
 
 			dataArr = append(dataArr, sqlStr)
-			start++
 
-			if start%offset == 0 {
-				times++
-				longDataArr = append(longDataArr, dataArr)
-
-				if times > 100 {
-					for k, v := range longDataArr {
-						sqlStr = xn5 + strings.Join(v, ",")
-						_, err = xn4db.Exec(sqlStr)
-						if err != nil {
-							fmt.Printf("%d.导入数据失败(%s) \r\n", k, err.Error())
-							continue
-						}
-						count += len(v)
-					}
-
-					times = 0
-					longDataArr = nil
+			if len(dataArr) > offset {
+				sqlStr = xn5 + strings.Join(dataArr, ",")
+				_, err = xn4db.Exec(sqlStr)
+				if err != nil {
+					fmt.Printf("%d.导入数据失败(%s) \r\n", err.Error())
+					continue
 				}
+				count += len(dataArr)
 
-				start = 0
 				dataArr = nil
 			}
 

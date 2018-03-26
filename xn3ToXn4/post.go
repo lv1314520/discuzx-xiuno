@@ -218,6 +218,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 			if len(dataArr) > offset {
 				sqlStr = xn5 + strings.Join(dataArr, ",")
+				dataArr = nil
 				_, err = xn4db.Exec(sqlStr)
 				if err != nil {
 					//fmt.Println(len(dataArr), offset)
@@ -226,8 +227,6 @@ func (this *post) toUpdate() (count int, err error) {
 					continue
 				}
 				count += len(dataArr)
-
-				dataArr = nil
 			}
 
 		}

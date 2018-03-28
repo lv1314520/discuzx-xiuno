@@ -142,8 +142,9 @@ func (this *post) toUpdate() (count int, err error) {
 	}
 
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost", oldField, xn3pre)
+	qmark := this.db3str.FieldMakeQmark(fields, "?")
+	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 	xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
-	qmark := this.db3str.FieldMakeValue(fields)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {
@@ -161,12 +162,16 @@ func (this *post) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %spost 表\r\n", xn4pre)
 
-	//dataArr := make([]postFields, ...)
-
-	var dataArr []string
-	var sqlStr string
-
-	offset := 30
+	tx, err := xn4db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tx.Rollback()
+	stmt, err := tx.Prepare(xn4)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
 
 	for data.Next() {
 		var field postFields
@@ -202,31 +207,22 @@ func (this *post) toUpdate() (count int, err error) {
 				field.message_fmt = field.message
 			}
 
-			sqlStr = "(" + fmt.Sprintf(qmark,
-				field.tid,
-				field.pid,
-				field.uid,
-				field.isfirst,
-				field.create_date,
-				field.userip,
-				field.images,
-				field.files,
-				field.message,
-				field.message_fmt) + ")"
+			_, err = stmt.Exec(
+				&field.tid,
+				&field.pid,
+				&field.uid,
+				&field.isfirst,
+				&field.create_date,
+				&field.userip,
+				&field.images,
+				&field.files,
+				&field.message,
+				&field.message_fmt)
 
-			dataArr = append(dataArr, sqlStr)
-
-			if len(dataArr) > offset {
-				sqlStr = xn5 + strings.Join(dataArr, ",")
-				dataArr = nil
-				_, err = xn4db.Exec(sqlStr)
-				if err != nil {
-					//fmt.Println(len(dataArr), offset)
-					//fmt.Printf("当前执行语句：\r\n%s\r\n\r\n", sqlStr)
-					fmt.Printf("当前已导入数量(%d), 导入数据失败(%s) \r\n", count, err.Error())
-					continue
-				}
-				count += len(dataArr)
+			if err != nil {
+				fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+			} else {
+				count++
 			}
 
 		}
@@ -236,13 +232,9 @@ func (this *post) toUpdate() (count int, err error) {
 		log.Fatalln(err.Error())
 	}
 
-	if dataArr != nil {
-		sqlStr = xn5 + strings.Join(dataArr, ",")
-		_, err = xn4db.Exec(sqlStr)
-		if err != nil {
-			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
-		}
-		count += len(dataArr)
+	err = tx.Commit()
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 
 	return count, err

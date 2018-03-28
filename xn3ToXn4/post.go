@@ -5,7 +5,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -144,7 +143,7 @@ func (this *post) toUpdate() (count int, err error) {
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost", oldField, xn3pre)
 	qmark := this.db3str.FieldMakeQmark(fields, "?")
 	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
-	xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
+	//xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {

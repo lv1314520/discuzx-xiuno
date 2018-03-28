@@ -171,7 +171,7 @@ func (this *Database) FieldMakeValue(str string) string {
 
 	arr := make([]string, strLen)
 	for i := 0; i < strLen; i++ {
-		arr[i] = "\"%s\"
+		arr[i] = "\"%s\""
 	}
 	return strings.Join(arr, ",")
 }

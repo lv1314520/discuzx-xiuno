@@ -6,7 +6,6 @@ import (
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
 	"strings"
-	"time"
 )
 
 type post struct {

@@ -102,7 +102,7 @@ func (this *post) toUpdateLess() (count int, err error) {
 			count++
 		}
 
-		xn4db.SetConnMaxLifetime(time.Second * 10)
+		//xn4db.SetConnMaxLifetime(time.Second * 10)
 	}
 
 	if err = data.Err(); err != nil {

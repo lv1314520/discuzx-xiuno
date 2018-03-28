@@ -217,7 +217,7 @@ func (this *post) toUpdate() (count int, err error) {
 				&field.images,
 				&field.files,
 				&field.message,
-				&field.message_fmt)
+				field.message_fmt)
 
 			if err != nil {
 				fmt.Printf("导入数据失败(%s) \r\n", err.Error())

@@ -152,10 +152,8 @@ func (this *post) toUpdate() (count int, err error) {
 
 	var val uint
 	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
-	rows, _ := xn3db.Query(xn3count)
-	if rows.Next() {
-		rows.Scan(&val)
-	}
+	rows := xn3db.QueryRow(xn3count)
+	rows.Scan(&val)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {
@@ -185,6 +183,7 @@ func (this *post) toUpdate() (count int, err error) {
 	start := 0
 	times := 0
 	offset := 50
+	maxTimes := 300
 
 	tx, err := xn4db.Begin()
 	if err != nil {
@@ -238,7 +237,7 @@ func (this *post) toUpdate() (count int, err error) {
 				longDataArr = append(longDataArr, dataArr)
 				dataArr = nil
 
-				if times > 50 {
+				if times > maxTimes {
 					for _, v := range longDataArr {
 						sqlArr = this.makeFileSql(qmark, v)
 						sqlStr = xn5 + strings.Join(sqlArr, ",")
@@ -251,7 +250,7 @@ func (this *post) toUpdate() (count int, err error) {
 						}
 						count += len(v)
 
-						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, rows))
+						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, val))
 						//tx.SetConnMaxLifetime(time.Second * 10)
 					}
 
@@ -280,6 +279,7 @@ func (this *post) toUpdate() (count int, err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		count += len(dataArr)
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, val))
 	}
 
 	//处理错误部分的
@@ -315,7 +315,7 @@ func (this *post) toUpdate() (count int, err error) {
 					fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 				} else {
 					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, rows))
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, val))
 					//xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}

@@ -5,7 +5,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
-	"time"
+	"strings"
 )
 
 type post struct {
@@ -31,6 +31,9 @@ func (this *post) update() {
 	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, count)
 }
 
+/**
+unused
+*/
 func (this *post) toUpdateLess() (count int, err error) {
 	xn3pre := this.db3str.DBPre
 	xn4pre := this.db4str.DBPre
@@ -101,7 +104,7 @@ func (this *post) toUpdateLess() (count int, err error) {
 			count++
 		}
 
-		xn4db.SetConnMaxLifetime(time.Second * 10)
+		//xn4db.SetConnMaxLifetime(time.Second * 10)
 	}
 
 	if err = data.Err(); err != nil {
@@ -141,9 +144,11 @@ func (this *post) toUpdate() (count int, err error) {
 	}
 
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost", oldField, xn3pre)
-	qmark := this.db3str.FieldMakeQmark(fields, "?")
-	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
-	//xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
+	xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
+	qmark := this.db3str.FieldMakeValue(fields)
+
+	//fmt.Println("Xiuno 3: " + xn3)
+	//fmt.Println("Xiuno 5: " + xn5)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {
@@ -161,16 +166,24 @@ func (this *post) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %spost 表\r\n", xn4pre)
 
+	//dataArr := make([]postFields, ...)
+
+	var dataArr []postFields
+	var longDataArr [][]postFields
+	var sqlStr string
+	var sqlArr []string
+
+	var errLongDataArr [][]postFields
+
+	start := 0
+	times := 0
+	offset := 50
+
 	tx, err := xn4db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer tx.Rollback()
-	stmt, err := tx.Prepare(xn4)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
 
 	for data.Next() {
 		var field postFields
@@ -202,39 +215,127 @@ func (this *post) toUpdate() (count int, err error) {
 		if err != nil {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
+
+			field.message = strings.Trim(field.message, "\\")
+			field.message_fmt = strings.Trim(field.message_fmt, "\\")
+
 			if field.message_fmt == "" {
 				field.message_fmt = field.message
 			}
 
-			_, err = stmt.Exec(
-				&field.tid,
-				&field.pid,
-				&field.uid,
-				&field.isfirst,
-				&field.create_date,
-				&field.userip,
-				&field.images,
-				&field.files,
-				&field.message,
-				field.message_fmt)
+			dataArr = append(dataArr, field)
+			start++
 
-			if err != nil {
-				fmt.Printf("导入数据失败(%s) \r\n", err.Error())
-			} else {
-				count++
+			if start%offset == 0 {
+				times++
+				longDataArr = append(longDataArr, dataArr)
+				dataArr = nil
+
+				if times > 50 {
+					for _, v := range longDataArr {
+						sqlArr = this.makeFileSql(qmark, v)
+						sqlStr = xn5 + strings.Join(sqlArr, ",")
+						_, err = tx.Exec(sqlStr)
+						if err != nil {
+							fmt.Printf("%d.导入数据失败(%s) \r\n", start, err.Error())
+
+							errLongDataArr = append(errLongDataArr, v)
+							continue
+						}
+						count += len(v)
+
+						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
+						//tx.SetConnMaxLifetime(time.Second * 10)
+					}
+
+					times = 0
+					longDataArr = nil
+				}
+
+				start = 0
 			}
 
 		}
 	}
 
 	if err = data.Err(); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("dataErr: " + err.Error())
+	}
+
+	if dataArr != nil {
+		sqlArr = this.makeFileSql(qmark, dataArr)
+		sqlStr = xn5 + strings.Join(sqlArr, ",")
+		_, err = tx.Exec(sqlStr)
+
+		if err != nil {
+			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+
+			errLongDataArr = append(errLongDataArr, dataArr)
+		}
+		count += len(dataArr)
+	}
+
+	//处理错误部分的
+	if errLongDataArr != nil {
+		qmark = this.db3str.FieldMakeQmark(fields, "?")
+		xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
+
+		stmt, err := tx.Prepare(xn4)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer stmt.Close()
+
+		start = 0
+		for _, value := range errLongDataArr {
+			for _, value := range value {
+				start++
+				fmt.Sprintf("插入错误序号: %d \r\n", start)
+
+				_, err = stmt.Exec(
+					&value.tid,
+					&value.pid,
+					&value.uid,
+					&value.isfirst,
+					&value.create_date,
+					&value.userip,
+					&value.images,
+					&value.files,
+					&value.message,
+					&value.message_fmt)
+
+				if err != nil {
+					fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+				} else {
+					count++
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
+					//xn4db.SetConnMaxLifetime(time.Second * 10)
+				}
+			}
+		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("txErr: " + err.Error())
 	}
 
 	return count, err
+}
+
+func (this *post) makeFileSql(qmark string, dataArr []postFields) (dataStr []string) {
+	for _, field := range dataArr {
+		dataStr = append(dataStr, "("+fmt.Sprintf(qmark,
+			field.tid,
+			field.pid,
+			field.uid,
+			field.isfirst,
+			field.create_date,
+			field.userip,
+			field.images,
+			field.files,
+			field.message,
+			field.message_fmt)+")")
+	}
+	return
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
 	"strings"
+	"time"
 )
 
 type post struct {
@@ -177,7 +178,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 	start := 0
 	times := 0
-	offset := 30
+	offset := 100
 	for data.Next() {
 		var field postFields
 		if msgFmtExist {
@@ -222,6 +223,7 @@ func (this *post) toUpdate() (count int, err error) {
 			if start%offset == 0 {
 				times++
 				longDataArr = append(longDataArr, dataArr)
+				dataArr = nil
 
 				if times > 100 {
 					for _, v := range longDataArr {
@@ -244,7 +246,6 @@ func (this *post) toUpdate() (count int, err error) {
 				}
 
 				start = 0
-				dataArr = nil
 			}
 
 		}
@@ -300,6 +301,7 @@ func (this *post) toUpdate() (count int, err error) {
 				} else {
 					count++
 					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
+					xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}
 		}

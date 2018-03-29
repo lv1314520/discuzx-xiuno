@@ -151,7 +151,7 @@ func (this *post) toUpdate() (count int, err error) {
 	//fmt.Println("Xiuno 5: " + xn5)
 
 	var val uint
-	xn3count := fmt.Sprintf("SELECT COUNT(*) FROM %spost", xn3pre)
+	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
 	rows, _ := xn3db.Query(xn3count)
 	if rows.Next() {
 		rows.Scan(&val)

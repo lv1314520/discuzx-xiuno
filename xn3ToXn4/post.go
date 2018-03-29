@@ -150,6 +150,13 @@ func (this *post) toUpdate() (count int, err error) {
 	//fmt.Println("Xiuno 3: " + xn3)
 	//fmt.Println("Xiuno 5: " + xn5)
 
+	var val uint
+	xn3count := fmt.Sprintf("SELECT COUNT(*) FROM %spost", xn3pre)
+	rows, _ := xn3db.Query(xn3count)
+	if rows.Next() {
+		rows.Scan(&val)
+	}
+
 	data, err := xn3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
@@ -244,7 +251,7 @@ func (this *post) toUpdate() (count int, err error) {
 						}
 						count += len(v)
 
-						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
+						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, rows))
 						//tx.SetConnMaxLifetime(time.Second * 10)
 					}
 
@@ -308,7 +315,7 @@ func (this *post) toUpdate() (count int, err error) {
 					fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 				} else {
 					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, rows))
 					//xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}

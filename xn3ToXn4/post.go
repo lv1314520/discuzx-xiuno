@@ -251,7 +251,7 @@ func (this *post) toUpdate() (count int, err error) {
 						}
 						count += len(v)
 
-						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, val))
+						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, len(errLongDataArr)))
 						//tx.SetConnMaxLifetime(time.Second * 10)
 					}
 
@@ -280,7 +280,7 @@ func (this *post) toUpdate() (count int, err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, val))
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, len(errLongDataArr)))
 	}
 
 	//处理错误部分的
@@ -295,6 +295,7 @@ func (this *post) toUpdate() (count int, err error) {
 		defer stmt.Close()
 
 		start = 0
+		errCount := 0
 		for _, value := range errLongDataArr {
 			for _, value := range value {
 				start++
@@ -314,9 +315,10 @@ func (this *post) toUpdate() (count int, err error) {
 
 				if err != nil {
 					fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+					errCount++
 				} else {
 					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", count, val))
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, errCount))
 					//xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}

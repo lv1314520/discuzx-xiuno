@@ -154,6 +154,7 @@ func (this *post) toUpdate() (count int, err error) {
 	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
 	rows := xn3db.QueryRow(xn3count)
 	rows.Scan(&val)
+	fmt.Printf("total: %d", val)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {
@@ -183,7 +184,7 @@ func (this *post) toUpdate() (count int, err error) {
 	start := 0
 	times := 0
 	offset := 50
-	maxTimes := 300
+	maxTimes := 50
 
 	tx, err := xn4db.Begin()
 	if err != nil {
@@ -237,7 +238,7 @@ func (this *post) toUpdate() (count int, err error) {
 				longDataArr = append(longDataArr, dataArr)
 				dataArr = nil
 
-				if times > maxTimes {
+				if times >= maxTimes {
 					for _, v := range longDataArr {
 						sqlArr = this.makeFileSql(qmark, v)
 						sqlStr = xn5 + strings.Join(sqlArr, ",")

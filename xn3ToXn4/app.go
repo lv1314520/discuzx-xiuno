@@ -2,6 +2,7 @@ package xn3ToXn4
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
@@ -17,6 +18,8 @@ type dbstr struct {
 	DBPre string
 	Auto  bool
 }
+
+var xiuno3db, xiuno4db *sql.DB
 
 func (this *App) Init() {
 	fmt.Println("\r\n===您选择了: 1. Xiuno3 升级到 Xiuno4\r\n")
@@ -34,14 +37,14 @@ func (this *App) Init() {
 	db3str.DBPre = s
 	fmt.Println("数据库表前缀为: " + s)
 
-	xn3db, err := db3str.Connect()
+	var err error
+	xiuno3db, err = db3str.Connect()
 	if err != nil {
 		fmt.Println(err)
 		log.Fatalln("\r\nXiuno3 数据库配置错误")
 	}
-	defer xn3db.Close()
 
-	err = xn3db.Ping()
+	err = xiuno3db.Ping()
 	if err != nil {
 		log.Fatalln("\r\nXiuno3: " + err.Error())
 	}
@@ -61,13 +64,12 @@ func (this *App) Init() {
 	db4str.DBPre = s
 	fmt.Println("数据库表前缀为: " + s)
 
-	xn4db, err := db4str.Connect()
+	xiuno4db, err = db4str.Connect()
 	if err != nil {
 		log.Fatalln("\r\nXiuno4 数据库配置错误")
 	}
-	defer xn4db.Close()
 
-	err = xn4db.Ping()
+	err = xiuno4db.Ping()
 	if err != nil {
 		log.Fatalln("\r\nXiuno4: " + err.Error())
 	}

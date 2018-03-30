@@ -55,35 +55,27 @@ CREATE TABLE IF NOT EXISTS %sfriendlink (
   KEY type (type)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
 `
-	xn3db, _ := this.db3str.Connect()
-	xn3CreateTable := fmt.Sprintf(createTable, xn3pre)
-	_, err = xn3db.Exec(xn3CreateTable)
-	if err != nil {
-		log.Fatalln("Xiuno3: ", xn3CreateTable, err.Error())
-	}
 
-	data, err := xn3db.Query(xn3)
+	data, err := xiuno3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
 	}
 	defer data.Close()
 
-	xn4db, _ := this.db4str.Connect()
-
 	xn4CreateTable := fmt.Sprintf(createTable, xn4pre)
-	_, err = xn3db.Exec(xn4CreateTable)
+	_, err = xiuno4db.Exec(xn4CreateTable)
 	if err != nil {
 		log.Fatalln("Xiuno4: ", xn4CreateTable, err.Error())
 	}
 
 	xn4Clear := "TRUNCATE `" + xn4pre + "friendlink`"
-	_, err = xn4db.Exec(xn4Clear)
+	_, err = xiuno4db.Exec(xn4Clear)
 	if err != nil {
 		log.Fatalf(":::清空 %sfriendlink 表失败: "+err.Error(), xn4pre)
 	}
 	fmt.Printf("清空 %sfriendlink 表成功\r\n", xn4pre)
 
-	tx, err := xn4db.Begin()
+	tx, err := xiuno4db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}

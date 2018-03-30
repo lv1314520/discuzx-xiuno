@@ -5,6 +5,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
+	"time"
 )
 
 type user struct {
@@ -102,6 +103,8 @@ func (this *user) toUpdate() (count int, err error) {
 		} else {
 			count++
 			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 user", count))
+
+			xn4db.SetConnMaxLifetime(time.Second * 10)
 		}
 	}
 

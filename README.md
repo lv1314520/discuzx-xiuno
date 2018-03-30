@@ -5,8 +5,8 @@
 MIT
 
 ### TODO
-- ✔XiunoBBS 3.x 升级 XiunoBBS 4.x
-- Discuz!X 3.x 转换 XiunoBBS 4.x
+- ✔XiunoBBS 3.x 升级 XiunoBBS 4.x **[参考](https://gitee.com/xiuno/xiunobbs/blob/master/tool/xn3_to_xn4.php)**
+- Discuz!X 3.x 转换 XiunoBBS 4.x **[参考](https://gitee.com/xiuno/xiunobbs/blob/master/tool/dx_to_xn4.php)**
 
 ### 使用教程
 - 拉取依赖库 ```go get -v github.com/skiy/xiuno-tools```   

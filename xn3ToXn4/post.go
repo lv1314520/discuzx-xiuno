@@ -169,6 +169,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 	xn4db.SetMaxIdleConns(0)
 	xn4db.SetMaxOpenConns(100)
+	xn4db.SetConnMaxLifetime(time.Second * 10)
 
 	xn4Clear := "TRUNCATE `" + xn4pre + "post`"
 	_, err = xn4db.Exec(xn4Clear)
@@ -255,11 +256,11 @@ func (this *post) toUpdate() (count int, err error) {
 
 							errLongDataArr = append(errLongDataArr, v)
 							continue
-						}
-						count += len(v)
+						} else {
+							count += len(v)
 
-						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, len(errLongDataArr)))
-						//tx.SetConnMaxLifetime(time.Second * 10)
+							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+						}
 					}
 
 					times = 0
@@ -276,6 +277,8 @@ func (this *post) toUpdate() (count int, err error) {
 		log.Fatalln("dataErr: " + err.Error())
 	}
 
+	fmt.Println("dataArr:", dataArr)
+
 	if dataArr != nil {
 		sqlArr = this.makeFileSql(qmark, dataArr)
 		sqlStr = xn5 + strings.Join(sqlArr, ",")
@@ -287,8 +290,10 @@ func (this *post) toUpdate() (count int, err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, len(errLongDataArr)))
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
 	}
+
+	fmt.Println("errlongDataArr:", errLongDataArr)
 
 	//处理错误部分的
 	if errLongDataArr != nil {
@@ -325,7 +330,7 @@ func (this *post) toUpdate() (count int, err error) {
 					errCount++
 				} else {
 					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, errCount))
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
 					//xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}
@@ -337,7 +342,7 @@ func (this *post) toUpdate() (count int, err error) {
 		log.Fatalln("txErr: " + err.Error())
 	}
 
-	fmt.Println("转换 post 表总耗时: ", time.Since(currentTime))
+	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
 
 	return count, err
 }

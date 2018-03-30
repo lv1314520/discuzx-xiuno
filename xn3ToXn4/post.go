@@ -297,8 +297,8 @@ func (this *post) toUpdate() (count int, err error) {
 
 		start = 0
 		errCount := 0
-		for _, value := range errLongDataArr {
-			for _, value := range value {
+		for _, values := range errLongDataArr {
+			for _, value := range values {
 				start++
 				fmt.Sprintf("插入错误序号: %d \r\n", start)
 

@@ -154,7 +154,7 @@ func (this *post) toUpdate() (count int, err error) {
 	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
 	rows := xn3db.QueryRow(xn3count)
 	rows.Scan(&val)
-	fmt.Printf("total: %d", val)
+	fmt.Printf("post total: %d \r\n", val)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {

@@ -76,7 +76,7 @@ func (this *App) Init() {
 	}
 
 	buf = bufio.NewReader(os.Stdin)
-	fmt.Println("全自动更新所有表(Y/N):(默认为 Y)")
+	fmt.Println("全自动更新所有表(Y/N): (默认为 Y)")
 	s = lib.Input(buf)
 	if s == "Y" {
 		db4str.Auto = true

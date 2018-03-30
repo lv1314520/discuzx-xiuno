@@ -31,7 +31,7 @@ func AutoUpdate(in bool, tb string) bool {
 		return true
 	}
 
-	fmt.Println("是否更新数据表 " + tb + ": (Y/N)")
+	fmt.Println("是否更新数据表 " + tb + "(Y/N):")
 	var auto bool
 	buf := bufio.NewReader(os.Stdin)
 	for {

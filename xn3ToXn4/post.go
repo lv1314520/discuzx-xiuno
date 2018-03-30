@@ -291,7 +291,6 @@ func (this *post) toUpdate() (count int, err error) {
 
 	//处理错误部分的
 	if errLongDataArr != nil {
-
 		stmt, err := xn4db.Prepare(xn4)
 		if err != nil {
 			log.Fatalln("处理部分错误: " + err.Error())
@@ -342,6 +341,7 @@ func (this *post) toUpdate() (count int, err error) {
 		}
 
 		for fixPosts.Next() {
+			errCount := 0
 			var field postFields
 			if msgFmtExist {
 				err = data.Scan(
@@ -386,6 +386,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 			if err != nil {
 				fmt.Printf("PID (%s) 导入数据失败(%s) \r\n", field.pid, err.Error())
+				errCount++
 			} else {
 				count++
 				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))

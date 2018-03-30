@@ -29,12 +29,12 @@ func (this *post) update() {
 
 	currentTime := time.Now()
 
-	err := this.toUpdate(0)
-	if err != nil {
-		log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
-	}
+	//err := this.toUpdate(0)
+	//if err != nil {
+	//	log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
+	//}
 
-	this.toUpdate(this.waitFix)
+	this.toUpdate(1)
 
 	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, this.count)
 

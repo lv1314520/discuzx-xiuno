@@ -158,6 +158,10 @@ func (this *post) toUpdate() (count int, err error) {
 	defer data.Close()
 
 	xn4db, _ := this.db4str.Connect()
+
+	xn4db.SetMaxIdleConns(0)
+	xn4db.SetMaxOpenConns(100)
+
 	xn4Clear := "TRUNCATE `" + xn4pre + "post`"
 	_, err = xn4db.Exec(xn4Clear)
 	if err != nil {
@@ -252,7 +256,7 @@ func (this *post) toUpdate() (count int, err error) {
 	}
 
 	if err = data.Err(); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("dataErr: " + err.Error())
 	}
 
 	if dataArr != nil {
@@ -275,7 +279,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 		stmt, err := xn4db.Prepare(xn4)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln("处理部分错误！" + err.Error())
 		}
 
 		start = 0

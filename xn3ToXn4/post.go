@@ -183,22 +183,15 @@ func (this *post) toUpdate() (count int, err error) {
 	//dataArr := make([]postFields, ...)
 
 	var dataArr []postFields
-	var longDataArr [][]postFields
+	var longDataArr, errLongDataArr [][]postFields
+
 	var sqlStr string
 	var sqlArr []string
-
-	var errLongDataArr [][]postFields
 
 	start := 0
 	times := 0
 	offset := 50
 	maxTimes := 50
-
-	tx, err := xn4db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer tx.Rollback()
 
 	for data.Next() {
 		var field postFields
@@ -250,12 +243,11 @@ func (this *post) toUpdate() (count int, err error) {
 					for _, v := range longDataArr {
 						sqlArr = this.makeFileSql(qmark, v)
 						sqlStr = xn5 + strings.Join(sqlArr, ",")
-						_, err = tx.Exec(sqlStr)
+						_, err = xn4db.Exec(sqlStr)
 						if err != nil {
-							fmt.Printf("%d.导入数据失败(%s) \r\n", start, err.Error())
+							fmt.Printf("%d - v - 导入数据失败(%s) \r\n", start, err.Error())
 
 							errLongDataArr = append(errLongDataArr, v)
-							continue
 						} else {
 							count += len(v)
 
@@ -277,15 +269,13 @@ func (this *post) toUpdate() (count int, err error) {
 		log.Fatalln("dataErr: " + err.Error())
 	}
 
-	fmt.Println("dataArr:", dataArr)
-
 	if dataArr != nil {
 		sqlArr = this.makeFileSql(qmark, dataArr)
 		sqlStr = xn5 + strings.Join(sqlArr, ",")
-		_, err = tx.Exec(sqlStr)
+		_, err = xn4db.Exec(sqlStr)
 
 		if err != nil {
-			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+			fmt.Printf("dataArr - 导入数据失败(%s) \r\n", err.Error())
 
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
@@ -300,11 +290,10 @@ func (this *post) toUpdate() (count int, err error) {
 		qmark = this.db3str.FieldMakeQmark(fields, "?")
 		xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-		stmt, err := tx.Prepare(xn4)
+		stmt, err := xn4db.Prepare(xn4)
 		if err != nil {
 			log.Fatalln("处理部分错误！" + err.Error())
 		}
-		defer stmt.Close()
 
 		start = 0
 		errCount := 0
@@ -337,12 +326,13 @@ func (this *post) toUpdate() (count int, err error) {
 		}
 	}
 
-	err = tx.Commit()
 	if err != nil {
 		log.Fatalln("txErr: " + err.Error())
 	}
 
 	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
+
+	defer xn4db.Close()
 
 	return count, err
 }

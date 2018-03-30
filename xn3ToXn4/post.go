@@ -1,7 +1,6 @@
 package xn3ToXn4
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
@@ -14,6 +13,9 @@ type post struct {
 	db3str,
 	db4str dbstr
 	fields postFields
+	waitFix,
+	count,
+	total int
 }
 
 type postFields struct {
@@ -25,12 +27,18 @@ func (this *post) update() {
 		return
 	}
 
-	count, err := this.toUpdate()
+	currentTime := time.Now()
+
+	err := this.toUpdate(0)
 	if err != nil {
 		log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
 	}
 
-	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, count)
+	this.toUpdate(this.waitFix)
+
+	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, this.count)
+
+	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
 }
 
 /**
@@ -121,8 +129,7 @@ func (this *post) toUpdateLess() (count int, err error) {
 	return count, err
 }
 
-func (this *post) toUpdate() (count int, err error) {
-	currentTime := time.Now()
+func (this *post) toUpdate(fixFlag int) (err error) {
 
 	xn3pre := this.db3str.DBPre
 	xn4pre := this.db4str.DBPre
@@ -151,14 +158,19 @@ func (this *post) toUpdate() (count int, err error) {
 	xn5 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES ", xn4pre, fields)
 	qmark := this.db3str.FieldMakeValue(fields)
 
+	qmark2 := this.db3str.FieldMakeQmark(fields, "?")
+	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark2)
 	//fmt.Println("Xiuno 3: " + xn3)
 	//fmt.Println("Xiuno 5: " + xn5)
 
-	var val uint
+	if fixFlag == 1 {
+		return this.fixPost(oldField, xn4, msgFmtExist)
+	}
+
 	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
 	rows := xn3db.QueryRow(xn3count)
-	rows.Scan(&val)
-	fmt.Printf("post total: %d \r\n", val)
+	rows.Scan(this.total)
+	fmt.Printf("post total: %d \r\n", this.total)
 
 	data, err := xn3db.Query(xn3)
 	if err != nil {
@@ -251,8 +263,8 @@ func (this *post) toUpdate() (count int, err error) {
 
 							errLongDataArr = append(errLongDataArr, v)
 						} else {
-							count += len(v)
-							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+							this.count += len(v)
+							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)))
 						}
 					}
 
@@ -280,14 +292,11 @@ func (this *post) toUpdate() (count int, err error) {
 
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
-		count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+		this.count += len(dataArr)
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)))
 	}
 
 	fmt.Println("errlongDataArr:", errLongDataArr)
-
-	qmark = this.db3str.FieldMakeQmark(fields, "?")
-	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
 	//处理错误部分的
 	if errLongDataArr != nil {
@@ -319,8 +328,8 @@ func (this *post) toUpdate() (count int, err error) {
 					fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 					errCount++
 				} else {
-					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
+					this.count++
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount))
 				}
 			}
 		}
@@ -330,17 +339,41 @@ func (this *post) toUpdate() (count int, err error) {
 		log.Fatalln("txErr: " + err.Error())
 	}
 
-	xn3 = "SELECT " + oldField + " FROM %s WHERE pid NOT IN (SELECT pid FROM %s)"
+	defer xn3db.Close()
+	defer xn4db.Close()
 
-	fixPosts := this.fixPost(xn3)
-	if fixPosts != nil {
+	if this.total-this.count > 0 {
+		//如果导入部分有失败的,则修复
+		this.waitFix = 1
+	}
+	return err
+}
 
+func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
+	sql := "SELECT " + oldField + " FROM %s WHERE pid NOT IN (SELECT pid FROM %s)"
+
+	xn3dbName := this.db3str.DBName + "." + this.db3str.DBPre + "post"
+	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
+	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
+
+	xn3db, err := this.db3str.Connect()
+	data, err := xn3db.Query(xn3sql)
+	if err != nil {
+		fmt.Println("查询数据库失败", err.Error())
+		return
+	}
+	defer xn3db.Close()
+
+	if data != nil {
+
+		xn4db, err := this.db4str.Connect()
 		stmt, err := xn4db.Prepare(xn4)
+
 		if err != nil {
 			log.Fatalln("修复帖子部分错误: " + err.Error())
 		}
 
-		for fixPosts.Next() {
+		for data.Next() {
 			errCount := 0
 			var field postFields
 			if msgFmtExist {
@@ -388,33 +421,13 @@ func (this *post) toUpdate() (count int, err error) {
 				fmt.Printf("PID (%s) 导入数据失败(%s) \r\n", field.pid, err.Error())
 				errCount++
 			} else {
-				count++
-				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
+				this.count++
+				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount))
 			}
 		}
 	}
 
-	defer xn3db.Close()
-	defer xn4db.Close()
-
-	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
-	return count, err
-}
-
-func (this *post) fixPost(sql string) (rows *sql.Rows) {
-	xn3dbName := this.db3str.DBName + "." + this.db3str.DBPre + "post"
-	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
-	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
-
-	xn3db, err := this.db3str.Connect()
-	rows, err = xn3db.Query(xn3sql)
-	if err != nil {
-		fmt.Println("查询数据库失败", err.Error())
-		return nil
-	}
-	defer xn3db.Close()
-
-	return rows
+	return
 }
 
 func (this *post) makeFileSql(qmark string, dataArr []postFields) (dataStr []string) {

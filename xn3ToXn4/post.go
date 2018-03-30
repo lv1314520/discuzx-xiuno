@@ -1,6 +1,7 @@
 package xn3ToXn4
 
 import (
+	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
@@ -41,7 +42,7 @@ func (this *post) toUpdateLess() (count int, err error) {
 
 	fields := "tid,pid,uid,isfirst,create_date,userip,images,files,message,message_fmt"
 	qmark := this.db3str.FieldMakeQmark(fields, "?")
-	xn3 := fmt.Sprintf("SELECT %s FROM %spost", fields, xn3pre)
+	xn3 := fmt.Sprintf("SELECT %s FROM %spost ORDER BY pid ASC", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
 	xn3db, err := this.db3str.Connect()
@@ -251,7 +252,7 @@ func (this *post) toUpdate() (count int, err error) {
 							errLongDataArr = append(errLongDataArr, v)
 						} else {
 							count += len(v)
-							//lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
 						}
 					}
 
@@ -280,15 +281,16 @@ func (this *post) toUpdate() (count int, err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		count += len(dataArr)
-		//lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
 	}
 
 	fmt.Println("errlongDataArr:", errLongDataArr)
 
+	qmark = this.db3str.FieldMakeQmark(fields, "?")
+	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
+
 	//处理错误部分的
 	if errLongDataArr != nil {
-		qmark = this.db3str.FieldMakeQmark(fields, "?")
-		xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
 		stmt, err := xn4db.Prepare(xn4)
 		if err != nil {
@@ -319,8 +321,7 @@ func (this *post) toUpdate() (count int, err error) {
 					errCount++
 				} else {
 					count++
-					//lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
-					//xn4db.SetConnMaxLifetime(time.Second * 10)
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
 				}
 			}
 		}
@@ -330,12 +331,89 @@ func (this *post) toUpdate() (count int, err error) {
 		log.Fatalln("txErr: " + err.Error())
 	}
 
-	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
+	xn3 = "SELECT " + oldField + " FROM %s WHERE pid NOT IN (SELECT pid FROM %s)"
+
+	fixPosts := this.fixPost(xn3)
+	if fixPosts != nil {
+
+		stmt, err := xn4db.Prepare(xn4)
+		if err != nil {
+			log.Fatalln("修复帖子部分错误: " + err.Error())
+		}
+
+		for fixPosts.Next() {
+			var field postFields
+			if msgFmtExist {
+				err = data.Scan(
+					&field.tid,
+					&field.pid,
+					&field.uid,
+					&field.isfirst,
+					&field.create_date,
+					&field.userip,
+					&field.images,
+					&field.files,
+					&field.message,
+					&field.message_fmt)
+			} else {
+				err = data.Scan(
+					&field.tid,
+					&field.pid,
+					&field.uid,
+					&field.isfirst,
+					&field.create_date,
+					&field.userip,
+					&field.images,
+					&field.files,
+					&field.message)
+			}
+
+			if field.message_fmt == "" {
+				field.message_fmt = field.message
+			}
+
+			_, err = stmt.Exec(
+				&field.tid,
+				&field.pid,
+				&field.uid,
+				&field.isfirst,
+				&field.create_date,
+				&field.userip,
+				&field.images,
+				&field.files,
+				&field.message,
+				&field.message_fmt)
+
+			if err != nil {
+				fmt.Printf("PID (%s) 导入数据失败(%s) \r\n", field.pid, err.Error())
+			} else {
+				count++
+				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
+			}
+		}
+	}
 
 	defer xn3db.Close()
 	defer xn4db.Close()
 
+	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
 	return count, err
+}
+
+func (this *post) fixPost(sql string) (rows *sql.Rows) {
+	xn3dbName := this.db3str.DBName + "." + this.db3str.DBPre + "post"
+	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
+	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
+
+	xn3db, err := this.db3str.Connect()
+	rows, err = xn3db.Query(xn3sql)
+	if err != nil {
+		fmt.Println("查询数据库失败", err.Error())
+		return nil
+	}
+	defer xn3db.Close()
+
+	return rows
 }
 
 func (this *post) makeFileSql(qmark string, dataArr []postFields) (dataStr []string) {

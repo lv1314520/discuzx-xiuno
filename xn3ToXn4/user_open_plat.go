@@ -89,8 +89,8 @@ CREATE TABLE IF NOT EXISTS %suser_open_plat (
 
 	fmt.Printf("正在升级 %suser_open_plat 表\r\n", xn4pre)
 
+	var field user_open_platFields
 	for data.Next() {
-		var field user_open_platFields
 		err = data.Scan(
 			&field.uid,
 			&field.platid,

@@ -80,8 +80,8 @@ func (this *group) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %sgroup 表\r\n", xn4pre)
 
+	var field groupFields
 	for data.Next() {
-		var field groupFields
 		err = data.Scan(
 			&field.gid,
 			&field.name,

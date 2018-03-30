@@ -206,8 +206,8 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 	offset := 50
 	maxTimes := 50
 
+	var field postFields
 	for data.Next() {
-		var field postFields
 		if msgFmtExist {
 			err = data.Scan(
 				&field.tid,
@@ -373,9 +373,9 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 			log.Fatalln("修复帖子部分错误: " + err.Error())
 		}
 
+		var field postFields
 		for data.Next() {
 			errCount := 0
-			var field postFields
 			if msgFmtExist {
 				err = data.Scan(
 					&field.tid,

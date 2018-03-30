@@ -95,8 +95,8 @@ func (this *thread) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %sthread 表\r\n", xn4pre)
 
+	var field threadFields
 	for data.Next() {
-		var field threadFields
 		err = data.Scan(
 			&field.fid,
 			&field.tid,

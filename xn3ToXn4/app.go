@@ -6,6 +6,7 @@ import (
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
 	"os"
+	"strings"
 )
 
 type App struct {
@@ -78,7 +79,7 @@ func (this *App) Init() {
 	buf = bufio.NewReader(os.Stdin)
 	fmt.Println("全自动更新所有表(Y/N): (默认为 Y)")
 	s = lib.Input(buf)
-	if s == "Y" {
+	if !strings.EqualFold(s, "N") {
 		db4str.Auto = true
 	}
 

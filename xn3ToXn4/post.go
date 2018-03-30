@@ -246,12 +246,12 @@ func (this *post) toUpdate() (count int, err error) {
 						_, err = xn4db.Exec(sqlStr)
 						if err != nil {
 							fmt.Printf("%d - v - 导入数据失败(%s) \r\n", start, err.Error())
+							fmt.Println(v)
 
 							errLongDataArr = append(errLongDataArr, v)
 						} else {
 							count += len(v)
-
-							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+							//lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
 						}
 					}
 
@@ -280,7 +280,7 @@ func (this *post) toUpdate() (count int, err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
+		//lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, len(errLongDataArr)))
 	}
 
 	fmt.Println("errlongDataArr:", errLongDataArr)
@@ -292,7 +292,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 		stmt, err := xn4db.Prepare(xn4)
 		if err != nil {
-			log.Fatalln("处理部分错误！" + err.Error())
+			log.Fatalln("处理部分错误: " + err.Error())
 		}
 
 		start = 0
@@ -319,7 +319,7 @@ func (this *post) toUpdate() (count int, err error) {
 					errCount++
 				} else {
 					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
+					//lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", count, val, errCount))
 					//xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}
@@ -332,6 +332,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 	fmt.Println("\r\n转换 post 表总耗时: ", time.Since(currentTime))
 
+	defer xn3db.Close()
 	defer xn4db.Close()
 
 	return count, err

@@ -5,7 +5,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
-	"time"
 )
 
 type user struct {

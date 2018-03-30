@@ -236,10 +236,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		if err != nil {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
-
-			field.message = strings.Trim(field.message, "\\")
-			field.message_fmt = strings.Trim(field.message_fmt, "\\")
-
+			
 			if field.message_fmt == "" {
 				field.message_fmt = field.message
 			}

@@ -78,6 +78,9 @@ func (this *App) Init() {
 		log.Fatalln("\r\n不能在同一个数据库里升级，否则数据会被清空！请将新论坛安装到其他数据库。")
 	}
 
+	xiuno3db.SetMaxIdleConns(0)
+	xiuno4db.SetMaxIdleConns(0)
+
 	buf = bufio.NewReader(os.Stdin)
 	fmt.Println("全自动更新所有表(Y/N): (默认为 Y)")
 	s = lib.Input(buf)

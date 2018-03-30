@@ -22,7 +22,7 @@ func main() {
 :::
 ::: 执行过程中按"Q", 再按"回车键"退出本程序...
 :::
-::: Version:1.0.2    Updated:2018-03-25
+::: Version:1.0.2    Updated:2018-03-30
 `)
 
 	inputVal := lib.Input(buf)

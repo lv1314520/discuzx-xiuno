@@ -6,6 +6,7 @@ import (
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
 	"strings"
+	"time"
 )
 
 type post struct {
@@ -120,6 +121,8 @@ func (this *post) toUpdateLess() (count int, err error) {
 }
 
 func (this *post) toUpdate() (count int, err error) {
+	currentTime := time.Now()
+
 	xn3pre := this.db3str.DBPre
 	xn4pre := this.db4str.DBPre
 
@@ -333,6 +336,8 @@ func (this *post) toUpdate() (count int, err error) {
 	if err != nil {
 		log.Fatalln("txErr: " + err.Error())
 	}
+
+	fmt.Println("转换 post 表总耗时: ", time.Since(currentTime))
 
 	return count, err
 }

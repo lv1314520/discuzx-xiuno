@@ -6,7 +6,6 @@ import (
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
 	"strings"
-	"time"
 )
 
 type post struct {
@@ -151,6 +150,12 @@ func (this *post) toUpdate() (count int, err error) {
 	//fmt.Println("Xiuno 3: " + xn3)
 	//fmt.Println("Xiuno 5: " + xn5)
 
+	var val uint
+	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
+	rows := xn3db.QueryRow(xn3count)
+	rows.Scan(&val)
+	fmt.Printf("total: %d", val)
+
 	data, err := xn3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
@@ -182,7 +187,15 @@ func (this *post) toUpdate() (count int, err error) {
 
 	start := 0
 	times := 0
-	offset := 100
+	offset := 50
+	maxTimes := 50
+
+	tx, err := xn4db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tx.Rollback()
+
 	for data.Next() {
 		var field postFields
 		if msgFmtExist {
@@ -229,11 +242,11 @@ func (this *post) toUpdate() (count int, err error) {
 				longDataArr = append(longDataArr, dataArr)
 				dataArr = nil
 
-				if times > 100 {
+				if times >= maxTimes {
 					for _, v := range longDataArr {
 						sqlArr = this.makeFileSql(qmark, v)
 						sqlStr = xn5 + strings.Join(sqlArr, ",")
-						_, err = xn4db.Exec(sqlStr)
+						_, err = tx.Exec(sqlStr)
 						if err != nil {
 							fmt.Printf("%d.导入数据失败(%s) \r\n", start, err.Error())
 
@@ -242,7 +255,8 @@ func (this *post) toUpdate() (count int, err error) {
 						}
 						count += len(v)
 
-						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
+						lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, len(errLongDataArr)))
+						//tx.SetConnMaxLifetime(time.Second * 10)
 					}
 
 					times = 0
@@ -262,7 +276,7 @@ func (this *post) toUpdate() (count int, err error) {
 	if dataArr != nil {
 		sqlArr = this.makeFileSql(qmark, dataArr)
 		sqlStr = xn5 + strings.Join(sqlArr, ",")
-		_, err = xn4db.Exec(sqlStr)
+		_, err = tx.Exec(sqlStr)
 
 		if err != nil {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
@@ -270,6 +284,7 @@ func (this *post) toUpdate() (count int, err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		count += len(dataArr)
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, len(errLongDataArr)))
 	}
 
 	//处理错误部分的
@@ -277,12 +292,14 @@ func (this *post) toUpdate() (count int, err error) {
 		qmark = this.db3str.FieldMakeQmark(fields, "?")
 		xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-		stmt, err := xn4db.Prepare(xn4)
+		stmt, err := tx.Prepare(xn4)
 		if err != nil {
 			log.Fatalln("处理部分错误！" + err.Error())
 		}
+		defer stmt.Close()
 
 		start = 0
+		errCount := 0
 		for _, value := range errLongDataArr {
 			for _, value := range value {
 				start++
@@ -302,13 +319,19 @@ func (this *post) toUpdate() (count int, err error) {
 
 				if err != nil {
 					fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+					errCount++
 				} else {
 					count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 post", count))
-					xn4db.SetConnMaxLifetime(time.Second * 10)
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，其中错误: %d", count, val, errCount))
+					//xn4db.SetConnMaxLifetime(time.Second * 10)
 				}
 			}
 		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Fatalln("txErr: " + err.Error())
 	}
 
 	return count, err

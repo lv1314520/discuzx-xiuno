@@ -29,11 +29,14 @@ func (this *post) update() {
 		return
 	}
 
-	buf := bufio.NewReader(os.Stdin)
-	fmt.Println("是否为修复导入错误帖子(Y/N): (默认为 N)")
-	s := lib.Input(buf)
-	if strings.EqualFold(s, "Y") {
-		this.waitFix = 1
+	//同个地址的库,则可以跨库修复
+	if this.db3str.DBHost == this.db4str.DBHost {
+		buf := bufio.NewReader(os.Stdin)
+		fmt.Println("是否为修复导入错误帖子(Y/N): (默认为 N)")
+		s := lib.Input(buf)
+		if strings.EqualFold(s, "Y") {
+			this.waitFix = 1
+		}
 	}
 
 	currentTime := time.Now()
@@ -217,6 +220,8 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 
 	var field postFields
 	for data.Next() {
+		field.message_fmt = ""
+
 		if msgFmtExist {
 			err = data.Scan(
 				&field.tid,
@@ -245,7 +250,6 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		if err != nil {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
-
 			if field.message_fmt == "" {
 				field.message_fmt = field.message
 			}
@@ -361,7 +365,7 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
 	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
 
-	fmt.Println("sql :"+sql, "\r\nxn4:"+xn4, "\r\nxn3sql:"+xn3sql)
+	fmt.Println("sql: "+sql, "\r\nxn4: "+xn4, "\r\nxn3sql: "+xn3sql)
 
 	data, err := xiuno3db.Query(xn3sql)
 	if err != nil {

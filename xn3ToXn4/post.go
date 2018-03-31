@@ -1,10 +1,12 @@
 package xn3ToXn4
 
 import (
+	"bufio"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/xiuno-tools/lib"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -27,11 +29,21 @@ func (this *post) update() {
 		return
 	}
 
+	buf := bufio.NewReader(os.Stdin)
+	fmt.Println("是否为修复导入错误帖子(Y/N): (默认为 N)")
+	s := lib.Input(buf)
+	if strings.EqualFold(s, " Y") {
+		this.waitFix = 1
+	}
+
 	currentTime := time.Now()
 
-	err := this.toUpdate(this.waitFix)
-	if err != nil {
-		log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
+	//导入全表
+	if this.waitFix != 1 {
+		err := this.toUpdate(this.waitFix)
+		if err != nil {
+			log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
+		}
 	}
 
 	fmt.Println("this.wait:", this.waitFix)
@@ -292,8 +304,6 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 	}
 
-	fmt.Println("errlongDataArr:", errLongDataArr)
-
 	//处理错误部分的
 	if errLongDataArr != nil {
 		stmt, err := xiuno4db.Prepare(xn4)
@@ -343,6 +353,8 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 }
 
 func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
+	fmt.Println("正在修复错误帖子...")
+
 	sql := "SELECT " + oldField + " FROM %s WHERE pid NOT IN (SELECT pid FROM %s)"
 
 	xn3dbName := this.db3str.DBName + "." + this.db3str.DBPre + "post"

@@ -366,7 +366,7 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 		fmt.Println("查询数据库失败", err.Error())
 		return
 	}
-	data.Close()
+	defer data.Close()
 
 	if data != nil {
 

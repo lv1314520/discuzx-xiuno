@@ -102,9 +102,10 @@ func (this *user) toUpdate() (count int, err error) {
 			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 user", count))
 		}
 	}
+	defer data.Close()
 
 	if err = data.Err(); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("user error: ", err.Error())
 	}
 
 	err = tx.Commit()

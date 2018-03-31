@@ -49,7 +49,7 @@ func (this *post) update() {
 		}
 	}
 
-	fmt.Println("\r\nthis.wait:", this.waitFix)
+	//fix posts
 	this.toUpdate(this.waitFix)
 
 	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, this.count)
@@ -354,7 +354,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		log.Fatalln("txErr: " + err.Error())
 	}
 
-	if this.total-this.count > 0 {
+	if this.total > this.count {
 		//如果导入部分有失败的,则修复
 		this.waitFix = 1
 	}
@@ -362,6 +362,11 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 }
 
 func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
+	//不在同一个库里面
+	if this.db3str.DBHost != this.db4str.DBHost {
+		return nil
+	}
+
 	fmt.Println("正在修复错误帖子...")
 
 	sql := "SELECT " + oldField + " FROM %s WHERE pid NOT IN (SELECT pid FROM %s)"
@@ -370,7 +375,7 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
 	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
 
-	fmt.Println("sql: "+sql, "\r\nxn4: "+xn4, "\r\nxn3sql: "+xn3sql)
+	//fmt.Println("sql: "+sql, "\r\nxn4: "+xn4, "\r\nxn3sql: "+xn3sql)
 
 	data, err := xiuno3db.Query(xn3sql)
 	if err != nil {

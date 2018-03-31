@@ -199,8 +199,8 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 
 	start := 0
 	times := 0
-	offset := 100
-	maxTimes := 20
+	offset := 50
+	maxTimes := 30
 
 	var field postFields
 	for data.Next() {

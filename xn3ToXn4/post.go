@@ -32,7 +32,7 @@ func (this *post) update() {
 	buf := bufio.NewReader(os.Stdin)
 	fmt.Println("是否为修复导入错误帖子(Y/N): (默认为 N)")
 	s := lib.Input(buf)
-	if strings.EqualFold(s, " Y") {
+	if strings.EqualFold(s, "Y") {
 		this.waitFix = 1
 	}
 

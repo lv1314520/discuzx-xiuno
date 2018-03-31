@@ -253,7 +253,6 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 						_, err = xiuno4db.Exec(sqlStr)
 						if err != nil {
 							fmt.Printf("%d - v - 导入数据失败(%s) \r\n", start, err.Error())
-							fmt.Println(v)
 
 							errLongDataArr = append(errLongDataArr, v)
 							errorCount = len(errLongDataArr) * offset

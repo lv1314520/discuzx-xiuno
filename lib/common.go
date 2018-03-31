@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	//"time"
+	"time"
 )
 
 func Input(r *bufio.Reader) string {
@@ -49,8 +49,11 @@ func AutoUpdate(in bool, tb string) bool {
 	return auto
 }
 
-func UpdateProcess(str string) {
-	//time.Sleep(100 * time.Millisecond)
+func UpdateProcess(str string, t int) {
+	if t > 0 {
+		time.Sleep(100 * time.Millisecond)
+	}
+
 	fmt.Printf("\r%s", str)
 	os.Stdout.Sync()
 }

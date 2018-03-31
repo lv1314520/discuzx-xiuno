@@ -147,7 +147,7 @@ func (this *thread) toUpdate() (count int, err error) {
 				fmt.Printf("%smythread 导入数据失败(%s) \r\n", xn4pre, err.Error())
 			}
 			count++
-			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 thread", count))
+			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条 thread", count), 0)
 		}
 	}
 

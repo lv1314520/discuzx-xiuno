@@ -116,7 +116,7 @@ func (this *post) toUpdateLess() (err error) {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 		} else {
 			this.count++
-			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", this.count, this.total))
+			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", this.count, this.total), 0)
 		}
 	}
 
@@ -257,7 +257,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 							errLongDataArr = append(errLongDataArr, v)
 						} else {
 							this.count += len(v)
-							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)))
+							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)), 0)
 						}
 					}
 
@@ -287,7 +287,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 			errLongDataArr = append(errLongDataArr, dataArr)
 		}
 		this.count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)))
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)), 0)
 	}
 
 	fmt.Println("errlongDataArr:", errLongDataArr)
@@ -323,7 +323,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 					errCount++
 				} else {
 					this.count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount))
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount), 0)
 				}
 			}
 		}
@@ -410,7 +410,7 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 				errCount++
 			} else {
 				this.count++
-				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount))
+				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount), 0)
 			}
 		}
 	}

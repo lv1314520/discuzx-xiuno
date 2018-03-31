@@ -201,6 +201,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 	times := 0
 	offset := 50
 	maxTimes := 30
+	errorCount := 0
 
 	var field postFields
 	for data.Next() {
@@ -255,9 +256,10 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 							fmt.Println(v)
 
 							errLongDataArr = append(errLongDataArr, v)
+							errorCount = len(errLongDataArr) * offset
 						} else {
 							this.count += len(v)
-							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)), 0)
+							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 						}
 					}
 
@@ -285,9 +287,10 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 			fmt.Printf("dataArr - 导入数据失败(%s) \r\n", err.Error())
 
 			errLongDataArr = append(errLongDataArr, dataArr)
+			errorCount = len(errLongDataArr) * offset
 		}
 		this.count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)), 0)
+		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 	}
 
 	fmt.Println("errlongDataArr:", errLongDataArr)

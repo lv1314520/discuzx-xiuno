@@ -387,8 +387,9 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 		}
 
 		var field postFields
+		errCount := 0
 		for data.Next() {
-			errCount := 0
+			field.message_fmt = ""
 			if msgFmtExist {
 				err = data.Scan(
 					&field.tid,

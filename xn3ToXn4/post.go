@@ -252,7 +252,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 						sqlStr = xn5 + strings.Join(sqlArr, ",")
 						_, err = xiuno4db.Exec(sqlStr)
 						if err != nil {
-							fmt.Printf("%d - v - 导入数据失败(%s) \r\n", start, err.Error())
+							fmt.Printf("\r\n v - 导入数据失败(%s) \r\n", err.Error())
 
 							errLongDataArr = append(errLongDataArr, v)
 							errorCount = len(errLongDataArr) * offset
@@ -283,7 +283,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		_, err = xiuno4db.Exec(sqlStr)
 
 		if err != nil {
-			fmt.Printf("dataArr - 导入数据失败(%s) \r\n", err.Error())
+			fmt.Printf("\r\n dataArr - 导入数据失败(%s) \r\n", err.Error())
 
 			errLongDataArr = append(errLongDataArr, dataArr)
 			errorCount = len(errLongDataArr) * offset

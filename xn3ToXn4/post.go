@@ -199,7 +199,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 
 	start := 0
 	times := 0
-	offset := 50
+	offset := 30
 	maxTimes := 30
 	errorCount := 0
 

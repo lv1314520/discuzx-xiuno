@@ -46,7 +46,7 @@ func (this *post) update() {
 		}
 	}
 
-	fmt.Println("this.wait:", this.waitFix)
+	fmt.Println("\r\nthis.wait:", this.waitFix)
 	this.toUpdate(this.waitFix)
 
 	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, this.count)
@@ -360,6 +360,8 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 	xn3dbName := this.db3str.DBName + "." + this.db3str.DBPre + "post"
 	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
 	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
+
+	fmt.Println("sql :"+sql, "\r\nxn4:"+xn4, "\r\nxn3sql:"+xn3sql)
 
 	data, err := xiuno3db.Query(xn3sql)
 	if err != nil {

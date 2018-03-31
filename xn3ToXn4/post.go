@@ -271,7 +271,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 							fmt.Printf("\r\n v - 导入数据失败(%s) \r\n", err.Error())
 
 							errLongDataArr = append(errLongDataArr, v)
-							errorCount = len(errLongDataArr) * offset
+							errorCount += len(v)
 						} else {
 							this.count += len(v)
 							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
@@ -302,11 +302,14 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 			fmt.Printf("\r\n dataArr - 导入数据失败(%s) \r\n", err.Error())
 
 			errLongDataArr = append(errLongDataArr, dataArr)
-			errorCount = len(errLongDataArr) * offset
+			errorCount += len(dataArr)
+		} else {
+			this.count += len(dataArr)
+			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 		}
-		this.count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 	}
+
+	fmt.Println("总共数量： ", this.total, "当前导入成功: ", this.count, "错误: ", errorCount)
 
 	//处理错误部分的
 	if errLongDataArr != nil {
@@ -314,6 +317,8 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		if err != nil {
 			log.Fatalln("处理部分错误: " + err.Error())
 		}
+
+		fmt.Println("处理部分错误数量: ", len(errLongDataArr), "组")
 
 		start = 0
 		errCount := 0

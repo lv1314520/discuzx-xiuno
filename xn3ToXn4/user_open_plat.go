@@ -48,35 +48,27 @@ CREATE TABLE IF NOT EXISTS %suser_open_plat (
 	KEY openid_platid (platid,openid)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
 `
-	xn3db, _ := this.db3str.Connect()
-	xn3CreateTable := fmt.Sprintf(createTable, xn3pre)
-	_, err = xn3db.Exec(xn3CreateTable)
-	if err != nil {
-		log.Fatalln("Xiuno3: ", xn3CreateTable, err.Error())
-	}
 
-	data, err := xn3db.Query(xn3)
+	data, err := xiuno3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
 	}
 	defer data.Close()
 
-	xn4db, _ := this.db4str.Connect()
-
 	xn4CreateTable := fmt.Sprintf(createTable, xn4pre)
-	_, err = xn3db.Exec(xn4CreateTable)
+	_, err = xiuno4db.Exec(xn4CreateTable)
 	if err != nil {
 		log.Fatalln("Xiuno4: ", xn4CreateTable, err.Error())
 	}
 
 	xn4Clear := "TRUNCATE `" + xn4pre + "user_open_plat`"
-	_, err = xn4db.Exec(xn4Clear)
+	_, err = xiuno4db.Exec(xn4Clear)
 	if err != nil {
 		log.Fatalf(":::清空 %suser_open_plat 表失败: "+err.Error(), xn4pre)
 	}
 	fmt.Printf("清空 %suser_open_plat 表成功\r\n", xn4pre)
 
-	tx, err := xn4db.Begin()
+	tx, err := xiuno4db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,8 +81,8 @@ CREATE TABLE IF NOT EXISTS %suser_open_plat (
 
 	fmt.Printf("正在升级 %suser_open_plat 表\r\n", xn4pre)
 
+	var field user_open_platFields
 	for data.Next() {
-		var field user_open_platFields
 		err = data.Scan(
 			&field.uid,
 			&field.platid,

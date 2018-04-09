@@ -52,22 +52,20 @@ func (this *group) toUpdate() (count int, err error) {
 	xn3 := fmt.Sprintf("SELECT %s FROM %sgroup", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %sgroup (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-	xn3db, _ := this.db3str.Connect()
-	data, err := xn3db.Query(xn3)
+	data, err := xiuno3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
 	}
 	defer data.Close()
 
-	xn4db, _ := this.db4str.Connect()
 	xn4Clear := "TRUNCATE `" + xn4pre + "group`"
-	_, err = xn4db.Exec(xn4Clear)
+	_, err = xiuno4db.Exec(xn4Clear)
 	if err != nil {
 		log.Fatalf(":::清空 %sgroup 表失败: "+err.Error(), xn4pre)
 	}
 	fmt.Printf("清空 %sgroup 表成功\r\n", xn4pre)
 
-	tx, err := xn4db.Begin()
+	tx, err := xiuno4db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,8 +78,8 @@ func (this *group) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %sgroup 表\r\n", xn4pre)
 
+	var field groupFields
 	for data.Next() {
-		var field groupFields
 		err = data.Scan(
 			&field.gid,
 			&field.name,

@@ -1,10 +1,12 @@
 package xn3ToXn4
 
 import (
+	"bufio"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skiy/golib"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -27,13 +29,27 @@ func (this *post) update() {
 		return
 	}
 
-	currentTime := time.Now()
-
-	err := this.toUpdate(this.waitFix)
-	if err != nil {
-		log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
+	//同个地址的库,则可以跨库修复
+	if this.db3str.DBHost == this.db4str.DBHost {
+		buf := bufio.NewReader(os.Stdin)
+		fmt.Println("是否为修复导入错误帖子(Y/N): (默认为 N)")
+		s := lib.Input(buf)
+		if strings.EqualFold(s, "Y") {
+			this.waitFix = 1
+		}
 	}
 
+	currentTime := time.Now()
+
+	//导入全表
+	if this.waitFix != 1 {
+		err := this.toUpdate(this.waitFix)
+		if err != nil {
+			log.Fatalln("转换 " + this.db3str.DBPre + "post 失败: " + err.Error())
+		}
+	}
+
+	//fix posts
 	this.toUpdate(this.waitFix)
 
 	fmt.Printf("转换 %spost 表成功，共(%d)条数据\r\n", this.db3str.DBPre, this.count)
@@ -44,7 +60,7 @@ func (this *post) update() {
 /**
 unused
 */
-func (this *post) toUpdateLess() (count int, err error) {
+func (this *post) toUpdateLess() (err error) {
 	xn3pre := this.db3str.DBPre
 	xn4pre := this.db4str.DBPre
 
@@ -53,22 +69,25 @@ func (this *post) toUpdateLess() (count int, err error) {
 	xn3 := fmt.Sprintf("SELECT %s FROM %spost ORDER BY pid ASC", fields, xn3pre)
 	xn4 := fmt.Sprintf("INSERT INTO %spost (%s) VALUES (%s)", xn4pre, fields, qmark)
 
-	xn3db, err := this.db3str.Connect()
-	data, err := xn3db.Query(xn3)
+	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
+	rows := xiuno3db.QueryRow(xn3count)
+	rows.Scan(&this.total)
+	fmt.Printf("post total: %d \r\n", this.total)
+
+	data, err := xiuno3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
 	}
 	defer data.Close()
 
-	xn4db, _ := this.db4str.Connect()
 	xn4Clear := "TRUNCATE `" + xn4pre + "post`"
-	_, err = xn4db.Exec(xn4Clear)
+	_, err = xiuno4db.Exec(xn4Clear)
 	if err != nil {
 		log.Fatalf(":::清空 %spost 表失败: "+err.Error(), xn4pre)
 	}
 	fmt.Printf("清空 %spost 表成功\r\n", xn4pre)
 
-	tx, err := xn4db.Begin()
+	tx, err := xiuno4db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,10 +130,9 @@ func (this *post) toUpdateLess() (count int, err error) {
 		if err != nil {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 		} else {
-			count++
+			this.count++
+			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post", this.count, this.total), 0)
 		}
-
-		//xn4db.SetConnMaxLifetime(time.Second * 10)
 	}
 
 	if err = data.Err(); err != nil {
@@ -126,7 +144,7 @@ func (this *post) toUpdateLess() (count int, err error) {
 		log.Fatalln(err.Error())
 	}
 
-	return count, err
+	return err
 }
 
 func (this *post) toUpdate(fixFlag int) (err error) {
@@ -134,8 +152,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 	xn3pre := this.db3str.DBPre
 	xn4pre := this.db4str.DBPre
 
-	xn3db, err := this.db3str.Connect()
-	query, err := xn3db.Query("select * from " + xn3pre + "post")
+	query, err := xiuno3db.Query("select * from " + xn3pre + "post")
 	if err != nil {
 		fmt.Println("查询数据库失败", err.Error())
 		return
@@ -168,24 +185,18 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 	}
 
 	xn3count := fmt.Sprintf("SELECT COUNT(*) AS count FROM %spost", xn3pre)
-	rows := xn3db.QueryRow(xn3count)
+	rows := xiuno3db.QueryRow(xn3count)
 	rows.Scan(&this.total)
 	fmt.Printf("post total: %d \r\n", this.total)
 
-	data, err := xn3db.Query(xn3)
+	data, err := xiuno3db.Query(xn3)
 	if err != nil {
 		log.Fatalln(xn3, err.Error())
 	}
 	defer data.Close()
 
-	xn4db, _ := this.db4str.Connect()
-
-	xn4db.SetMaxIdleConns(0)
-	xn4db.SetMaxOpenConns(100)
-	xn4db.SetConnMaxLifetime(time.Second * 10)
-
 	xn4Clear := "TRUNCATE `" + xn4pre + "post`"
-	_, err = xn4db.Exec(xn4Clear)
+	_, err = xiuno4db.Exec(xn4Clear)
 	if err != nil {
 		log.Fatalf(":::清空 %spost 表失败: "+err.Error(), xn4pre)
 	}
@@ -203,11 +214,14 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 
 	start := 0
 	times := 0
-	offset := 50
-	maxTimes := 50
+	offset := 30
+	maxTimes := 30
+	errorCount := 0
 
+	var field postFields
 	for data.Next() {
-		var field postFields
+		field.message_fmt = ""
+
 		if msgFmtExist {
 			err = data.Scan(
 				&field.tid,
@@ -236,10 +250,6 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		if err != nil {
 			fmt.Printf("获取数据失败(%s) \r\n", err.Error())
 		} else {
-
-			field.message = strings.Trim(field.message, "\\")
-			field.message_fmt = strings.Trim(field.message_fmt, "\\")
-
 			if field.message_fmt == "" {
 				field.message_fmt = field.message
 			}
@@ -256,15 +266,15 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 					for _, v := range longDataArr {
 						sqlArr = this.makeFileSql(qmark, v)
 						sqlStr = xn5 + strings.Join(sqlArr, ",")
-						_, err = xn4db.Exec(sqlStr)
+						_, err = xiuno4db.Exec(sqlStr)
 						if err != nil {
-							fmt.Printf("%d - v - 导入数据失败(%s) \r\n", start, err.Error())
-							fmt.Println(v)
+							fmt.Printf("\r\n v - 导入数据失败(%s) \r\n", err.Error())
 
 							errLongDataArr = append(errLongDataArr, v)
+							errorCount += len(v)
 						} else {
 							this.count += len(v)
-							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)))
+							lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 						}
 					}
 
@@ -282,28 +292,33 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		log.Fatalln("dataErr: " + err.Error())
 	}
 
+	//最后一次未满足 maxTimes 时, 剩下的数据
 	if dataArr != nil {
 		sqlArr = this.makeFileSql(qmark, dataArr)
 		sqlStr = xn5 + strings.Join(sqlArr, ",")
-		_, err = xn4db.Exec(sqlStr)
+		_, err = xiuno4db.Exec(sqlStr)
 
 		if err != nil {
-			fmt.Printf("dataArr - 导入数据失败(%s) \r\n", err.Error())
+			fmt.Printf("\r\n dataArr - 导入数据失败(%s) \r\n", err.Error())
 
 			errLongDataArr = append(errLongDataArr, dataArr)
+			errorCount += len(dataArr)
+		} else {
+			this.count += len(dataArr)
+			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errorCount), 0)
 		}
-		this.count += len(dataArr)
-		lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, len(errLongDataArr)))
 	}
 
-	fmt.Println("errlongDataArr:", errLongDataArr)
+	fmt.Println("总共数量： ", this.total, "当前导入成功: ", this.count, "错误: ", errorCount)
 
 	//处理错误部分的
 	if errLongDataArr != nil {
-		stmt, err := xn4db.Prepare(xn4)
+		stmt, err := xiuno4db.Prepare(xn4)
 		if err != nil {
 			log.Fatalln("处理部分错误: " + err.Error())
 		}
+
+		fmt.Println("处理部分错误数量: ", len(errLongDataArr), "组")
 
 		start = 0
 		errCount := 0
@@ -329,7 +344,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 					errCount++
 				} else {
 					this.count++
-					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount))
+					lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount), 0)
 				}
 			}
 		}
@@ -339,10 +354,7 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 		log.Fatalln("txErr: " + err.Error())
 	}
 
-	defer xn3db.Close()
-	defer xn4db.Close()
-
-	if this.total-this.count > 0 {
+	if this.total > this.count {
 		//如果导入部分有失败的,则修复
 		this.waitFix = 1
 	}
@@ -350,32 +362,39 @@ func (this *post) toUpdate(fixFlag int) (err error) {
 }
 
 func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
+	//不在同一个库里面
+	if this.db3str.DBHost != this.db4str.DBHost {
+		return nil
+	}
+
+	fmt.Println("正在修复错误帖子...")
+
 	sql := "SELECT " + oldField + " FROM %s WHERE pid NOT IN (SELECT pid FROM %s)"
 
 	xn3dbName := this.db3str.DBName + "." + this.db3str.DBPre + "post"
 	xn4dbName := this.db4str.DBName + "." + this.db4str.DBPre + "post"
 	xn3sql := fmt.Sprintf(sql, xn3dbName, xn4dbName)
 
-	xn3db, err := this.db3str.Connect()
-	data, err := xn3db.Query(xn3sql)
+	//fmt.Println("sql: "+sql, "\r\nxn4: "+xn4, "\r\nxn3sql: "+xn3sql)
+
+	data, err := xiuno3db.Query(xn3sql)
 	if err != nil {
 		fmt.Println("查询数据库失败", err.Error())
 		return
 	}
-	defer xn3db.Close()
+	defer data.Close()
 
 	if data != nil {
 
-		xn4db, err := this.db4str.Connect()
-		stmt, err := xn4db.Prepare(xn4)
-
+		stmt, err := xiuno4db.Prepare(xn4)
 		if err != nil {
 			log.Fatalln("修复帖子部分错误: " + err.Error())
 		}
 
+		var field postFields
+		errCount := 0
 		for data.Next() {
-			errCount := 0
-			var field postFields
+			field.message_fmt = ""
 			if msgFmtExist {
 				err = data.Scan(
 					&field.tid,
@@ -422,7 +441,7 @@ func (this *post) fixPost(oldField, xn4 string, msgFmtExist bool) (err error) {
 				errCount++
 			} else {
 				this.count++
-				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount))
+				lib.UpdateProcess(fmt.Sprintf("正在升级第 %d / %d 条 post，错误: %d", this.count, this.total, errCount), 0)
 			}
 		}
 	}

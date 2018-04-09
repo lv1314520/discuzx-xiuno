@@ -3,7 +3,7 @@ package xn3ToXn4
 import (
 	"bufio"
 	"fmt"
-	"github.com/skiy/xiuno-tools/lib"
+	"github.com/skiy/golib"
 	"log"
 	"os"
 )

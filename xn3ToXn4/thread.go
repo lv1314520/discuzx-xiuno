@@ -3,7 +3,7 @@ package xn3ToXn4
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/skiy/xiuno-tools/lib"
+	"github.com/skiy/golib"
 	"log"
 	"strconv"
 )

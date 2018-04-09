@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/skiy/xiuno-tools/lib"
+	"github.com/skiy/golib"
 	"github.com/skiy/xiuno-tools/xn3ToXn4"
 	"os"
 )
@@ -22,7 +22,7 @@ func main() {
 :::
 ::: 执行过程中按"Q", 再按"回车键"退出本程序...
 :::
-::: Version:1.0.2    Updated:2018-03-30
+::: Version:1.0.3    Updated:2018-04-09
 `)
 
 	inputVal := lib.Input(buf)

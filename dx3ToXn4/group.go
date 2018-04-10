@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/skiy/golib"
 	"log"
+	"strconv"
 )
 
 type group struct {
@@ -58,7 +59,7 @@ func (this *group) toUpdate() (count int, err error) {
 	fields += "," + this.dxstr.FieldAddPrev("f", "allowpost,allowreply,allowpostattach,allowgetattach")
 	fields += "," + this.dxstr.FieldAddPrev("a", "allowstickthread,alloweditpost,allowdelpost,allowmovethread,allowbanvisituser,allowviewip")
 
-	dxsql := fmt.Sprintf("SELECT %s FROM %s u LEFT JOIN %s f ON u.groupid = f.groupid LEFT JOIN %s a ON a.groupid = u.groupid ORDER BY u.groupid ASC", fields, dxtb1, dxtb2, dxtb3)
+	dxsql := fmt.Sprintf("SELECT %s FROM %s u LEFT JOIN %s f ON u.groupid = f.groupid LEFT JOIN %s a ON a.admingid = u.groupid ORDER BY u.groupid ASC", fields, dxtb1, dxtb2, dxtb3)
 
 	newFields := "gid,name,creditsfrom,creditsto,allowread,allowthread,allowpost,allowattach,allowdown,allowtop,allowupdate,allowdelete,allowmove,allowbanuser,allowviewip"
 	qmark := this.dxstr.FieldMakeQmark(newFields, "?")
@@ -85,40 +86,57 @@ func (this *group) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %s 表\r\n", this.dbname)
 
-	var field userFields
+	var field groupFields
+	var gtype string
 	for data.Next() {
 		err = data.Scan(
-			gid,
-			name,
-			creditsfrom,
-			creditsto,
-			allowread,
-			allowthread,
-			allowpost,
-			allowattach,
-			allowdown,
-			allowtop,
-			allowupdate,
-			allowdelete,
-			allowmove,
-			allowbanuser,
-			allowviewip)
+			&field.gid,
+			&field.name,
+			&gtype,
+			&field.creditsfrom,
+			&field.creditsto,
+			&field.allowread,
+			&field.allowthread,
+			&field.allowpost,
+			&field.allowattach,
+			&field.allowdown,
+			&field.allowtop,
+			&field.allowupdate,
+			&field.allowdelete,
+			&field.allowmove,
+			&field.allowbanuser,
+			&field.allowviewip)
 
-		create_ip := lib.Ip2long(field.create_ip)
-		login_ip := lib.Ip2long(field.login_ip)
+		if gtype == "member" {
+			field.allowtop = "0"
+			field.allowupdate = "0"
+			field.allowdelete = "0"
+			field.allowmove = "0"
+			field.allowbanuser = "0"
+			field.allowviewip = "0"
+		}
+
+		allowtop, _ := strconv.Atoi(field.allowtop)
+		if allowtop > 0 {
+			field.allowtop = "1"
+		}
 
 		_, err = stmt.Exec(
-			&field.uid,
 			&field.gid,
-			&field.email,
-			&field.username,
-			&field.password,
-			&field.salt,
-			&field.credits,
-			create_ip,
-			&field.create_date,
-			login_ip,
-			&field.login_date)
+			&field.name,
+			&field.creditsfrom,
+			&field.creditsto,
+			&field.allowread,
+			&field.allowthread,
+			&field.allowpost,
+			&field.allowattach,
+			&field.allowdown,
+			&field.allowtop,
+			&field.allowupdate,
+			&field.allowdelete,
+			&field.allowmove,
+			&field.allowbanuser,
+			&field.allowviewip)
 
 		if err != nil {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())

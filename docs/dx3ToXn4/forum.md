@@ -29,7 +29,7 @@ INSERT INTO bbs_forum SET fid='1', name='默认版块', brief='默认版块介�
 #  cache_date int(11) NOT NULL default '0',		# 最后 threadlist 缓存的时间，6种排序前10页结果缓存。如果是前10页，先读缓存，并依据此字段过期。更新条件：发贴
 ```
 
-```sql  
+```sql
 # 版块访问规则, forum.accesson 开启时生效, 记录行数： fid * gid
 DROP TABLE IF EXISTS bbs_forum_access;
 CREATE TABLE bbs_forum_access (				# 字段中文名

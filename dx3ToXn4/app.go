@@ -88,7 +88,8 @@ func (this *App) Init() {
 
 	tables := [...]string{
 		//"user",
-		"group",
+		//"group",
+		"forum",
 	}
 
 	for _, table := range tables {
@@ -106,6 +107,14 @@ func (this *App) Init() {
 
 		case "group":
 			do := group{}
+			do.dxstr = dxstr
+			do.xnstr = xnstr
+
+			do.update()
+			break
+
+		case "forum":
+			do := forum{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 

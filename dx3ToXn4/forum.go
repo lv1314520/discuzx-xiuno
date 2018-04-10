@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type user struct {
+type forum struct {
 	dxstr,
 	xnstr dbstr
 	count,
@@ -14,22 +14,20 @@ type user struct {
 	dbname string
 }
 
-type userFields struct {
-	uid,
-	gid,
-	email,
-	username,
-	password,
-	salt,
-	credits,
-	create_ip,
-	create_date,
-	login_ip,
-	login_date string
+type forumFields struct {
+	fid,
+	name,
+	rank,
+	threads,
+	todayposts,
+	brief,
+	announcement,
+	seo_title,
+	seo_keywords string
 }
 
-func (this *user) update() {
-	this.dbname = this.xnstr.DBPre + "user"
+func (this *forum) update() {
+	this.dbname = this.xnstr.DBPre + "forum"
 	if !lib.AutoUpdate(this.xnstr.Auto, this.dbname) {
 		return
 	}
@@ -42,20 +40,18 @@ func (this *user) update() {
 	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n", this.dbname, count)
 }
 
-func (this *user) toUpdate() (count int, err error) {
+func (this *forum) toUpdate() (count int, err error) {
 	dxpre := this.dxstr.DBPre
 
-	dxtb1 := dxpre + "common_member"
-	dxtb2 := dxpre + "ucenter_members"
-	dxtb3 := dxpre + "common_member_status"
+	dxtb1 := dxpre + "forum_forum"
+	dxtb2 := dxpre + "forum_forumfield"
 
-	fields := this.dxstr.FieldAddPrev("m", "uid,groupid,email,username,credits,regdate")
-	fields += "," + this.dxstr.FieldAddPrev("u", "password,salt")
-	fields += "," + this.dxstr.FieldAddPrev("s", "regip,lastip,lastvisit")
+	fields := this.dxstr.FieldAddPrev("f1", "fid,name,rank,threads,todayposts")
+	fields += "," + this.dxstr.FieldAddPrev("f2", "description,rules,seotitle,keywords")
 
-	dxsql := fmt.Sprintf("SELECT %s FROM %s m LEFT JOIN %s u ON u.uid = m.uid LEFT JOIN %s s ON s.uid = m.uid ORDER BY m.uid ASC", fields, dxtb1, dxtb2, dxtb3)
+	dxsql := fmt.Sprintf("SELECT %s FROM %s f1 LEFT JOIN %s f2 ON f2.fid = f1.fid WHERE f1.type = 'forum' AND status = 1 ORDER BY f1.fid ASC", fields, dxtb1, dxtb2)
 
-	newFields := "uid,gid,email,username,password,salt,credits,create_ip,create_date,login_ip,login_date"
+	newFields := "fid,name,rank,threads,todayposts,brief,announcement,seo_title,seo_keywords"
 	qmark := this.dxstr.FieldMakeQmark(newFields, "?")
 	xnsql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", this.dbname, newFields, qmark)
 
@@ -80,36 +76,29 @@ func (this *user) toUpdate() (count int, err error) {
 
 	fmt.Printf("正在升级 %s 表\r\n", this.dbname)
 
-	var field userFields
+	var field forumFields
 	for data.Next() {
 		err = data.Scan(
-			&field.uid,
-			&field.gid,
-			&field.email,
-			&field.username,
-			&field.credits,
-			&field.create_date,
-			&field.password,
-			&field.salt,
-			&field.create_ip,
-			&field.login_ip,
-			&field.login_date)
-
-		create_ip := lib.Ip2long(field.create_ip)
-		login_ip := lib.Ip2long(field.login_ip)
+			&field.fid,
+			&field.name,
+			&field.rank,
+			&field.threads,
+			&field.todayposts,
+			&field.brief,
+			&field.announcement,
+			&field.seo_title,
+			&field.seo_keywords)
 
 		_, err = stmt.Exec(
-			&field.uid,
-			&field.gid,
-			&field.email,
-			&field.username,
-			&field.password,
-			&field.salt,
-			&field.credits,
-			create_ip,
-			&field.create_date,
-			login_ip,
-			&field.login_date)
+			&field.fid,
+			&field.name,
+			&field.rank,
+			&field.threads,
+			&field.todayposts,
+			&field.brief,
+			&field.announcement,
+			&field.seo_title,
+			&field.seo_keywords)
 
 		if err != nil {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())

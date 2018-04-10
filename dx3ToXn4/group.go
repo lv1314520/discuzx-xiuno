@@ -10,7 +10,6 @@ import (
 type group struct {
 	dxstr,
 	xnstr dbstr
-	fields userFields
 	count,
 	total int
 	dbname string

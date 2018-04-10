@@ -227,7 +227,7 @@ MySQL [dx]> desc pre_forum_forumfield;
 ```
 
 ## 备注
-- pre_forum_forum.type = 'forum' 时值才对应
+- 使用到两表: pre_forum_forum, pre_forum_forumfield
+- pre_forum_forum.type = 'forum', status == 1 时值才对应
 - icon 需要重新上传 - data/attachment/common/a5/common_{$fid}_icon.png  
-- moduids 版主清空 - 对应forumfield.moderators (用户名1\n用户名2) 
-- bbs_forum_access 版块规则全部清空
+- moduids 版主清空 - 对应forumfield.moderators (用户名1\n用户名2) (扩展处修复)

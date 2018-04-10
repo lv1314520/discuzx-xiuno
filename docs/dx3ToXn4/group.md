@@ -291,7 +291,6 @@ MySQL [dx]> desc pre_common_admingroup;
 
 ## 备注
 - 使用到三表: pre_common_usergroup, pre_common_usergroup_field, pre_common_admingroup
-- 当 radminid 不为0时，则提取管理组信息
 - 当 type 值有三个 enum('system','special','member')
-- 当 type != member 时,creditsfrom 和 creditsto 值为0
+- 当 type == member 时, 填充管理组的值(allowtop,allowupdate,allowdelete,allowmove,allowbanuser,allowviewip)
 - 删除用户功能手动修改数据库 (或者后面在扩展功能添加此功能)

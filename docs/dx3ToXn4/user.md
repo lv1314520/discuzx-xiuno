@@ -171,7 +171,7 @@ MySQL [dx]> desc pre_common_member_status;
 ```
 
 ## 备注
-- 使用到三表: pre_common_member,pre_ucenter_members,pre_common_member_status
+- 使用到三表: pre_common_member, pre_ucenter_members, pre_common_member_status
 - avatar 头像需要重置 avatarstatus=1 时 
 > upload/avatar/000/1.png - /uc_server/data/avatar/000/00/00/01_avatar_middle.jpg
-- 涉及到IP部分，将正常IP转换为数值形式
+- create_ip,login_ip 涉及到IP部分，将正常IP转换为数值形式

@@ -89,21 +89,21 @@ MySQL [dx]> desc pre_forum_forum;
 +------------------+-----------------------------+------+-----+---------+----------------+
 | Field            | Type                        | Null | Key | Default | Extra          |
 +------------------+-----------------------------+------+-----+---------+----------------+
-| fid              | mediumint(8) unsigned       | NO   | PRI | NULL    | auto_increment |
-| fup              | mediumint(8) unsigned       | NO   | MUL | 0       |                |
-| type             | enum('group','forum','sub') | NO   |     | forum   |                |
-| name             | char(50)                    | NO   |     |         |                |
-| status           | tinyint(1)                  | NO   | MUL | 0       |                |
-| displayorder     | smallint(6)                 | NO   |     | 0       |                |
-| styleid          | smallint(6) unsigned        | NO   |     | 0       |                |
-| threads          | mediumint(8) unsigned       | NO   |     | 0       |                |
-| posts            | mediumint(8) unsigned       | NO   |     | 0       |                |
-| todayposts       | mediumint(8) unsigned       | NO   |     | 0       |                |
-| yesterdayposts   | mediumint(8) unsigned       | NO   |     | 0       |                |
-| rank             | smallint(6) unsigned        | NO   |     | 0       |                |
+| fid              | mediumint(8) unsigned       | NO   | 版块ID                          |
+| fup              | mediumint(8) unsigned       | NO   | 上级版块ID                       |
+| type             | enum('group','forum','sub') | NO   | 版块类型                         |
+| name             | char(50)                    | NO   | 名称                            |
+| status           | tinyint(1)                  | NO   | 显示状态                         |
+| displayorder     | smallint(6)                 | NO   | 显示顺序                         |
+| styleid          | smallint(6) unsigned        | NO   | 风格ID                          |
+| threads          | mediumint(8) unsigned       | NO   | 主题数量                         |
+| posts            | mediumint(8) unsigned       | NO   | 帖子数量                         |
+| todayposts       | mediumint(8) unsigned       | NO   | 今日发帖数量                     |
+| yesterdayposts   | mediumint(8) unsigned       | NO   | 昨日发帖数量                     |
+| rank             | smallint(6) unsigned        | NO   | 版块主题排序(按最新帖/最后回复排序) |
 | oldrank          | smallint(6) unsigned        | NO   |     | 0       |                |
-| lastpost         | char(110)                   | NO   |     |         |                |
-| domain           | char(15)                    | NO   |     |         |                |
+| lastpost         | char(110)                   | NO   | 最后发帖 (主题ID 标题 时间戳 用户名 |
+| domain           | char(15)                    | NO   | 绑定的二级域名                   |
 | allowsmilies     | tinyint(1)                  | NO   |     | 0       |                |
 | allowhtml        | tinyint(1)                  | NO   |     | 0       |                |
 | allowbbcode      | tinyint(1)                  | NO   |     | 0       |                |
@@ -144,7 +144,7 @@ MySQL [dx]> desc pre_forum_forumfield;
 +------------------+-----------------------+------+-----+---------+-------+
 | Field            | Type                  | Null | Key | Default | Extra |
 +------------------+-----------------------+------+-----+---------+-------+
-| fid              | mediumint(8) unsigned | NO   | PRI | 0       |       |
+| fid              | mediumint(8) unsigned | NO   | PRI | 0       |版块ID  |
 | description      | text                  | NO   |     | NULL    |       |
 | password         | varchar(12)           | NO   |     |         |       |
 | icon             | varchar(255)          | NO   |     |         |       |
@@ -194,11 +194,40 @@ MySQL [dx]> desc pre_forum_forumfield;
 46 rows in set (0.00 sec)
 ```
 
-### 对应关系
+### 对应关系 - forum 版块
 ```
 +-----------+---------------------+------+-----+---------+----------------+
 | XiunoBBS  | Discuz              |   描述
 +-----------+---------------------+------+-----+---------+----------------+
-| xx        | xx                  |  xx
+| fid       | fid                 |  版块ID
+| name      | name                |  版块名称
+| rank      | rank                |  版块排序
+| threads   | threads             |  主题数
+| todayposts| todayposts          |  今日发帖数
+| todaythreads | -                          |  今日主题数
+| brief        | - 对应forumfield.description|  版块介绍
+| announcement | - 对应forumfield.rules      |  版块公告
+| access       | -                          |  是否开启权限控制
+| orderby      | -                          |  默认列表排序
+| create_date  | -                          |  版块创建时间
+| icon         | -<1>                       |  图标最后存放时间(0为无图标)
+| moduids      | -<2>                       |  版主id(1,2,3)
+| seo_title    | - 对应forumfield.seotitle   |  SEO标题
+| seo_keywords | - 对应forumfield.keywords   |  SEO关键词
 +-----------+---------------------+------+-----+---------+----------------+
 ```
+
+### 对应关系 - bbs_forum_access 版块规则(当forum.access开启时启用)
+```
++-----------+---------------------+------+-----+---------+----------------+
+| XiunoBBS  | Discuz              |   描述
++-----------+---------------------+------+-----+---------+----------------+
+| fid       | fid                 |  版块ID
++-----------+---------------------+------+-----+---------+----------------+
+```
+
+## 备注
+- pre_forum_forum.type = 'forum' 时值才对应
+- icon 需要重新上传 - data/attachment/common/a5/common_{$fid}_icon.png  
+- moduids 版主清空 - 对应forumfield.moderators (用户名1\n用户名2) 
+- bbs_forum_access 版块规则全部清空

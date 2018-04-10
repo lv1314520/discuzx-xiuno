@@ -3,7 +3,7 @@
 
 **user(用户) 对应表关系**
 ```sql
-### 用户表 ###
+# 用户表
 DROP TABLE IF EXISTS `bbs_user`;
 CREATE TABLE `bbs_user` (
   uid int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户编号',
@@ -156,8 +156,8 @@ MySQL [dx]> desc pre_common_member_status;
 | salt         | ucenter_members.salt            | 密码盐值
 | mobile       | -                | 手机号
 | qq           | -                | QQ
-| threads      | -                | 主题数
-| posts        | -                | 帖子数
+| threads      | -<4>             | 主题数
+| posts        | -<4>             | 帖子数
 | credits      | credits          | 积分
 | golds        | -                | 金币
 | rmbs         | -                | 人民币
@@ -175,3 +175,4 @@ MySQL [dx]> desc pre_common_member_status;
 - avatar 头像需要重置 avatarstatus=1 时 
 > upload/avatar/000/1.png - /uc_server/data/avatar/000/00/00/01_avatar_middle.jpg
 - create_ip,login_ip 涉及到IP部分，将正常IP转换为数值形式
+- threads, posts 转换完 threads 和 posts 后再更新统计

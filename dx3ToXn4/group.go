@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type user struct {
+type group struct {
 	dxstr,
 	xnstr dbstr
 	fields userFields
@@ -15,22 +15,26 @@ type user struct {
 	dbname string
 }
 
-type userFields struct {
-	uid,
+type groupFields struct {
 	gid,
-	email,
-	username,
-	password,
-	salt,
-	credits,
-	create_ip,
-	create_date,
-	login_ip,
-	login_date string
+	name,
+	creditsfrom,
+	creditsto,
+	allowread,
+	allowthread,
+	allowpost,
+	allowattach,
+	allowdown,
+	allowtop,
+	allowupdate,
+	allowdelete,
+	allowmove,
+	allowbanuser,
+	allowviewip string
 }
 
-func (this *user) update() {
-	this.dbname = this.xnstr.DBPre + "user"
+func (this *group) update() {
+	this.dbname = this.xnstr.DBPre + "group"
 	if !lib.AutoUpdate(this.xnstr.Auto, this.dbname) {
 		return
 	}
@@ -43,20 +47,20 @@ func (this *user) update() {
 	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n", this.dbname, count)
 }
 
-func (this *user) toUpdate() (count int, err error) {
+func (this *group) toUpdate() (count int, err error) {
 	dxpre := this.dxstr.DBPre
 
-	dxtb1 := dxpre + "common_member"
-	dxtb2 := dxpre + "ucenter_members"
-	dxtb3 := dxpre + "common_member_status"
+	dxtb1 := dxpre + "common_usergroup"
+	dxtb2 := dxpre + "common_usergroup_field"
+	dxtb3 := dxpre + "common_admingroup"
 
-	fields := this.dxstr.FieldAddPrev("m", "uid,groupid,email,username,credits,regdate")
-	fields += "," + this.dxstr.FieldAddPrev("u", "password,salt")
-	fields += "," + this.dxstr.FieldAddPrev("s", "regip,lastip,lastvisit")
+	fields := this.dxstr.FieldAddPrev("u", "groupid,grouptitle,type,creditslower,creditshigher,allowvisit")
+	fields += "," + this.dxstr.FieldAddPrev("f", "allowpost,allowreply,allowpostattach,allowgetattach")
+	fields += "," + this.dxstr.FieldAddPrev("a", "allowstickthread,alloweditpost,allowdelpost,allowmovethread,allowbanvisituser,allowviewip")
 
-	dxsql := fmt.Sprintf("SELECT %s FROM %s m LEFT JOIN %s u ON u.uid = m.uid LEFT JOIN %s s ON s.uid = m.uid ORDER BY m.uid ASC", fields, dxtb1, dxtb2, dxtb3)
+	dxsql := fmt.Sprintf("SELECT %s FROM %s u LEFT JOIN %s f ON u.groupid = f.groupid LEFT JOIN %s a ON a.groupid = u.groupid ORDER BY u.groupid ASC", fields, dxtb1, dxtb2, dxtb3)
 
-	newFields := "uid,gid,email,username,password,salt,credits,create_ip,create_date,login_ip,login_date"
+	newFields := "gid,name,creditsfrom,creditsto,allowread,allowthread,allowpost,allowattach,allowdown,allowtop,allowupdate,allowdelete,allowmove,allowbanuser,allowviewip"
 	qmark := this.dxstr.FieldMakeQmark(newFields, "?")
 	xnsql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", this.dbname, newFields, qmark)
 
@@ -84,17 +88,21 @@ func (this *user) toUpdate() (count int, err error) {
 	var field userFields
 	for data.Next() {
 		err = data.Scan(
-			&field.uid,
-			&field.gid,
-			&field.email,
-			&field.username,
-			&field.credits,
-			&field.create_date,
-			&field.password,
-			&field.salt,
-			&field.create_ip,
-			&field.login_ip,
-			&field.login_date)
+			gid,
+			name,
+			creditsfrom,
+			creditsto,
+			allowread,
+			allowthread,
+			allowpost,
+			allowattach,
+			allowdown,
+			allowtop,
+			allowupdate,
+			allowdelete,
+			allowmove,
+			allowbanuser,
+			allowviewip)
 
 		create_ip := lib.Ip2long(field.create_ip)
 		login_ip := lib.Ip2long(field.login_ip)

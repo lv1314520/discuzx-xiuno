@@ -34,6 +34,7 @@ MIT
 ### 鸣谢
 - https://github.com/go-sql-driver/mysql
 - 
+- Discuz https://gitee.com/ComsenzDiscuz/DiscuzX
 - XiunoBBS https://bbs.xiuno.com
 
 ### 作者

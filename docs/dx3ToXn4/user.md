@@ -161,7 +161,7 @@ MySQL [dx]> desc pre_common_member_status;
 | credits      | credits          | 积分
 | golds        | -                | 金币
 | rmbs         | -                | 人民币
-| create_ip    | pre_ucenter_members.regip <3>   | 创建IP
+| create_ip    | pre_common_member_status.regip <3>   | 创建IP
 | create_date  | regdate                         | 注册时间
 | login_ip     | pre_common_member_status.lastip | 最后登录IP
 | login_date   | pre_common_member_status.lastvisit  | 最后登录时间

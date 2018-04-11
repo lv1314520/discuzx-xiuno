@@ -53,7 +53,7 @@ func (this *post) toUpdate() (count int, err error) {
 
 	newFields := "tid,pid,uid,isfirst,create_date,userip,message,message_fmt"
 	qmark := this.dxstr.FieldMakeQmark(newFields, "?")
-	xnsql := fmt.Sprintf("INSERT INTO %s (%s, doctype) VALUES (%s, '3')", this.dbname, newFields, qmark)
+	xnsql := fmt.Sprintf("INSERT INTO %s (%s, doctype) VALUES (%s, '0')", this.dbname, newFields, qmark)
 
 	xnsql2 := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", xntb2, "uid,tid,pid", "?,?,?")
 
@@ -112,7 +112,7 @@ func (this *post) toUpdate() (count int, err error) {
 			&field.isfirst,
 			&field.create_date,
 			userip,
-			&field.message,
+			message_fmt,
 			message_fmt)
 
 		if err != nil {

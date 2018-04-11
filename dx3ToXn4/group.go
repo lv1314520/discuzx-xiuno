@@ -44,7 +44,7 @@ func (this *group) update() {
 		log.Fatalln("转换 " + this.dbname + " 失败: " + err.Error())
 	}
 
-	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n", this.dbname, count)
+	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n\r\n", this.dbname, count)
 }
 
 func (this *group) toUpdate() (count int, err error) {

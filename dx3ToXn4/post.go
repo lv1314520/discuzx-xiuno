@@ -36,7 +36,7 @@ func (this *post) update() {
 		log.Fatalln("转换 " + this.dbname + " 失败: " + err.Error())
 	}
 
-	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n", this.dbname, count)
+	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n\r\n", this.dbname, count)
 }
 
 func (this *post) toUpdate() (count int, err error) {
@@ -133,4 +133,12 @@ func (this *post) toUpdate() (count int, err error) {
 	}
 
 	return count, err
+}
+
+/**
+将帖子内的附件转换为HTML
+*/
+func (this *post) AttachReplace(message string) string {
+	preg := "[attach]2[/attach]"
+	return preg
 }

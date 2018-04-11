@@ -37,7 +37,7 @@ func (this *forum) update() {
 		log.Fatalln("转换 " + this.dbname + " 失败: " + err.Error())
 	}
 
-	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n", this.dbname, count)
+	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n\r\n", this.dbname, count)
 }
 
 func (this *forum) toUpdate() (count int, err error) {
@@ -89,6 +89,9 @@ func (this *forum) toUpdate() (count int, err error) {
 			&field.seo_title,
 			&field.seo_keywords)
 
+		seo_title := lib.Substr(field.seo_title, 0, 60)
+		seo_keywords := lib.Substr(field.seo_keywords, 0, 60)
+
 		_, err = stmt.Exec(
 			&field.fid,
 			&field.name,
@@ -97,8 +100,8 @@ func (this *forum) toUpdate() (count int, err error) {
 			&field.todayposts,
 			&field.brief,
 			&field.announcement,
-			&field.seo_title,
-			&field.seo_keywords)
+			seo_title,
+			seo_keywords)
 
 		if err != nil {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())

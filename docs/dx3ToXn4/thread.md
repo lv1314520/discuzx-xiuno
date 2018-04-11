@@ -167,8 +167,8 @@ mysql> desc pre_forum_thread;
 | last_date   | lastpost                | 最后回复时间
 | views       | views                   | 浏览次数
 | posts       | replies                 | 回复次数
-| images      | -                       | 图片数
-| files       | -                       | 文件数
+| images      | -<4>                    | 图片数
+| files       | -<4>                    | 文件数
 | mods        | -                       | 版主修改次数
 | closed      | closed                  | 是否已关闭
 | firstpid    | - forum_post.pid > first| 主帖 ID
@@ -202,3 +202,4 @@ mysql> desc pre_forum_thread;
 - 使用到 xiuno 的三表: bbs_thread, bbs_thread_top, bbs_mythread
 - 使用到 dx 的表 pre_forum_post
 - 最后发帖者及最后帖子 PID 最终扩展处再处理
+- 图片数及附件数从 attach 表中提取

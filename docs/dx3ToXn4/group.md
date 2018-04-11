@@ -284,7 +284,7 @@ MySQL [dx]> desc pre_common_admingroup;
 | allowdelete     | _admingroup.allowdelpost        | 允许删除
 | allowmove       | _admingroup.allowmovethread     | 允许移动
 | allowbanuser    | _admingroup.allowbanvisituser   | 允许禁止用户
-| allowdeleteuser | -                               | 允许删除用户
+| allowdeleteuser | -<4>                            | 允许删除用户
 | allowviewip     | _admingroup.allowviewip         | 允许查看用户IP
 +--------------+----------------------+------+-----+---------+----------------+
 ```
@@ -294,4 +294,4 @@ MySQL [dx]> desc pre_common_admingroup;
 - 当 type 值有三个 enum('system','special','member')
 - 当 type == member 时, 填充管理组的值(allowtop,allowupdate,allowdelete,allowmove,allowbanuser,allowviewip)
 - 删除用户功能手动修改数据库 (或者后面在扩展功能添加此功能)
-- 扩展功能：XiunoBBS 新用户注册固定用户组为 **101**，现决定将creditsfrom为0，creditsto不为0的组ID改为101
+- 扩展功能：因XiunoBBS 新用户注册固定用户组为 **101**，现决定将creditsfrom为0，creditsto不为0的组ID改为101

@@ -210,8 +210,8 @@ MySQL [dx]> desc pre_forum_forumfield;
 | access       | -                          |  是否开启权限控制
 | orderby      | -                          |  默认列表排序
 | create_date  | -                          |  版块创建时间
-| icon         | -<1>                       |  图标最后存放时间(0为无图标)
-| moduids      | -<2>                       |  版主id(1,2,3)
+| icon         | -<3>                       |  图标最后存放时间(0为无图标)
+| moduids      | -<4>                       |  版主id(1,2,3)
 | seo_title    | - 对应forumfield.seotitle   |  SEO标题
 | seo_keywords | - 对应forumfield.keywords   |  SEO关键词
 +-----------+---------------------+------+-----+---------+----------------+

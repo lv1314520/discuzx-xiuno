@@ -12,9 +12,9 @@ import (
 
 //group: ✔修正可删除用户的组 id,
 //group: ✔将XiunoBBS 将creditsfrom为0，creditsto不为0的组ID改为101，并将 user 为此组的 gid 改为101
-//post: 图片数及附件数从 attach 表中提取
-//thread: 图片数及附件数从 attach 表中提取,
-//thread: 修正最后发帖者及最后帖子
+//post: ✔图片数及附件数从 attach 表中提取
+//thread: ✔图片数及附件数从 post 表中 isfirst = 1提取,
+//thread: ✔修正最后发帖者及最后帖子
 //user: ✔更新 threads 和 posts 统计
 
 //Linux 平台下设置两论坛的根目录，移动附件、头像及版块图片
@@ -44,7 +44,13 @@ func (this *extension) update() {
 	//this.fixUserGroup()
 
 	//修正最后发帖者及最后帖子
-	this.fixThreadLastPost()
+	//this.fixThreadLastPost()
+
+	//修正帖子的附件数和图片数
+	this.fixPostAttach()
+
+	//修正主题的附件数和图片数
+	this.fixThreadAttach()
 }
 
 /**
@@ -192,6 +198,97 @@ func (this *extension) fixUserGroup() {
 	}
 }
 
+/**
+更新主题的 lastpid 和 lastuid
+*/
 func (this *extension) fixThreadLastPost() {
+	pre := this.xnstr.DBPre
 
+	this.tbname = pre + "thread"
+
+	xntb2 := pre + "post"
+
+	upsql := `
+			UPDATE %s t
+			INNER JOIN
+			(
+				SELECT tid, uid AS last_uid, pid AS last_pid
+				FROM %s
+				WHERE pid IN (SELECT max(pid) FROM %s GROUP BY tid)
+			) p
+				ON t.tid = p.tid
+			SET
+				t.lastuid = p.last_uid,
+				t.lastpid = p.last_pid
+			`
+	xnsql := fmt.Sprintf(upsql, this.tbname, xntb2, xntb2)
+
+	res, err := xndb.Exec(xnsql)
+	if err != nil {
+		fmt.Printf("更新主题的 lastpid 和 lastuid 失败", err.Error())
+		return
+	} else {
+		rows, _ := res.RowsAffected()
+		fmt.Printf("更新主题的 lastpid 和 lastuid 成功，共(%d)条数据\r\n\r\n", rows)
+	}
+}
+
+/**
+更新帖子的附件和图片数
+*/
+func (this *extension) fixPostAttach() {
+	pre := this.xnstr.DBPre
+
+	this.tbname = pre + "post"
+
+	xntb2 := pre + "attach"
+
+	upsql := `
+			UPDATE %s p
+			SET 
+			images = (SELECT count(aid) FROM %s WHERE isimage = 1 AND pid = p.pid),
+			files = (SELECT count(aid) FROM %s WHERE isimage != 1 AND pid = p.pid)
+			
+			`
+	xnsql := fmt.Sprintf(upsql, this.tbname, xntb2, xntb2)
+
+	res, err := xndb.Exec(xnsql)
+	if err != nil {
+		fmt.Printf("更新帖子附件(files)和图片数(images)失败", err.Error())
+		return
+	} else {
+		rows, _ := res.RowsAffected()
+		fmt.Printf("更新帖子附件(files)和图片数(images)成功，共(%d)条数据\r\n\r\n", rows)
+	}
+}
+
+/**
+更新主题的附件和图片数
+*/
+func (this *extension) fixThreadAttach() {
+	pre := this.xnstr.DBPre
+
+	this.tbname = pre + "thread"
+
+	xntb2 := pre + "post"
+
+	upsql := `
+			UPDATE
+				%s t
+			INNER JOIN %s p ON
+				p.isfirst = 1 AND p.tid = t.tid
+			SET
+				t.files = p.files,
+				t.images = p.images
+			`
+	xnsql := fmt.Sprintf(upsql, this.tbname, xntb2)
+
+	res, err := xndb.Exec(xnsql)
+	if err != nil {
+		fmt.Printf("更新主题附件(files)和图片数(images)失败", err.Error())
+		return
+	} else {
+		rows, _ := res.RowsAffected()
+		fmt.Printf("更新主题附件(files)和图片数(images)成功，共(%d)条数据\r\n\r\n", rows)
+	}
 }

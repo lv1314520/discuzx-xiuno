@@ -17,11 +17,11 @@ import (
 //thread: ✔图片数及附件数从 post 表中 isfirst = 1提取,
 //thread: ✔修正最后发帖者及最后帖子
 //user: ✔更新 threads 和 posts 统计
-//forum: 修正版主 UID
 
 //Linux 平台下设置两论坛的根目录，移动附件、头像及版块图标
 //user: 修正头像avatarstatus
 //forum: 修正版块icon
+//forum: 修正版主uid
 
 type extension struct {
 	dxstr,

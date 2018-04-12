@@ -87,12 +87,12 @@ func (this *App) Init() {
 	}
 
 	tables := [...]string{
-		//"user",
-		//"group",
-		//"forum",
-		//"attach",
-		//"thread",
-		//"post",
+		"user",
+		"group",
+		"forum",
+		"attach",
+		"thread",
+		"post",
 	}
 
 	for _, table := range tables {
@@ -162,7 +162,7 @@ func (this *App) Init() {
 ::: 已将 ` + oldname + ` 升级至 ` + newname + `
 ::: 本程序开源地址: https://github.com/skiy/xiuno-tools
 ::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
-::: 如有意见和建议或者遇到BUG，请到GitHub提issue。
+::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。
 :::
 `)
 }

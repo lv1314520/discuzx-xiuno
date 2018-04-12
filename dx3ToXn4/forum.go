@@ -11,7 +11,7 @@ type forum struct {
 	xnstr dbstr
 	count,
 	total int
-	dbname string
+	tbname string
 }
 
 type forumFields struct {
@@ -27,17 +27,17 @@ type forumFields struct {
 }
 
 func (this *forum) update() {
-	this.dbname = this.xnstr.DBPre + "forum"
-	if !lib.AutoUpdate(this.xnstr.Auto, this.dbname) {
+	this.tbname = this.xnstr.DBPre + "forum"
+	if !lib.AutoUpdate(this.xnstr.Auto, this.tbname) {
 		return
 	}
 
 	count, err := this.toUpdate()
 	if err != nil {
-		log.Fatalln("转换 " + this.dbname + " 失败: " + err.Error())
+		log.Fatalln("转换 " + this.tbname + " 失败: " + err.Error())
 	}
 
-	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n\r\n", this.dbname, count)
+	fmt.Printf("转换 %s 表成功，共(%d)条数据\r\n\r\n", this.tbname, count)
 }
 
 func (this *forum) toUpdate() (count int, err error) {
@@ -53,7 +53,7 @@ func (this *forum) toUpdate() (count int, err error) {
 
 	newFields := "fid,name,rank,threads,todayposts,brief,announcement,seo_title,seo_keywords"
 	qmark := this.dxstr.FieldMakeQmark(newFields, "?")
-	xnsql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", this.dbname, newFields, qmark)
+	xnsql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", this.tbname, newFields, qmark)
 
 	data, err := dxdb.Query(dxsql)
 	if err != nil {
@@ -61,12 +61,12 @@ func (this *forum) toUpdate() (count int, err error) {
 	}
 	defer data.Close()
 
-	xnClear := "TRUNCATE " + this.dbname
+	xnClear := "TRUNCATE " + this.tbname
 	_, err = xndb.Exec(xnClear)
 	if err != nil {
-		log.Fatalf(":::清空 %s 表失败: "+err.Error(), this.dbname)
+		log.Fatalf(":::清空 %s 表失败: "+err.Error(), this.tbname)
 	}
-	fmt.Printf("清空 %s 表成功 \r\n", this.dbname)
+	fmt.Printf("清空 %s 表成功 \r\n", this.tbname)
 
 	stmt, err := xndb.Prepare(xnsql)
 	if err != nil {
@@ -74,7 +74,7 @@ func (this *forum) toUpdate() (count int, err error) {
 	}
 	defer stmt.Close()
 
-	fmt.Printf("正在升级 %s 表\r\n", this.dbname)
+	fmt.Printf("正在升级 %s 表\r\n", this.tbname)
 
 	var field forumFields
 	for data.Next() {

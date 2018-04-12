@@ -87,12 +87,12 @@ func (this *App) Init() {
 	}
 
 	tables := [...]string{
-		"user",
-		"group",
-		"forum",
-		"attach",
-		"thread",
-		"post",
+		//"user",
+		//"group",
+		//"forum",
+		//"attach",
+		//"thread",
+		//"post",
 	}
 
 	for _, table := range tables {
@@ -101,7 +101,7 @@ func (this *App) Init() {
 		switch table {
 
 		case "user":
-			do := user{}
+			do := &user{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 
@@ -109,7 +109,7 @@ func (this *App) Init() {
 			break
 
 		case "group":
-			do := group{}
+			do := &group{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 
@@ -117,7 +117,7 @@ func (this *App) Init() {
 			break
 
 		case "forum":
-			do := forum{}
+			do := &forum{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 
@@ -125,7 +125,7 @@ func (this *App) Init() {
 			break
 
 		case "thread":
-			do := thread{}
+			do := &thread{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 
@@ -133,7 +133,7 @@ func (this *App) Init() {
 			break
 
 		case "post":
-			do := post{}
+			do := &post{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 
@@ -141,7 +141,7 @@ func (this *App) Init() {
 			break
 
 		case "attach":
-			do := attach{}
+			do := &attach{}
 			do.dxstr = dxstr
 			do.xnstr = xnstr
 
@@ -149,6 +149,12 @@ func (this *App) Init() {
 			break
 		}
 	}
+
+	do := &extension{}
+	do.dxstr = dxstr
+	do.xnstr = xnstr
+
+	do.update()
 
 	fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	fmt.Println(`

@@ -13,13 +13,15 @@ import (
 //group: ✔修正可删除用户的组 id,
 //group: ✔将XiunoBBS 将creditsfrom为0，creditsto不为0的组ID改为101，并将 user 为此组的 gid 改为101
 //post: ✔图片数及附件数从 attach 表中提取
+//post: message 中 [attach]1[/attach] 的内容提取并替换url
 //thread: ✔图片数及附件数从 post 表中 isfirst = 1提取,
 //thread: ✔修正最后发帖者及最后帖子
 //user: ✔更新 threads 和 posts 统计
+//forum: 修正版主 UID
 
-//Linux 平台下设置两论坛的根目录，移动附件、头像及版块图片
+//Linux 平台下设置两论坛的根目录，移动附件、头像及版块图标
 //user: 修正头像avatarstatus
-//forum: 修正版主 UID,icon
+//forum: 修正版块icon
 
 type extension struct {
 	dxstr,
@@ -35,22 +37,40 @@ func (this *extension) update() {
 	}
 
 	//修正用户主题、帖子统计
-	//this.fixUserPostStat()
+	this.fixUserPostStat()
 
 	//修正用户组的删除用户权限
-	//this.fixGroup()
+	this.fixGroup()
 
 	//修正gid为101的用户及用户组
-	//this.fixUserGroup()
+	this.fixUserGroup()
 
 	//修正最后发帖者及最后帖子
-	//this.fixThreadLastPost()
+	this.fixThreadLastPost()
 
 	//修正帖子的附件数和图片数
 	this.fixPostAttach()
 
 	//修正主题的附件数和图片数
 	this.fixThreadAttach()
+
+	//附件提示
+	this.CopyAttachTip()
+
+	buf := bufio.NewReader(os.Stdin)
+	fmt.Println(`
+是否更新其它扩展信息(Y/N): (默认为 N)
+更新 版块icon、用户头像、版主
+并且移动附件、版块icon、用户头像
+
+`)
+	s := lib.Input(buf)
+	if !strings.EqualFold(s, "Y") {
+		return
+	}
+
+	//复制文件
+	//this.CopyFiles()
 }
 
 /**
@@ -291,4 +311,74 @@ func (this *extension) fixThreadAttach() {
 		rows, _ := res.RowsAffected()
 		fmt.Printf("更新主题附件(files)和图片数(images)成功，共(%d)条数据\r\n\r\n", rows)
 	}
+}
+
+/**
+移动文件提示
+*/
+func (this *extension) CopyAttachTip() {
+	fmt.Printf(`
+请将 Discuz!X 的 data/attachment/forum/ 下的文件夹
+复制到 XiunoBBS 的 upload/attach/ 中
+
+`)
+}
+
+/**
+复制文件
+*/
+func (this *extension) CopyFiles() {
+	buf := bufio.NewReader(os.Stdin)
+	var dxpath, xnpath string
+	for {
+		if dxpath == "" {
+			fmt.Println("配置 Discuz 根目录地址: ")
+
+			s := lib.Input(buf)
+			if s != "" {
+				dxpath = s
+			}
+
+			if dxpath == "" {
+				continue
+			}
+		}
+
+		if xnpath == "" {
+			fmt.Println("配置 XiunoBBS 根目录地址: ")
+
+			s := lib.Input(buf)
+			if s != "" {
+				xnpath = s
+			}
+
+			if xnpath == "" {
+				continue
+			}
+		}
+
+		if dxpath == xnpath {
+			fmt.Println("Discuz 和 XiunoBBS 目录地址不能相同")
+
+			dxpath, xnpath = "", ""
+			continue
+		} else {
+			fmt.Printf("Discuz目录: %s\r\nXiunoBBS目录: %s\r\n\r\n", dxpath, xnpath)
+			break
+		}
+	}
+
+	err := lib.CopyDir(dxpath, xnpath)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+/**
+修正版块图标
+*/
+func (this *extension) fixForumIcon() {
+	//data/attachment/common/a5/common_{$fid}_icon.png - upload/forum/{$fid}.png
 }

@@ -43,6 +43,8 @@ func (this *extension) update() {
 	//修正帖子图片 - 废弃
 	//this.fixPostImages()
 
+		this.fixForumMod()
+	//
 	//	//修正用户主题、帖子统计
 	//	this.fixUserPostStat()
 	//
@@ -202,17 +204,6 @@ func (this *extension) fixUserPostStat() {
 		rows, _ := res.RowsAffected()
 		fmt.Printf("更新用户主题、帖子统计成功，共(%d)条数据\r\n\r\n", rows)
 	}
-}
-
-func (this *extension) fixUserAvatar() {
-	//var userAvatar bool
-	//
-	//buf := bufio.NewReader(os.Stdin)
-	//fmt.Println("是否修正用户头像(Y/N): (默认为 N)")
-	//s := lib.Input(buf)
-	//if strings.EqualFold(s, "Y") {
-	//	userAvatar = true
-	//}
 }
 
 /**
@@ -482,10 +473,10 @@ XiunoBBS 目录: %s
 	}
 
 	//复制附件
-	//this.copyAttachFiles()
+	this.copyAttachFiles()
 
 	//复制头像
-	//this.copyAvatarImages()
+	this.copyAvatarImages()
 
 	//复制版块图标
 	this.copyForumIcons()
@@ -764,4 +755,45 @@ errmsg: %s
 	}
 
 	fmt.Printf("\r\n更新版块icon成功，共(%d)条数据\r\n\r\n", count)
+}
+
+/**
+修正版块版主
+ */
+func (this *extension) fixForumMod() {
+	dxpre := this.dxstr.DBPre
+	xnpre := this.xnstr.DBPre
+
+	this.tbname = xnpre + "forum"
+
+	dxtb1 := dxpre + "forum_forumfield"
+
+	selSql := "SELECT fid,moderators FROM %s WHERE moderators != ''"
+
+	dxsql := fmt.Sprintf(selSql, dxtb1)
+
+	xnsql := fmt.Sprintf("UPDATE %s SET moduids = ? WHERE fid = ?", this.tbname)
+
+	data, err := dxdb.Query(dxsql)
+	if err != nil {
+		log.Fatalln(dxsql, err.Error())
+	}
+	defer data.Close()
+
+	stmt, err := xndb.Prepare(xnsql)
+	if err != nil {
+		log.Fatalf("stmt error: %s \r\n", err.Error())
+	}
+	defer stmt.Close()
+
+	var fid,moderators string
+	for data.Next() {
+		err = data.Scan(&fid, &moderators)
+		if err != nil {
+			fmt.Printf("获取版块版主失败(%s) \r\n", err.Error())
+			continue
+		}
+
+		fmt.Println(moderators)
+	}
 }

@@ -210,8 +210,8 @@ MySQL [dx]> desc pre_forum_forumfield;
 | access       | -                          |  是否开启权限控制
 | orderby      | -                          |  默认列表排序
 | create_date  | -                          |  版块创建时间
-| icon         | - 对应forum_forumfield.icon<3>    |  图标最后存放时间(0为无图标)
-| moduids      | -<4>                       |  版主id(1,2,3)
+| icon         | - 对应forumfield.icon<3>    |  图标最后存放时间(0为无图标)
+| moduids      | -<6>                       |  版主id(1,2,3)
 | seo_title    | - 对应forumfield.seotitle   |  SEO标题
 | seo_keywords | - 对应forumfield.keywords   |  SEO关键词
 +-----------+---------------------+------+-----+---------+----------------+
@@ -232,4 +232,4 @@ MySQL [dx]> desc pre_forum_forumfield;
 - icon - 如果存在 icon 则值为时间戳
 - data/attachment/common/a5/common_{$fid}_icon.png - upload/forum/{$fid}.png 
 - data/attachment/common/a5/common_{$fid}_icon.png - data/attachment/common/
-- moduids 版主清空 - 对应forumfield.moderators (用户名1\n用户名2) (扩展处修复)
+- moduids 版主清空 - 对应pre_forum_forumfield.moderators (用户名1\n用户名2) (扩展处修复)

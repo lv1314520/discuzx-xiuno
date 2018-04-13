@@ -21,7 +21,7 @@ import (
 //user: ✔更新 threads 和 posts 统计
 
 //Linux 平台下设置两论坛的根目录，移动附件、头像及版块图标
-//user: 修正头像avatarstatus
+//user: ✔修正头像avatar
 //forum: 修正版块icon
 //forum: 修正版主uid
 
@@ -485,7 +485,10 @@ XiunoBBS 目录: %s
 	//this.copyAttachFiles()
 
 	//复制头像
-	this.copyAvatarImages()
+	//this.copyAvatarImages()
+
+	//复制版块图标
+	this.copyForumIcons()
 }
 
 /**
@@ -494,7 +497,6 @@ XiunoBBS 目录: %s
 func (this *extension) copyAttachFiles() {
 	if this.xnpath == "" || this.dxpath == "" {
 		fmt.Printf(`
-复制附件文件夹失败: 
 XiunoBBS 和 Discuz!X 目录不能为空
 `)
 		return
@@ -553,7 +555,6 @@ errmsg: %s
 func (this *extension) copyAvatarImages() {
 	if this.xnpath == "" || this.dxpath == "" {
 		fmt.Printf(`
-复制附件文件夹失败: 
 XiunoBBS 和 Discuz!X 目录不能为空
 `)
 		return
@@ -677,6 +678,90 @@ errmsg: %s
 /**
 修正版块图标
 */
-func (this *extension) fixForumIcon() {
-	//data/attachment/common/a5/common_{$fid}_icon.png - upload/forum/{$fid}.png
+func (this *extension) copyForumIcons() {
+	if this.xnpath == "" || this.dxpath == "" {
+		fmt.Printf(`
+XiunoBBS 和 Discuz!X 目录不能为空
+`)
+		return
+	}
+
+	dxpre := this.dxstr.DBPre
+	xnpre := this.xnstr.DBPre
+
+	this.tbname = xnpre + "forum"
+
+	dxtb1 := dxpre + "forum_forumfield"
+
+	selSql := "SELECT fid,icon FROM %s WHERE icon != ''"
+
+	dxsql := fmt.Sprintf(selSql, dxtb1)
+
+	xnsql := fmt.Sprintf("UPDATE %s SET icon = ? WHERE fid = ?", this.tbname)
+
+	data, err := dxdb.Query(dxsql)
+	if err != nil {
+		log.Fatalln(dxsql, err.Error())
+	}
+	defer data.Close()
+
+	stmt, err := xndb.Prepare(xnsql)
+	if err != nil {
+		log.Fatalf("stmt error: %s \r\n", err.Error())
+	}
+	defer stmt.Close()
+
+	iconPath := this.xnpath + "/upload/forum"
+	dxiconPath := this.dxpath + "/data/attachment/common"
+
+	var fid, iconUrl string
+	var count int
+	timestamp := time.Now().Unix()
+	for data.Next() {
+		err = data.Scan(&fid, &iconUrl)
+
+		if err != nil {
+			fmt.Printf("获取版块(%s)icon失败(%s) \r\n", fid, err.Error())
+			continue
+		}
+
+		iconPathFile := fmt.Sprintf("%s/%s.png", iconPath, fid)
+		dxiconPathFile := fmt.Sprintf("%s/%s", dxiconPath, iconUrl)
+
+		_, err = os.Stat(dxiconPathFile)
+		if err != nil {
+			fmt.Printf(`
+版块(%s)icon文件不存在: 
+%s
+errmsg: %s
+`, fid, dxiconPathFile, err.Error())
+
+			continue
+		}
+
+		err = lib.CopyFile(dxiconPathFile, iconPathFile)
+
+		if err != nil {
+			fmt.Printf(`
+版块(%s)icon文件失败: 
+%s 
+-> 
+%s
+errmsg: %s
+`, fid, dxiconPathFile, iconPathFile, err.Error())
+		} else {
+
+			_, err = xndb.Exec(xnsql, timestamp, fid)
+			if err != nil {
+				fmt.Printf("更新版块(%s)icon失败: %s", fid, err.Error())
+
+				continue
+			}
+
+			count++
+			lib.UpdateProcess(fmt.Sprintf("正在更新版块icon，第 %d 条数据", count), 0)
+		}
+	}
+
+	fmt.Printf("\r\n更新版块icon成功，共(%d)条数据\r\n\r\n", count)
 }

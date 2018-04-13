@@ -3,6 +3,7 @@ package dx3ToXn4
 import (
 	"bufio"
 	"fmt"
+	"github.com/skiy/bbcode"
 	"github.com/skiy/golib"
 	"log"
 	"os"
@@ -13,7 +14,7 @@ import (
 //group: ✔修正可删除用户的组 id,
 //group: ✔将XiunoBBS 将creditsfrom为0，creditsto不为0的组ID改为101，并将 user 为此组的 gid 改为101
 //post: ✔图片数及附件数从 attach 表中提取
-//post: message 中 [attach]1[/attach] 的内容提取并替换url
+//post: <err>message 中 [attach]1[/attach] 的内容提取并替换url - 会再将html给转换多一次，所以此功能提前
 //thread: ✔图片数及附件数从 post 表中 isfirst = 1提取,
 //thread: ✔修正最后发帖者及最后帖子
 //user: ✔更新 threads 和 posts 统计
@@ -29,6 +30,8 @@ type extension struct {
 	count,
 	total int
 	tbname string
+	dxpath,
+	xnpath string
 }
 
 func (this *extension) update() {
@@ -36,41 +39,145 @@ func (this *extension) update() {
 		return
 	}
 
-	//修正用户主题、帖子统计
-	this.fixUserPostStat()
+	//修正帖子图片 - 废弃
+	//this.fixPostImages()
 
-	//修正用户组的删除用户权限
-	this.fixGroup()
-
-	//修正gid为101的用户及用户组
-	this.fixUserGroup()
-
-	//修正最后发帖者及最后帖子
-	this.fixThreadLastPost()
-
-	//修正帖子的附件数和图片数
-	this.fixPostAttach()
-
-	//修正主题的附件数和图片数
-	this.fixThreadAttach()
-
-	//附件提示
-	this.CopyAttachTip()
+	//	//修正用户主题、帖子统计
+	//	this.fixUserPostStat()
+	//
+	//	//修正用户组的删除用户权限
+	//	this.fixGroup()
+	//
+	//	//修正gid为101的用户及用户组
+	//	this.fixUserGroup()
+	//
+	//	//修正最后发帖者及最后帖子
+	//	this.fixThreadLastPost()
+	//
+	//	//修正帖子的附件数和图片数
+	//	this.fixPostAttach()
+	//
+	//	//修正主题的附件数和图片数
+	//	this.fixThreadAttach()
+	//
+	//	//附件提示
+	//	this.CopyAttachTip()
 
 	buf := bufio.NewReader(os.Stdin)
 	fmt.Println(`
-是否更新其它扩展信息(Y/N): (默认为 N)
+----------------------------------
 更新 版块icon、用户头像、版主
 并且移动附件、版块icon、用户头像
-
-`)
+是否更新其它扩展信息(Y/N): (默认为 N)
+----------------------------------`)
 	s := lib.Input(buf)
 	if !strings.EqualFold(s, "Y") {
 		return
 	}
 
 	//复制文件
-	//this.CopyFiles()
+	this.CopyFiles()
+}
+
+/**
+内容中的附件与图片 (bug - 会再将html转换一次) 此功能废弃
+*/
+func (this *extension) fixPostImages() {
+	pre := this.xnstr.DBPre
+
+	this.tbname = pre + "post"
+	xntb1 := pre + "attach"
+
+	selSql := "SELECT pid,message,message_fmt FROM %s"
+	xnsql := fmt.Sprintf(selSql, this.tbname)
+
+	data, err := xndb.Query(xnsql)
+	if err != nil {
+		log.Fatalln(xnsql, err.Error())
+	}
+	defer data.Close()
+
+	selSql1 := "SELECT isimage,filename FROM %s WHERE aid = ?"
+	xnsql1 := fmt.Sprintf(selSql1, xntb1)
+
+	upSql2 := "UPDATE %s SET message = ?, message_fmt = ? WHERE pid = ?"
+	xnsql2 := fmt.Sprintf(upSql2, this.tbname)
+	stmt, err := xndb.Prepare(xnsql2)
+	if err != nil {
+		log.Fatalf("stmt error: %s \r\n", err.Error())
+	}
+	defer stmt.Close()
+
+	var isimage, filename string
+
+	compiler := bbcode.NewCompiler(true, true)
+	compiler.SetTag("attach", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+
+		out := bbcode.NewHTMLTag("")
+		out.Name = ""
+
+		closeFlag := true
+
+		value := node.GetOpeningTag().Value
+		if value == "" {
+			attachId := bbcode.CompileText(node)
+			//fmt.Println("attachid:", attachId, "\r\n")
+
+			if len(attachId) > 0 {
+				err = xndb.QueryRow(xnsql1, attachId).Scan(&isimage, &filename)
+				if err != nil {
+					fmt.Printf("查询附件(%s)失败(%s) \r\n", attachId, err.Error())
+				} else {
+					if isimage == "1" {
+						out.Name = "img"
+						out.Attrs["src"] = "upload/attach/" + filename
+
+						closeFlag = false
+					} else {
+						out.Name = "a"
+						out.Attrs["href"] = "?attach-download-" + attachId + ".htm" //bbcode.ValidURL(filename)
+						out.Attrs["target"] = "_blank"
+
+						closeFlag = true
+					}
+				}
+			}
+		}
+
+		//fmt.Println(">>>>>>>>>>>>>>>>>\r\n", out ,"\r\n<<<<<<<<<<<<<<<<<<<<\r\n\r\n")
+
+		return out, closeFlag
+	})
+
+	var pid, message, message_fmt string
+	var count int
+	for data.Next() {
+		err = data.Scan(&pid, &message, &message_fmt)
+
+		msg := compiler.Compile(message)
+		_, err = stmt.Exec(&msg, &msg, &pid)
+		if err != nil {
+			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
+		} else {
+			count++
+			lib.UpdateProcess(fmt.Sprintf("正在更新 (post) 第 %d 条数据", count), 0)
+		}
+	}
+	//
+	//DefaultTagCompilers["url"] = func(node *BBCodeNode) (*HTMLTag, bool) {
+	//	out := NewHTMLTag("")
+	//	out.Name = "a"
+	//	value := node.GetOpeningTag().Value
+	//	if value == "" {
+	//		text := CompileText(node)
+	//		if len(text) > 0 {
+	//			out.Attrs["href"] = ValidURL(text)
+	//		}
+	//	} else {
+	//		out.Attrs["href"] = ValidURL(value)
+	//	}
+	//	return out, true
+	//}
 }
 
 /**
@@ -226,7 +333,7 @@ func (this *extension) fixThreadLastPost() {
 
 	this.tbname = pre + "thread"
 
-	xntb2 := pre + "post"
+	xntb1 := pre + "post"
 
 	upsql := `
 			UPDATE %s t
@@ -241,7 +348,7 @@ func (this *extension) fixThreadLastPost() {
 				t.lastuid = p.last_uid,
 				t.lastpid = p.last_pid
 			`
-	xnsql := fmt.Sprintf(upsql, this.tbname, xntb2, xntb2)
+	xnsql := fmt.Sprintf(upsql, this.tbname, xntb1, xntb1)
 
 	res, err := xndb.Exec(xnsql)
 	if err != nil {
@@ -261,7 +368,7 @@ func (this *extension) fixPostAttach() {
 
 	this.tbname = pre + "post"
 
-	xntb2 := pre + "attach"
+	xntb1 := pre + "attach"
 
 	upsql := `
 			UPDATE %s p
@@ -270,7 +377,7 @@ func (this *extension) fixPostAttach() {
 			files = (SELECT count(aid) FROM %s WHERE isimage != 1 AND pid = p.pid)
 			
 			`
-	xnsql := fmt.Sprintf(upsql, this.tbname, xntb2, xntb2)
+	xnsql := fmt.Sprintf(upsql, this.tbname, xntb1, xntb1)
 
 	res, err := xndb.Exec(xnsql)
 	if err != nil {
@@ -290,7 +397,7 @@ func (this *extension) fixThreadAttach() {
 
 	this.tbname = pre + "thread"
 
-	xntb2 := pre + "post"
+	xntb1 := pre + "post"
 
 	upsql := `
 			UPDATE
@@ -301,7 +408,7 @@ func (this *extension) fixThreadAttach() {
 				t.files = p.files,
 				t.images = p.images
 			`
-	xnsql := fmt.Sprintf(upsql, this.tbname, xntb2)
+	xnsql := fmt.Sprintf(upsql, this.tbname, xntb1)
 
 	res, err := xndb.Exec(xnsql)
 	if err != nil {
@@ -329,51 +436,111 @@ func (this *extension) CopyAttachTip() {
 */
 func (this *extension) CopyFiles() {
 	buf := bufio.NewReader(os.Stdin)
-	var dxpath, xnpath string
 	for {
-		if dxpath == "" {
-			fmt.Println("配置 Discuz 根目录地址: ")
+		if this.dxpath == "" {
+			fmt.Println("\r\n配置 Discuz 根目录地址: ")
 
 			s := lib.Input(buf)
 			if s != "" {
-				dxpath = s
+				this.dxpath = strings.TrimSpace(s)
+				this.dxpath = strings.TrimRight(this.dxpath, "/")
 			}
 
-			if dxpath == "" {
+			if this.dxpath == "" {
 				continue
 			}
 		}
 
-		if xnpath == "" {
-			fmt.Println("配置 XiunoBBS 根目录地址: ")
+		if this.xnpath == "" {
+			fmt.Println("\r\n配置 XiunoBBS 根目录地址: ")
 
 			s := lib.Input(buf)
 			if s != "" {
-				xnpath = s
+				this.xnpath = strings.TrimSpace(s)
+				this.xnpath = strings.TrimRight(this.xnpath, "/")
 			}
 
-			if xnpath == "" {
+			if this.xnpath == "" {
 				continue
 			}
 		}
 
-		if dxpath == xnpath {
-			fmt.Println("Discuz 和 XiunoBBS 目录地址不能相同")
+		if this.dxpath == this.xnpath {
+			fmt.Println("Discuz!X 和 XiunoBBS 目录地址不能相同")
 
-			dxpath, xnpath = "", ""
+			this.dxpath, this.xnpath = "", ""
 			continue
 		} else {
-			fmt.Printf("Discuz目录: %s\r\nXiunoBBS目录: %s\r\n\r\n", dxpath, xnpath)
+			fmt.Printf(`
+Discuz!X 目录: %s
+XiunoBBS 目录: %s
+`, this.dxpath, this.xnpath)
 			break
 		}
 	}
 
-	err := lib.CopyDir(dxpath, xnpath)
+	//复制附件
+	this.copyAttachFiles()
+}
 
-	if err != nil {
-		fmt.Println(err)
+/**
+复制附件
+*/
+func (this *extension) copyAttachFiles() {
+	if this.xnpath == "" || this.dxpath == "" {
+		fmt.Printf(`
+复制附件文件夹失败: 
+XiunoBBS 和 Discuz!X 目录不能为空
+`)
 		return
 	}
+
+	attachPath := this.xnpath + "/upload/attach"
+	dxattachPath := this.dxpath + "/data/attachment/forum"
+
+	buf := bufio.NewReader(os.Stdin)
+	fmt.Printf(`
+---------------------------------------
+是否复制 Discuz 附件到 Xiuno
+「注意」将清空以下文件夹，且不可恢复！ 
+%s
+请输入(Y/N): (默认为 N)
+---------------------------------------
+`, attachPath)
+	s := lib.Input(buf)
+	if !strings.EqualFold(s, "Y") {
+		return
+	}
+	err := os.RemoveAll(attachPath)
+	if err != nil {
+		fmt.Printf(`
+删除附件文件夹失败:
+%s
+errmsg: %s
+`, attachPath, err.Error())
+		return
+	}
+
+	err = lib.CopyDir(dxattachPath, attachPath)
+
+	if err != nil {
+		fmt.Printf(`
+复制附件文件夹失败: 
+%s -> %s
+errmsg: %s
+`, dxattachPath, attachPath, err.Error())
+
+		return
+	}
+
+	fmt.Printf(`
+复制附件文件夹成功: 
+%s 
+-> 
+%s
+
+`, dxattachPath, attachPath)
+
 }
 
 /**

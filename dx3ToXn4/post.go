@@ -2,6 +2,7 @@ package dx3ToXn4
 
 import (
 	"fmt"
+	"github.com/skiy/bbcode"
 	"github.com/skiy/golib"
 	"log"
 )
@@ -100,7 +101,8 @@ func (this *post) toUpdate() (count int, err error) {
 		userip := lib.Ip2long(field.userip)
 
 		if field.message != "" {
-			message_fmt = lib.BBCodeToHtml(field.message)
+			//message_fmt = lib.BBCodeToHtml(field.message) //未处理message中的附件的
+			message_fmt = this.BBCodeToHtml(field.message) //处理message中的附件
 		} else {
 			message_fmt = ""
 		}
@@ -136,9 +138,111 @@ func (this *post) toUpdate() (count int, err error) {
 }
 
 /**
-将帖子内的附件转换为HTML
+bbcode 转 html
 */
-func (this *post) AttachReplace(message string) string {
-	preg := "[attach]2[/attach]"
-	return preg
+func (this *post) BBCodeToHtml(msg string) string {
+	compiler := bbcode.NewCompiler(true, true)
+
+	//转 table
+	compiler.SetTag("table", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "table"
+		return out, true
+	})
+
+	//转 tr
+	compiler.SetTag("tr", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "tr"
+
+		return out, true
+	})
+	//转 td
+	compiler.SetTag("td", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "td"
+
+		return out, true
+	})
+
+	//ul
+	compiler.SetTag("list", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "ul"
+
+		return out, true
+	})
+
+	//text-align
+	compiler.SetTag("align", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "div"
+		value := node.GetOpeningTag().Value
+		if value != "" {
+			out.Attrs["style"] = "text-align: " + value
+		}
+		return out, true
+	})
+
+	//li -> 将 [*] 转为 li
+	compiler.SetTag("*", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "li"
+
+		return out, true
+	})
+
+	//font -> 清空 font
+	compiler.SetTag("font", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = ""
+
+		return out, true
+	})
+
+	//处理message中的附件
+	pre := this.xnstr.DBPre
+
+	xntb1 := pre + "attach"
+	selSql1 := "SELECT isimage,filename FROM %s WHERE aid = ?"
+	xnsql1 := fmt.Sprintf(selSql1, xntb1)
+
+	var isimage, filename string
+	compiler.SetTag("attach", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+
+		out := bbcode.NewHTMLTag("")
+		out.Name = ""
+
+		closeFlag := true
+
+		value := node.GetOpeningTag().Value
+		if value == "" {
+			attachId := bbcode.CompileText(node)
+			//fmt.Println("attachid:", attachId, "\r\n")
+
+			if len(attachId) > 0 {
+				err := xndb.QueryRow(xnsql1, attachId).Scan(&isimage, &filename)
+				if err != nil {
+					fmt.Printf("查询附件(%s)失败(%s) \r\n", attachId, err.Error())
+				} else {
+					if isimage == "1" {
+						out.Name = "img"
+						out.Attrs["src"] = "upload/attach/" + filename
+
+						closeFlag = false
+					} else {
+						out.Name = "a"
+						out.Attrs["href"] = "?attach-download-" + attachId + ".htm" //bbcode.ValidURL(filename)
+						out.Attrs["target"] = "_blank"
+						out.Value = "附件: "
+
+						closeFlag = true
+					}
+				}
+			}
+		}
+		return out, closeFlag
+	})
+
+	return compiler.Compile(msg)
 }

@@ -91,12 +91,12 @@ func (this *App) Init() {
 	}
 
 	tables := [...]string{
-		//"user",
-		//"group",
-		//"forum",
-		//"attach",
-		//"thread",
-		//"post",
+		"user",
+		"group",
+		"forum",
+		"attach",
+		"thread",
+		"post",
 	}
 
 	for _, table := range tables {

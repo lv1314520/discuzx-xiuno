@@ -43,28 +43,28 @@ func (this *extension) update() {
 	//修正帖子图片 - 废弃
 	//this.fixPostImages()
 
-		this.fixForumMod()
-	//
-	//	//修正用户主题、帖子统计
-	//	this.fixUserPostStat()
-	//
-	//	//修正用户组的删除用户权限
-	//	this.fixGroup()
-	//
-	//	//修正gid为101的用户及用户组
-	//	this.fixUserGroup()
-	//
-	//	//修正最后发帖者及最后帖子
-	//	this.fixThreadLastPost()
-	//
-	//	//修正帖子的附件数和图片数
-	//	this.fixPostAttach()
-	//
-	//	//修正主题的附件数和图片数
-	//	this.fixThreadAttach()
-	//
-	//	//附件提示
-	//	this.CopyAttachTip()
+	this.fixForumMod()
+
+	//修正用户主题、帖子统计
+	this.fixUserPostStat()
+
+	//修正用户组的删除用户权限
+	this.fixGroup()
+
+	//修正gid为101的用户及用户组
+	this.fixUserGroup()
+
+	//修正最后发帖者及最后帖子
+	this.fixThreadLastPost()
+
+	//修正帖子的附件数和图片数
+	this.fixPostAttach()
+
+	//修正主题的附件数和图片数
+	this.fixThreadAttach()
+
+	//附件提示
+	this.CopyAttachTip()
 
 	buf := bufio.NewReader(os.Stdin)
 	fmt.Println(`
@@ -543,6 +543,9 @@ errmsg: %s
 
 }
 
+/**
+修正用户头像
+*/
 func (this *extension) copyAvatarImages() {
 	if this.xnpath == "" || this.dxpath == "" {
 		fmt.Printf(`
@@ -759,12 +762,14 @@ errmsg: %s
 
 /**
 修正版块版主
- */
+*/
 func (this *extension) fixForumMod() {
 	dxpre := this.dxstr.DBPre
 	xnpre := this.xnstr.DBPre
 
 	this.tbname = xnpre + "forum"
+
+	xntb2 := xnpre + "user"
 
 	dxtb1 := dxpre + "forum_forumfield"
 
@@ -786,7 +791,9 @@ func (this *extension) fixForumMod() {
 	}
 	defer stmt.Close()
 
-	var fid,moderators string
+	var fid, moderators string
+	var mods string
+	modArr := make(map[string][]string)
 	for data.Next() {
 		err = data.Scan(&fid, &moderators)
 		if err != nil {
@@ -794,6 +801,56 @@ func (this *extension) fixForumMod() {
 			continue
 		}
 
-		fmt.Println(moderators)
+		moders := strings.Split(moderators, "	")
+
+		if len(moders) > 0 {
+			modArr[fid] = moders
+			mods += strings.Join(moders, ",") + ","
+		}
 	}
+
+	if mods == "" {
+		return
+	}
+
+	modsField := this.xnstr.ValueMakeData(mods)
+	selSql2 := "SELECT DISTINCT uid, username FROM %s WHERE username IN (%s)"
+	xnsql1 := fmt.Sprintf(selSql2, xntb2, modsField)
+
+	data, err = xndb.Query(xnsql1)
+
+	var uid, username string
+	uidMap := make(map[string]string)
+	for data.Next() {
+		err = data.Scan(&uid, &username)
+		if err != nil {
+			fmt.Printf("获取版主uid失败(%s) \r\n", err.Error())
+			continue
+		}
+
+		uidMap[username] = uid
+	}
+
+	var moduids []string
+	var count int
+	for k, v := range modArr {
+		if len(v) > 0 {
+			for _, u := range v {
+				moduids = append(moduids, uidMap[u])
+			}
+
+			moduidsStr := strings.Join(moduids, ",")
+			_, err = stmt.Exec(moduidsStr, k)
+			if err != nil {
+				fmt.Printf("更新版块(%s)版主(%s)失败: %s\r\n", fid, moduidsStr, err.Error())
+			} else {
+				count++
+				lib.UpdateProcess(fmt.Sprintf("正在更新版块(%s)版主，第 %d 条数据", fid, count), 0)
+			}
+
+			moduids = nil
+		}
+	}
+
+	fmt.Printf("\r\n更新版块版主成功，共(%d)条数据\r\n\r\n", count)
 }

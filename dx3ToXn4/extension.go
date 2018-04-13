@@ -43,7 +43,7 @@ func (this *extension) update() {
 	//修正帖子图片 - 废弃
 	//this.fixPostImages()
 
-	this.fixForumMod()
+	//this.fixForumMod()
 
 	//修正用户主题、帖子统计
 	this.fixUserPostStat()
@@ -223,16 +223,32 @@ func (this *extension) fixGroup() {
 	defer data.Close()
 
 	var gid, name string
+	gidMap := make(map[string]string)
 	for data.Next() {
 		err = data.Scan(&gid, &name)
 		if err != nil {
 			fmt.Printf("查询用户组失败(%s) \r\n", err.Error())
 		} else {
+			gidMap[gid] = name
 			fmt.Printf("用户组ID：%s, 用户组名: %s \r\n", gid, name)
 		}
 	}
 
+	fmt.Println("设置游客用户组的ID: (默认为 7)")
 	buf := bufio.NewReader(os.Stdin)
+	guest := "7"
+	s := lib.Input(buf)
+	if gidMap[guest] != "" {
+		guest = s
+	}
+	fmt.Printf("设置的游客组ID 为：%s, 组名: %s \r\n", guest, gidMap[guest])
+	xnsql2 := fmt.Sprintf("UPDATE %s SET gid = 0 WHERE gid = ?", this.tbname)
+	_, err = xndb.Exec(xnsql2, guest)
+	if err != nil {
+		fmt.Printf("将用户组(%s:%s)用户组为游客组失败: %s\r\n\r\n", gidMap[guest], guest, err.Error())
+	}
+
+	buf = bufio.NewReader(os.Stdin)
 	power := "1,2"
 	var powerArr []string
 	var powerList []int
@@ -266,9 +282,9 @@ func (this *extension) fixGroup() {
 	}
 
 	powerStr := strings.Join(powerArr, ",")
-	xnsql2 := fmt.Sprintf("UPDATE %s SET allowdeleteuser = 1 WHERE gid IN (%s)", this.tbname, powerStr)
+	xnsql3 := fmt.Sprintf("UPDATE %s SET allowdeleteuser = 1 WHERE gid IN (%s)", this.tbname, powerStr)
 
-	res, err := xndb.Exec(xnsql2)
+	res, err := xndb.Exec(xnsql3)
 	if err != nil {
 		fmt.Printf("更新用户组(删除用户)权限失败: %s \r\n%s\r\n\r\n", err.Error())
 	} else {
@@ -763,6 +779,7 @@ errmsg: %s
 /**
 修正版块版主
 */
+/*
 func (this *extension) fixForumMod() {
 	dxpre := this.dxstr.DBPre
 	xnpre := this.xnstr.DBPre
@@ -854,3 +871,4 @@ func (this *extension) fixForumMod() {
 
 	fmt.Printf("\r\n更新版块版主成功，共(%d)条数据\r\n\r\n", count)
 }
+*/

@@ -6,16 +6,16 @@ MIT
 
 ### TODO
 - ✔XiunoBBS 3.x 升级 XiunoBBS 4.x **[参考](https://gitee.com/xiuno/xiunobbs/blob/master/tool/xn3_to_xn4.php)**
-- Discuz!X 3.x 转换 XiunoBBS 4.x [说明](docs/dx3ToXn4/)
+- ✔Discuz!X 3.x 转换 XiunoBBS 4.x [说明](docs/dx3ToXn4/)
 
-### 使用教程
+### 编译教程
 - 拉取依赖库 ```go get -v github.com/skiy/xiuno-tools```   
 - 编译程序 ```go install```
 - 完成，文件在 ```$GOPATH/bin``` 里
 
 **温馨提示:**
 > 如果已配置好``GOBIN``或者将 ``$GOPATH/bin`` 环境变量，   
-即可以在任何目录下执行 ``xiuno-tools`` 启动本程序。   
+即可以在任何目录下执行 **``xiuno-tools``** 启动本程序。   
 程序必须有**可执行权限**。   
 
 **工具使用教程**
@@ -29,6 +29,15 @@ MIT
 > - 在 VNC 窗口1 按照 日志窗口2的提示输入数据库相关信息，输入完成后，即可关闭日志窗口及 VNC 窗口。
 > - 待过一段时间后，再登录系统查看 ```update.log``` 查看转换日志是否完成。
 
+### 扫码赞助
+请赞助时赢得添加备注，方便我把名单公开以及提供技术支持。
+
+![支付宝](docs/images/alipay.png)
+**支付宝**    
+
+![微信](docs/images/wxpay.png)
+**微信**   
+
 ### 更新日志
 
 ### 鸣谢
@@ -36,7 +45,6 @@ MIT
 - Discuz http://www.discuz.net
 -
 - https://github.com/go-sql-driver/mysql
-- https://github.com/PuerkitoBio/goquery
 - https://github.com/frustra/bbcode
 - https://github.com/mozillazg/go-pinyin
 

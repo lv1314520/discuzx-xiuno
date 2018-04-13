@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //group: ✔修正可删除用户的组 id,
@@ -474,13 +475,17 @@ func (this *extension) CopyFiles() {
 			fmt.Printf(`
 Discuz!X 目录: %s
 XiunoBBS 目录: %s
+
 `, this.dxpath, this.xnpath)
 			break
 		}
 	}
 
 	//复制附件
-	this.copyAttachFiles()
+	//this.copyAttachFiles()
+
+	//复制头像
+	this.copyAvatarImages()
 }
 
 /**
@@ -526,7 +531,9 @@ errmsg: %s
 	if err != nil {
 		fmt.Printf(`
 复制附件文件夹失败: 
-%s -> %s
+%s 
+-> 
+%s
 errmsg: %s
 `, dxattachPath, attachPath, err.Error())
 
@@ -541,6 +548,130 @@ errmsg: %s
 
 `, dxattachPath, attachPath)
 
+}
+
+func (this *extension) copyAvatarImages() {
+	if this.xnpath == "" || this.dxpath == "" {
+		fmt.Printf(`
+复制附件文件夹失败: 
+XiunoBBS 和 Discuz!X 目录不能为空
+`)
+		return
+	}
+
+	dxpre := this.dxstr.DBPre
+	xnpre := this.xnstr.DBPre
+
+	this.tbname = xnpre + "user"
+
+	dxtb1 := dxpre + "common_member"
+
+	selSql := "SELECT uid FROM %s WHERE avatarstatus = 1"
+
+	dxsql := fmt.Sprintf(selSql, dxtb1)
+
+	xnsql := fmt.Sprintf("UPDATE %s SET avatar = ? WHERE uid = ?", this.tbname)
+
+	data, err := dxdb.Query(dxsql)
+	if err != nil {
+		log.Fatalln(dxsql, err.Error())
+	}
+	defer data.Close()
+
+	stmt, err := xndb.Prepare(xnsql)
+	if err != nil {
+		log.Fatalf("stmt error: %s \r\n", err.Error())
+	}
+	defer stmt.Close()
+
+	avatarPath := this.xnpath + "/upload/avatar"
+	dxavatarPath := this.dxpath + "/uc_server/data/avatar"
+
+	var uid string
+	var count int
+	timestamp := time.Now().Unix()
+	for data.Next() {
+		err = data.Scan(&uid)
+
+		if err != nil {
+			fmt.Printf("获取用户头像失败(%s) \r\n", err.Error())
+			continue
+		}
+
+		realUid := fmt.Sprintf("%09s", uid)
+
+		//Xn avatar rule
+		dir1 := lib.Substr(realUid, 0, 3)
+		avatarImagePath := fmt.Sprintf("%s/%s/", avatarPath, dir1)
+		avatarPathFile := avatarImagePath + uid + ".png"
+		err = os.MkdirAll(avatarImagePath, os.ModePerm)
+		if err != nil {
+			fmt.Printf(`
+创建用户(%s)头像文件夹失败: 
+%s
+errmsg: %s
+`, uid, avatarImagePath, err.Error())
+
+			continue
+		}
+
+		//Dx avatar rule
+		dir2 := lib.Substr(realUid, 3, 2)
+		dir3 := lib.Substr(realUid, 5, 2)
+		dir4 := lib.Substr(realUid, -2, 0)
+		dxAvatarImagePath := fmt.Sprintf("%s/%s/%s/%s/%s_avatar_big.jpg", dxavatarPath, dir1, dir2, dir3, dir4)
+
+		_, err = os.Stat(dxAvatarImagePath)
+		if err != nil {
+			fmt.Printf(`
+用户(%s)头像文件不存在: 
+%s
+errmsg: %s
+`, uid, dxAvatarImagePath, err.Error())
+
+			continue
+		}
+
+		err = lib.CopyFile(dxAvatarImagePath, avatarPathFile)
+
+		if err != nil {
+			fmt.Printf(`
+复制用户(%s)头像失败: 
+%s 
+-> 
+%s
+errmsg: %s
+`, uid, dxAvatarImagePath, avatarPathFile, err.Error())
+		} else {
+
+			_, err = xndb.Exec(xnsql, timestamp, uid)
+			if err != nil {
+				fmt.Printf("更新用户(%s)头像失败: %s", uid, err.Error())
+
+				continue
+			}
+
+			count++
+			lib.UpdateProcess(fmt.Sprintf("正在更新用户头像，第 %d 条数据", count), 0)
+		}
+	}
+
+	/*
+		$filename = "$uid.png";
+		$dir = substr(sprintf("%09d", $uid), 0, 3).'/';
+		$path = $conf['upload_path'].'avatar/'.$dir;
+		$url = $conf['upload_url'].'avatar/'.$dir.$filename;
+
+		$uid = abs(intval($uid));
+		$uid = sprintf("%09d", $uid);
+		$dir1 = substr($uid, 0, 3);
+		$dir2 = substr($uid, 3, 2);
+		$dir3 = substr($uid, 5, 2);
+		$typeadd = $type == 'real' ? '_real' : '';
+		return $dir1.'/'.$dir2.'/'.$dir3.'/'.substr($uid, -2).$typeadd."_avatar_$size.jpg";
+	*/
+
+	fmt.Printf("\r\n更新用户头像成功，共(%d)条数据\r\n\r\n", count)
 }
 
 /**

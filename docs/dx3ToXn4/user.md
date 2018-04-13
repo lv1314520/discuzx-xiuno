@@ -166,7 +166,7 @@ MySQL [dx]> desc pre_common_member_status;
 | login_ip     | pre_common_member_status.lastip | 最后登录IP
 | login_date   | pre_common_member_status.lastvisit  | 最后登录时间
 | logins       | -                               | 登录次数
-| avatar       | - avatarstatus=1                | 是否有头像
+| avatar       | - avatarstatus=1                | 是否有头像(有头像时，填更新头像时的时间戳)
 +--------------+----------------------+------+-----+---------+----------------+
 ```
 

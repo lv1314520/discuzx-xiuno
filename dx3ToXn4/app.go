@@ -1,14 +1,10 @@
 package dx3ToXn4
 
 import (
-	//"bufio"
+	"bufio"
 	"database/sql"
 	"fmt"
 	"github.com/skiy/golib"
-	//"log"
-	//"os"
-	//"strings"
-	"bufio"
 	"log"
 	"os"
 	"strings"
@@ -23,7 +19,10 @@ type dbstr struct {
 	Auto  bool
 }
 
-var dxdb, xndb *sql.DB
+var (
+	dxdb, xndb *sql.DB
+	groupReset bool
+)
 
 func (this *App) Init() {
 	oldname := "Discuz!X3.x"

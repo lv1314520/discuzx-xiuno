@@ -1,10 +1,13 @@
 package dx3ToXn4
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/skiy/golib"
 	"log"
+	"os"
 	"strconv"
+	"strings"
 )
 
 type group struct {
@@ -35,10 +38,24 @@ type groupFields struct {
 
 func (this *group) update() {
 	this.dbname = this.xnstr.DBPre + "group"
-	if !lib.AutoUpdate(this.xnstr.Auto, this.dbname) {
+	//全自动(用户组也转换的判断)
+	//if !lib.AutoUpdate(this.xnstr.Auto, this.dbname) {
+	//	return
+	//}
+	buf := bufio.NewReader(os.Stdin)
+	fmt.Printf(`
+---------------------------------------
+是否使用官方用户组
+所有用户将会迁移至注册用户(gid:101)
+请输入(Y/N): (默认为 Y)
+---------------------------------------
+`)
+	s := lib.Input(buf)
+
+	if !strings.EqualFold(s, "N") {
+		groupReset = true
 		return
 	}
-
 	count, err := this.toUpdate()
 	if err != nil {
 		log.Fatalln("转换 " + this.dbname + " 失败: " + err.Error())

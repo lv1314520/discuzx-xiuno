@@ -43,16 +43,22 @@ func (this *extension) update() {
 	//修正帖子图片 - 废弃
 	//this.fixPostImages()
 
-	//this.fixForumMod()
+	this.fixForumMod()
 
 	//修正用户主题、帖子统计
 	this.fixUserPostStat()
 
-	//修正用户组的删除用户权限
-	this.fixGroup()
+	//使用官方用户组
+	if groupReset {
+		this.resetGroup()
+		//不使用官方用户组
+	} else {
+		//修正用户组的删除用户权限
+		this.fixGroup()
 
-	//修正gid为101的用户及用户组
-	this.fixUserGroup()
+		//修正gid为101的用户及用户组
+		this.fixUserGroup()
+	}
 
 	//修正最后发帖者及最后帖子
 	this.fixThreadLastPost()
@@ -207,6 +213,49 @@ func (this *extension) fixUserPostStat() {
 }
 
 /**
+使用官方用户组
+(将所有用户gid设置成101,并且设置管理员ID)
+*/
+func (this *extension) resetGroup() {
+	pre := this.xnstr.DBPre
+
+	this.tbname = pre + "user"
+
+	upSql := "UPDATE %s SET gid = %s"
+
+	memberSql := fmt.Sprintf(upSql, this.tbname, "101")
+	adminSql := fmt.Sprintf(upSql, this.tbname, "1 WHERE uid = ?")
+
+	_, err := xndb.Exec(memberSql)
+	if err != nil {
+		fmt.Printf("将所有用户迁移至注册用户组失败: %s\r\n\r\n", err.Error())
+		return
+	}
+
+	buf := bufio.NewReader(os.Stdin)
+	var uid string
+	for {
+		fmt.Println("请设置管理员UID")
+
+		s := lib.Input(buf)
+
+		val, err := strconv.Atoi(s)
+		if err == nil && val > 0 {
+			uid = fmt.Sprintf("%d", val)
+			break
+		}
+
+		fmt.Println("管理员UID格式错误，请重输")
+	}
+	_, err = xndb.Exec(adminSql, uid)
+	if err != nil {
+		fmt.Printf("将用户(uid: %s)升级至管理员组失败: %s\r\n\r\n", uid, err.Error())
+		return
+	}
+	fmt.Printf("将用户(uid: %s)升级至管理员组成功\r\n\r\n", uid)
+}
+
+/**
 更新用户组 (删除用户) 权限
 */
 func (this *extension) fixGroup() {
@@ -245,7 +294,7 @@ func (this *extension) fixGroup() {
 	xnsql2 := fmt.Sprintf("UPDATE %s SET gid = 0 WHERE gid = ?", this.tbname)
 	_, err = xndb.Exec(xnsql2, guest)
 	if err != nil {
-		fmt.Printf("将用户组(%s:%s)用户组为游客组失败: %s\r\n\r\n", gidMap[guest], guest, err.Error())
+		fmt.Printf("将用户组(%s:%s)设置为游客组失败: %s\r\n\r\n", gidMap[guest], guest, err.Error())
 	}
 
 	buf = bufio.NewReader(os.Stdin)
@@ -779,7 +828,6 @@ errmsg: %s
 /**
 修正版块版主
 */
-/*
 func (this *extension) fixForumMod() {
 	dxpre := this.dxstr.DBPre
 	xnpre := this.xnstr.DBPre
@@ -871,4 +919,3 @@ func (this *extension) fixForumMod() {
 
 	fmt.Printf("\r\n更新版块版主成功，共(%d)条数据\r\n\r\n", count)
 }
-*/

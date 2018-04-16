@@ -35,8 +35,13 @@ func (this *App) Init() {
 	dxstr.Setting()
 
 	buf := bufio.NewReader(os.Stdin)
-	fmt.Println("请配置数据库表前缀:(一般为 pre_)")
+	fmt.Println("请配置数据库表前缀:(空格为无前缀, 默认为 pre_)")
 	s := lib.Input(buf)
+	if s == "" {
+		s = "pre_"
+	} else if s == " " {
+		s = ""
+	}
 	dxstr.DBPre = s
 	fmt.Println("数据库表前缀为: " + s)
 
@@ -59,8 +64,14 @@ func (this *App) Init() {
 	xnstr.Setting()
 
 	buf = bufio.NewReader(os.Stdin)
-	fmt.Println("请配置数据库表前缀:(一般为 bbs_)")
+	fmt.Println("请配置数据库表前缀:(空格为无前缀, 默认为 bbs_)")
 	s = lib.Input(buf)
+	if s == "" {
+		s = "bbs_"
+	} else if s == " " {
+		s = ""
+	}
+
 	xnstr.DBPre = s
 	fmt.Println("数据库表前缀为: " + s)
 

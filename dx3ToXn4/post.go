@@ -201,10 +201,38 @@ func (this *post) BBCodeToHtml(msg string) string {
 	})
 
 	//free -> 清空 free
-	compiler.SetTag("free", nil)
+	compiler.SetTag("free", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = ""
+
+		return out, true
+	})
 
 	//hide -> 清空 hide
-	compiler.SetTag("hide", nil)
+	compiler.SetTag("hide", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = ""
+
+		return out, true
+	})
+
+	//qq -> 更新 qq 标签
+	compiler.SetTag("qq", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = ""
+
+		value := node.GetOpeningTag().Value
+		if value == "" {
+			qq := bbcode.CompileText(node)
+
+			if len(qq) > 0 {
+				out.Name = "a"
+				out.Attrs["href"] = "http://wpa.qq.com/msgrd?v=3&uin=" + qq + "&site=Xiuno&from=Xiuno&menu=yes"
+				out.Attrs["target"] = "_blank"
+			}
+		}
+		return out, true
+	})
 
 	//处理message中的附件
 	pre := this.xnstr.DBPre

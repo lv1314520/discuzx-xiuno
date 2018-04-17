@@ -22,7 +22,7 @@ func main() {
 :::
 ::: 执行过程中按"Q", 再按"回车键"退出本程序...
 :::
-::: Version:1.1.1    Updated:2018-04-14
+::: Version:1.1.2    Updated:2018-04-17
 `)
 
 	var flag bool

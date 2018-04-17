@@ -200,6 +200,12 @@ func (this *post) BBCodeToHtml(msg string) string {
 		return out, true
 	})
 
+	//free -> 清空 free
+	compiler.SetTag("free", nil)
+
+	//hide -> 清空 hide
+	compiler.SetTag("hide", nil)
+
 	//处理message中的附件
 	pre := this.xnstr.DBPre
 

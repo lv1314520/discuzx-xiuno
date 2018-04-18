@@ -43,7 +43,7 @@ func (this *App) Init() {
 		s = ""
 	}
 	dxstr.DBPre = s
-	fmt.Println("数据库表前缀为: " + s)
+	fmt.Printf("数据库表前缀为: %s\r\n\r\n", s)
 
 	var err error
 	dxdb, err = dxstr.Connect()
@@ -63,7 +63,6 @@ func (this *App) Init() {
 	fmt.Printf("正在配置 %s 数据库\r\n", newname)
 	xnstr.Setting()
 
-	buf = bufio.NewReader(os.Stdin)
 	fmt.Println("请配置数据库表前缀:(空格为无前缀, 默认为 bbs_)")
 	s = lib.Input(buf)
 	if s == "" {
@@ -73,7 +72,7 @@ func (this *App) Init() {
 	}
 
 	xnstr.DBPre = s
-	fmt.Println("数据库表前缀为: " + s)
+	fmt.Printf("数据库表前缀为: %s\r\n\r\n", s)
 
 	xndb, err = xnstr.Connect()
 	if err != nil {
@@ -87,18 +86,36 @@ func (this *App) Init() {
 	}
 
 	if dxstr.DBHost == xnstr.DBHost && dxstr.DBName == xnstr.DBName {
-		log.Fatalln("\r\n不能在同一个数据库里转换，否则数据会被清空！请将新论坛安装到其他数据库。")
+		if dxstr.DBPre == xnstr.DBPre {
+			log.Fatalln(`
+Discuz!X和XiunoBBS的数据库名和表前缀不能相同，
+否则数据可能会造成破坏！
+请将新论坛安装到其他数据库。
+`)
+		}
+
+		fmt.Printf(`
+您将在同一个数据库转换数据，
+需要再次确认是否强行转换(Y/N): (默认为 N)
+database host: %s 
+database name: %s
+`, xnstr.DBHost, xnstr.DBName)
+
+		s = lib.Input(buf)
+		if !strings.EqualFold(s, "Y") {
+			log.Fatalln(`您已退出程序`)
+		}
 	}
 
 	dxdb.SetMaxIdleConns(0)
 	xndb.SetMaxIdleConns(0)
 
-	buf = bufio.NewReader(os.Stdin)
-	fmt.Println("全自动更新所有表(Y/N): (默认为 Y)")
+	fmt.Println("\r\n全自动更新所有表(Y/N): (默认为 Y)")
 	s = lib.Input(buf)
 	if !strings.EqualFold(s, "N") {
 		xnstr.Auto = true
 	}
+	fmt.Println("")
 
 	tables := [...]string{
 		"user",

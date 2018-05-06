@@ -199,6 +199,8 @@ func (this *extension) fixUserPostStat() {
 	xntb1 := pre + "thread"
 	xntb2 := pre + "post"
 
+	fmt.Println("修正用户主题与帖子统计，可能耗时较长，请耐心等待...")
+
 	upSql := `UPDATE %s u set u.threads = (SELECT count(*) FROM %s WHERE uid = u.uid), u.posts = (SELECT COUNT(*) FROM %s WHERE uid = u.uid)`
 	xnsql := fmt.Sprintf(upSql, this.tbname, xntb1, xntb2)
 

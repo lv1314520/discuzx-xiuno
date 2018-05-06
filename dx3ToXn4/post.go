@@ -184,6 +184,17 @@ func (this *post) BBCodeToHtml(msg string) string {
 		return out, true
 	})
 
+	//backcolor=yellow
+	compiler.SetTag("backcolor", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
+		out := bbcode.NewHTMLTag("")
+		out.Name = "div"
+		value := node.GetOpeningTag().Value
+		if value != "" {
+			out.Attrs["style"] = "background-color: " + value
+		}
+		return out, true
+	})
+
 	//li -> 将 [*] 转为 li
 	compiler.SetTag("*", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
 		out := bbcode.NewHTMLTag("")

@@ -14,6 +14,8 @@ XiunoBBS 主程序含 **17**表
 - thread_top - 置顶主题表 - [thread.md](thread.md)
 - user - 用户表 - [user.md](user.md)
 
+- extension - 最终修正附件、头像、版块 icon、管理员等功能 - [extension.md](extension.md)
+
 ### 不作处理的表
 - cache - 缓存表，用来保存临时数据
 - forum_access 版块访问规则

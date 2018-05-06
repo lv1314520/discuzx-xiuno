@@ -39,15 +39,21 @@ MIT
 **微信**   
 
 ### 更新日志
+**v1.1.4**
+修复 文字背景颜色
+
+**v1.1.3**
+增加 支持虚拟主机方式(一个数据库同时安装Discuz!X和Xiuno)
+
 **v1.1.2**
-1. 更新 迁移时，添加默认表前缀
-2. 修复 ubb 代码中的 hide,free,qq 标签
+更新 迁移时，添加默认表前缀
+修复 ubb 代码中的 hide,free,qq 标签
 
 **v1.1.1**
-1. 新增 是否使用 XiunoBBS 官方用户组选项
+新增 是否使用 XiunoBBS 官方用户组选项
 
 **v1.1.0**
-1. 新增 Discuz!X3.x 转换 XiunoBBS4.x
+新增 Discuz!X3.x 转换 XiunoBBS4.x
 
 ### 鸣谢
 - XiunoBBS https://bbs.xiuno.com

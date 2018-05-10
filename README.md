@@ -10,6 +10,7 @@ MIT
 
 ### 编译教程
 - 拉取依赖库 ```go get -v github.com/skiy/xiuno-tools```   
+- 进入项目目录 ```cd $GOPATH/src/github.com/skiy/xiuno-tools```
 - 编译程序 ```go install```
 - 完成，文件在 ```$GOPATH/bin``` 里
 
@@ -32,15 +33,16 @@ MIT
 ### 扫码赞助
 请记得添加备注，方便我把名单公开以及提供技术支持。
 
-![支付宝](docs/images/alipay.png)
+![支付宝](docs/images/alipay.png)   
 **支付宝**    
 
-![微信](docs/images/wxpay.png)
+![微信](docs/images/wxpay.png)   
 **微信**   
 
 ### 更新日志
 **v1.1.4**   
 修复 文字背景颜色
+修正 附件无下载次数时错误的问题
 
 **v1.1.3**   
 增加 支持虚拟主机方式(一个数据库同时安装Discuz!X和Xiuno)

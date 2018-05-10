@@ -44,9 +44,6 @@ func (this *extension) update() {
 
 	this.fixForumMod()
 
-	//修正用户主题、帖子统计
-	this.fixUserPostStat()
-
 	//使用官方用户组
 	if groupReset {
 		this.resetGroup()
@@ -73,6 +70,9 @@ func (this *extension) update() {
 	if !strings.EqualFold(s, "Y") {
 		return
 	}
+
+	//修正用户主题、帖子统计
+	this.fixUserPostStat()
 
 	//复制文件
 	this.CopyFiles()

@@ -1,10 +1,13 @@
 package dx3ToXn4
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/skiy/bbcode"
 	"github.com/skiy/golib"
 	"log"
+	"os"
+	"strconv"
 )
 
 type post struct {
@@ -12,7 +15,8 @@ type post struct {
 	xnstr dbstr
 	count,
 	total int
-	tbname string
+	tbname  string
+	lastPid string
 }
 
 type postFields struct {
@@ -48,9 +52,18 @@ func (this *post) toUpdate() (count int, err error) {
 
 	xntb2 := xnpre + "mypost"
 
+	where := ""
+	buf := bufio.NewReader(os.Stdin)
+	fmt.Println("\r\n如果上次导入帖子出现错误，请输入最后记录的 pid， 若无请按“回车键”")
+	s := lib.Input(buf)
+	val, _ := strconv.Atoi(s)
+	if val > 0 {
+		where = fmt.Sprintf("WHERE pid > %d", val)
+	}
+
 	fields := "tid,pid,authorid,first,dateline,useip,message"
 
-	dxsql := fmt.Sprintf("SELECT %s FROM %s ORDER BY pid ASC", fields, dxtb1)
+	dxsql := fmt.Sprintf("SELECT %s FROM %s %s ORDER BY pid ASC", fields, dxtb1, where)
 
 	newFields := "tid,pid,uid,isfirst,create_date,userip,message,message_fmt"
 	qmark := this.dxstr.FieldMakeQmark(newFields, "?")
@@ -125,7 +138,8 @@ func (this *post) toUpdate() (count int, err error) {
 			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
 		} else {
 			count++
-			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条数据", count), 0)
+			lib.UpdateProcess(fmt.Sprintf("正在升级第 %d 条数据，当前 pid 为 %s", count, field.pid), 0)
+			this.lastPid = field.pid
 
 			_, err = xndb.Exec(xnsql2, &field.uid, &field.tid, &field.pid)
 			if err != nil {
@@ -135,7 +149,7 @@ func (this *post) toUpdate() (count int, err error) {
 	}
 
 	if err = data.Err(); err != nil {
-		log.Fatalf("user insert error: %s \r\n", err.Error())
+		log.Fatalf("帖子导入出现致命错误(%s)，最后一条数据 pid 为: %s \r\n", err.Error(), this.lastPid)
 	}
 
 	return count, err
@@ -272,7 +286,7 @@ func (this *post) BBCodeToHtml(msg string) string {
 			if len(attachId) > 0 {
 				err := xndb.QueryRow(xnsql1, attachId).Scan(&isimage, &filename)
 				if err != nil {
-					fmt.Printf("查询附件(%s)失败(%s) \r\n", attachId, err.Error())
+					fmt.Printf("\r\n查询附件(aid: %s)失败(%s) \r\n", attachId, err.Error())
 				} else {
 					if isimage == "1" {
 						out.Name = "img"

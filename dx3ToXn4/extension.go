@@ -521,6 +521,8 @@ XiunoBBS 和 Discuz!X 目录不能为空
 		return
 	}
 
+	fmt.Println("正在更新用户头像...")
+
 	dxpre := this.dxstr.DBPre
 	xnpre := this.xnstr.DBPre
 
@@ -646,6 +648,7 @@ XiunoBBS 和 Discuz!X 目录不能为空
 `)
 		return
 	}
+	fmt.Println("正在更新版块图标...")
 
 	dxpre := this.dxstr.DBPre
 	xnpre := this.xnstr.DBPre

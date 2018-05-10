@@ -3,7 +3,6 @@ package dx3ToXn4
 import (
 	"bufio"
 	"fmt"
-	"github.com/skiy/bbcode"
 	"github.com/skiy/golib"
 	"log"
 	"os"

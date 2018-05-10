@@ -39,22 +39,7 @@ func (this *extension) update() {
 		return
 	}
 
-	//修正帖子图片 - 废弃
-	//this.fixPostImages()
-
 	this.fixForumMod()
-
-	//使用官方用户组
-	if groupReset {
-		this.resetGroup()
-		//不使用官方用户组
-	} else {
-		//修正用户组的删除用户权限
-		this.fixGroup()
-
-		//修正gid为101的用户及用户组
-		this.fixUserGroup()
-	}
 
 	//附件提示
 	this.CopyAttachTip()
@@ -70,12 +55,23 @@ func (this *extension) update() {
 	if !strings.EqualFold(s, "Y") {
 		return
 	}
+	//复制文件
+	this.CopyFiles()
+
+	//使用官方用户组
+	if groupReset {
+		this.resetGroup()
+		//不使用官方用户组
+	} else {
+		//修正用户组的删除用户权限
+		this.fixGroup()
+
+		//修正gid为101的用户及用户组
+		this.fixUserGroup()
+	}
 
 	//修正用户主题、帖子统计
 	this.fixUserPostStat()
-
-	//复制文件
-	this.CopyFiles()
 
 	//修正最后发帖者及最后帖子
 	this.fixThreadLastPost()

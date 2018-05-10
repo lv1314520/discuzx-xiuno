@@ -60,15 +60,6 @@ func (this *extension) update() {
 		this.fixUserGroup()
 	}
 
-	//修正最后发帖者及最后帖子
-	this.fixThreadLastPost()
-
-	//修正帖子的附件数和图片数
-	this.fixPostAttach()
-
-	//修正主题的附件数和图片数
-	this.fixThreadAttach()
-
 	//附件提示
 	this.CopyAttachTip()
 
@@ -86,107 +77,15 @@ func (this *extension) update() {
 
 	//复制文件
 	this.CopyFiles()
-}
 
-/**
-内容中的附件与图片 (bug - 会再将html转换一次) 此功能废弃
-*/
-func (this *extension) fixPostImages() {
-	pre := this.xnstr.DBPre
+	//修正最后发帖者及最后帖子
+	this.fixThreadLastPost()
 
-	this.tbname = pre + "post"
-	xntb1 := pre + "attach"
+	//修正帖子的附件数和图片数
+	this.fixPostAttach()
 
-	selSql := "SELECT pid,message,message_fmt FROM %s"
-	xnsql := fmt.Sprintf(selSql, this.tbname)
-
-	data, err := xndb.Query(xnsql)
-	if err != nil {
-		log.Fatalln(xnsql, err.Error())
-	}
-	defer data.Close()
-
-	selSql1 := "SELECT isimage,filename FROM %s WHERE aid = ?"
-	xnsql1 := fmt.Sprintf(selSql1, xntb1)
-
-	upSql2 := "UPDATE %s SET message = ?, message_fmt = ? WHERE pid = ?"
-	xnsql2 := fmt.Sprintf(upSql2, this.tbname)
-	stmt, err := xndb.Prepare(xnsql2)
-	if err != nil {
-		log.Fatalf("stmt error: %s \r\n", err.Error())
-	}
-	defer stmt.Close()
-
-	var isimage, filename string
-
-	compiler := bbcode.NewCompiler(true, true)
-	compiler.SetTag("attach", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
-
-		out := bbcode.NewHTMLTag("")
-		out.Name = ""
-
-		closeFlag := true
-
-		value := node.GetOpeningTag().Value
-		if value == "" {
-			attachId := bbcode.CompileText(node)
-			//fmt.Println("attachid:", attachId, "\r\n")
-
-			if len(attachId) > 0 {
-				err = xndb.QueryRow(xnsql1, attachId).Scan(&isimage, &filename)
-				if err != nil {
-					fmt.Printf("查询附件(%s)失败(%s) \r\n", attachId, err.Error())
-				} else {
-					if isimage == "1" {
-						out.Name = "img"
-						out.Attrs["src"] = "upload/attach/" + filename
-
-						closeFlag = false
-					} else {
-						out.Name = "a"
-						out.Attrs["href"] = "?attach-download-" + attachId + ".htm" //bbcode.ValidURL(filename)
-						out.Attrs["target"] = "_blank"
-
-						closeFlag = true
-					}
-				}
-			}
-		}
-
-		//fmt.Println(">>>>>>>>>>>>>>>>>\r\n", out ,"\r\n<<<<<<<<<<<<<<<<<<<<\r\n\r\n")
-
-		return out, closeFlag
-	})
-
-	var pid, message, message_fmt string
-	var count int
-	for data.Next() {
-		err = data.Scan(&pid, &message, &message_fmt)
-
-		msg := compiler.Compile(message)
-		_, err = stmt.Exec(&msg, &msg, &pid)
-		if err != nil {
-			fmt.Printf("导入数据失败(%s) \r\n", err.Error())
-		} else {
-			count++
-			lib.UpdateProcess(fmt.Sprintf("正在更新 (post) 第 %d 条数据", count), 0)
-		}
-	}
-	//
-	//DefaultTagCompilers["url"] = func(node *BBCodeNode) (*HTMLTag, bool) {
-	//	out := NewHTMLTag("")
-	//	out.Name = "a"
-	//	value := node.GetOpeningTag().Value
-	//	if value == "" {
-	//		text := CompileText(node)
-	//		if len(text) > 0 {
-	//			out.Attrs["href"] = ValidURL(text)
-	//		}
-	//	} else {
-	//		out.Attrs["href"] = ValidURL(value)
-	//	}
-	//	return out, true
-	//}
+	//修正主题的附件数和图片数
+	this.fixThreadAttach()
 }
 
 /**

@@ -117,6 +117,8 @@ func (this *extension) fixUserPostStat() {
 (将所有用户gid设置成101,并且设置管理员ID)
 */
 func (this *extension) resetGroup() {
+	fmt.Println("正在将所有用户迁移至注册用户组...")
+
 	pre := this.xnstr.DBPre
 
 	this.tbname = pre + "user"
@@ -159,6 +161,8 @@ func (this *extension) resetGroup() {
 更新用户组 (删除用户) 权限
 */
 func (this *extension) fixGroup() {
+	fmt.Println("更新用户组 (删除用户) 权限...")
+
 	pre := this.xnstr.DBPre
 
 	this.tbname = pre + "group"
@@ -246,6 +250,8 @@ func (this *extension) fixGroup() {
 更新最低级用户组ID为101,及对应用户的组为101
 */
 func (this *extension) fixUserGroup() {
+	fmt.Println("正在更新用户及最低级用户组ID为101...")
+
 	pre := this.xnstr.DBPre
 
 	this.tbname = pre + "group"

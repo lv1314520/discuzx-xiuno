@@ -117,7 +117,11 @@ func (this *thread) toUpdate() (count int, err error) {
 			&field.userip,
 			&field.firstpid)
 
-		userip := lib.Ip2long(field.userip)
+		var userip uint32
+		if field.userip != "" {
+			field.userip = "127.0.0.1"
+		}
+		userip = lib.Ip2long(field.userip)
 
 		_, err = stmt.Exec(
 			&field.fid,

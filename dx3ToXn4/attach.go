@@ -112,6 +112,11 @@ func (this *attach) toUpdate() (count int, err error) {
 				field.isimage = "0"
 			}
 
+			downloads := "0"
+			if field.downloads != "" {
+				downloads = field.downloads
+			}
+
 			_, err = stmt.Exec(
 				&field.aid,
 				&field.tid,
@@ -124,7 +129,7 @@ func (this *attach) toUpdate() (count int, err error) {
 				filetype,
 				&field.create_date,
 				&field.comment,
-				&field.downloads,
+				downloads,
 				&field.isimage)
 
 			if err != nil {

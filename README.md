@@ -1,4 +1,5 @@
 ### Xiuno Tools
+
 ------
 
 ### 开源协议
@@ -9,6 +10,7 @@ MIT
 - ✔Discuz!X 3.x 转换 XiunoBBS 4.x [说明](docs/dx3ToXn4/)
 
 ### 编译教程
+- 拉取代码库 ```git clone -b v1.x https://github.com/skiy/xiuno-tools $GOPATH/src/github.com/skiy/xiuno-tools```
 - 拉取依赖库 ```go get -v github.com/skiy/xiuno-tools```   
 - 进入项目目录 ```cd $GOPATH/src/github.com/skiy/xiuno-tools```
 - 编译程序 ```go install```

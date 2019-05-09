@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main()  {
+func main() {
 	fmt.Println(`
 	:::
 	::: 本项目开源地址: https://github.com/skiy/xiuno-tools

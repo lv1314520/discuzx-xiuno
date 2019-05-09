@@ -13,7 +13,7 @@ Xiuno BBS 辅助工具
 - 拉取主项目 ```go get -v github.com/skiy/xiuno-tools``` 
 
 ### 注意事项
-本程序使用 ***go mod*** 标准库，需要 ***go 1.11.x+*** 的开发环境。
+本程序使用 ***```go mod```*** 标准库，需要 ***```go1.11 +```*** 的开发环境。
 
 ### 使用到的开源项目
 - XiunoBBS https://bbs.xiuno.com

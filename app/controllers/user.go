@@ -19,10 +19,6 @@ func (t *user) ToConvert() (err error) {
 
 	cfg := mcfg.GetCfg()
 
-	//ucPre := cfg.GetString("database.uc.0.prefix")
-	//discuzPre := cfg.GetString("database.discuz.0.prefix")
-	//xiunoPre := cfg.GetString("database.xiuno.0.prefix")
-
 	ucPre, discuzPre, xiunoPre := database.GetPrefix("uc"), database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
 	ucMemberTable := ucPre + "members"
@@ -48,9 +44,12 @@ func (t *user) ToConvert() (err error) {
 		return errors.New(fmt.Sprintf("清空数据表(%s)失败, %s", xiunoTable, err.Error()))
 	}
 
+	var count int64
+	batch := cfg.GetInt("tables.xiuno.user.batch")
+
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
-		dataList = append(dataList, gdb.Map{
+		d := gdb.Map{
 			"uid":         u["uid"],
 			"gid":         u["groupid"],
 			"email":       u["email"],
@@ -62,16 +61,31 @@ func (t *user) ToConvert() (err error) {
 			"create_date": u["create_date"],
 			"login_ip":    common.Ip2long(u["lastip"].(string)),
 			"login_date":  u["lastvisit"],
-		})
+		}
+
+		// 批量插入数量
+		if batch > 1 {
+			dataList = append(dataList, d)
+		} else {
+			if res, err := xiunoDB.Insert(xiunoTable, d); err != nil {
+				return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+			} else {
+				c, _ := res.RowsAffected()
+				count += c
+			}
+		}
 	}
 
-	if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
-	} else {
-		count, _ := res.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
-		return nil
+	if len(dataList) > 0 {
+		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
+			return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+		} else {
+			count, _ = res.RowsAffected()
+		}
 	}
+
+	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	return
 }
 
 func NewUser() *user {

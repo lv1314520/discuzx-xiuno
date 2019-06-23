@@ -50,6 +50,7 @@ func (t *group) ToConvert() (err error) {
 		return errors.New(fmt.Sprintf("清空数据表(%s)失败, %s", xiunoTable, err.Error()))
 	}
 
+	var count int64
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
 		allowtop := gconv.Int(u["allowstickthread"])
@@ -90,14 +91,15 @@ func (t *group) ToConvert() (err error) {
 		dataList = append(dataList, d)
 	}
 
-	if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
-	} else {
-		count, _ := res.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
-		return nil
+	if len(dataList) > 0 {
+		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
+			return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+		} else {
+			count, _ = res.RowsAffected()
+		}
 	}
 
+	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	return
 }
 

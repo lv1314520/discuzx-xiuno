@@ -94,7 +94,7 @@ func (t *attach) ToConvert() (err error) {
 
 		if len(dataList) > 0 {
 			// 批量插入
-			if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
+			if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, batch); err != nil {
 				return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
 			} else {
 				c, _ := res.RowsAffected()

@@ -102,6 +102,10 @@ github.com/shurcooL/reactions v0.0.0-20181006231557-f2e0b4ca5b82/go.mod h1:TCR1l
 github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYEDaXHZDBsXlPCDqdhQuJkuw4NOtaxYe3xii4=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
+github.com/skiy/bbcode v0.0.0-20150429195712-e3d2906cb269 h1:sGMS3/NL9rgYw4ozADGfUXINYKnJzAuOGE9CPRWJW6c=
+github.com/skiy/bbcode v0.0.0-20150429195712-e3d2906cb269/go.mod h1:43E5ifcobKqMS2pE5HUoppdyE+ZdPZKu9ZxLopHR9V8=
+github.com/skiy/bbcode v0.0.0-20180807171629-48be21ce690c h1:GQF55d8H8AeFFUKhq/vCURg0ffAjN2PwzS3iLGVpQ0Q=
+github.com/skiy/bbcode v0.0.0-20180807171629-48be21ce690c/go.mod h1:43E5ifcobKqMS2pE5HUoppdyE+ZdPZKu9ZxLopHR9V8=
 github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d/go.mod h1:UdhH50NIW0fCiwBSr0co2m7BnFLdv4fQTgdqdJTHFeE=
 github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e/go.mod h1:HuIsMU8RRBOtsCgI77wP899iHVBQpCmg4ErYMZB+2IA=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=

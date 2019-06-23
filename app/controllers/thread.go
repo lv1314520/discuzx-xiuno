@@ -25,9 +25,11 @@ func (t *thread) ToConvert() (err error) {
 	dxThreadTable := discuzPre + "forum_thread"
 	dxPostTable := discuzPre + "forum_post"
 
+	lastTid := cfg.GetInt("tables.xiuno.thread.last_tid")
+
 	fields := "t.fid,t.tid,t.displayorder,t.authorid,t.subject,t.dateline,t.lastpost,t.views,t.replies,t.closed,p.useip,p.pid"
 	var r gdb.Result
-	r, err = database.GetDiscuzDB().Table(dxThreadTable+" t").LeftJoin(dxPostTable+" p", "p.tid = t.tid").Fields(fields).Select()
+	r, err = database.GetDiscuzDB().Table(dxThreadTable+" t").LeftJoin(dxPostTable+" p", "p.tid = t.tid").Where("p.first = ?", 1).Where("t.tid >= ?", lastTid).OrderBy("tid ASC").Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.thread.name")
 	if err != nil {

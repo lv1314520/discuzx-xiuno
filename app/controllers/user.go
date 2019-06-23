@@ -68,7 +68,7 @@ func (t *user) ToConvert() (err error) {
 			dataList = append(dataList, d)
 		} else {
 			if res, err := xiunoDB.Insert(xiunoTable, d); err != nil {
-				return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+				return errors.New(fmt.Sprintf("表 %s 数据导入失败, %s", xiunoTable, err.Error()))
 			} else {
 				c, _ := res.RowsAffected()
 				count += c

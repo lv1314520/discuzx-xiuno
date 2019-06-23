@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"xiuno-tools/app/controllers"
+	"xiuno-tools/app/controllers/extension"
 	"xiuno-tools/app/libraries/mcfg"
 	"xiuno-tools/app/libraries/mlog"
 )
@@ -51,6 +52,9 @@ func (t *app) Parsing() {
 			}
 		}
 	}
+
+	// 扩展功能
+	extension.NewExtension().Parsing()
 }
 
 /**

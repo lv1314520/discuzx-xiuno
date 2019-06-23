@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
+	"time"
 	"xiuno-tools/app"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mcfg"
@@ -14,16 +15,17 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	fmt.Println(`
-	:::
-	::: 本项目开源地址: https://github.com/skiy/xiuno-tools
-	::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
-	::: 本项目讨论帖：https://bbs.jadehive.com/thread-8059.htm
-	:::
-	:::
-	::: 执行过程中按 "Ctrl + Z" 结束本程序...
-	:::
-	::: Version:2.0.0    Updated:2019-05-01
-	`)
+:::
+::: 本项目开源地址: https://github.com/skiy/xiuno-tools
+::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
+::: 本项目讨论帖：https://bbs.jadehive.com/thread-8059.htm
+:::
+:::
+::: 执行过程中按 "Ctrl + Z" 结束本程序...
+:::
+::: Version:2.0.0    Updated:2019-05-01
+:::
+`)
 
 	//配置初始化
 	initialize()
@@ -33,7 +35,22 @@ func main() {
 		mlog.Log.Fatal("", "数据库连接失败: %s", err.Error())
 	}
 
+	start := time.Now()
+
 	app.NewApp().Parsing()
+
+	fmt.Println(fmt.Sprintf(`
+:::
+::: 已将 Discuz!X 升级至 XiunoBBS
+::: 总耗时: %v
+:::
+::: 本程序开源地址: https://github.com/skiy/xiuno-tools
+::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
+::: QQ: 86999077 技术支持论坛: https://bbs.jadehive.com
+:::
+::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。
+:::`, time.Since(start)))
+
 }
 
 /**

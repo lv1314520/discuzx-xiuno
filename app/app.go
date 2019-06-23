@@ -24,6 +24,9 @@ func (t *app) Parsing() {
 		"attach",
 		"thread",
 		"post",
+		"thread_top",
+		"mythread",
+		"mypost",
 	}
 
 	var err error
@@ -72,6 +75,15 @@ func (t *app) ctrl(name string) (ctrl controllers.Controller, err error) {
 
 	case "post":
 		ctrl = controllers.NewPost()
+
+	case "thread_top":
+		ctrl = controllers.NewThreadTop()
+
+	case "mythread":
+		ctrl = controllers.NewMythread()
+
+	case "mypost":
+		ctrl = controllers.NewMypost()
 
 	default:
 		err = errors.New("找不到对应的控制器,无法转换该表")

@@ -10,7 +10,7 @@ Xiuno BBS 辅助工具
 - 数据优化
 
 ### 编译指南
-- 拉取主项目 ```go get -v github.com/skiy/xiuno-tools``` 
+- 拉取主项目 ```go get -v -b v2.x github.com/skiy/xiuno-tools``` 
 
 ### 注意事项
 本程序使用 ***```go mod```*** 标准库，需要 ***```go1.11 +```*** 的开发环境。
@@ -19,8 +19,8 @@ Xiuno BBS 辅助工具
 - XiunoBBS https://bbs.xiuno.com
 - Discuz!X http://www.discuz.net
 -
-- https://github.com/jinzhu/gorm (数据库工具)
-- https://github.com/go-ini/ini (ini 文件配置工具)
+
+- https://github.com/gogf/gf (基础框架)
 - https://github.com/frustra/bbcode (内容 BBCODE 转 HTML)
 
 ### 作者

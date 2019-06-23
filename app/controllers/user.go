@@ -19,9 +19,11 @@ func (t *user) ToConvert() (err error) {
 
 	cfg := mcfg.GetCfg()
 
-	ucPre := cfg.GetString("database.uc.0.prefix")
-	discuzPre := cfg.GetString("database.discuz.0.prefix")
-	xiunoPre := cfg.GetString("database.xiuno.0.prefix")
+	//ucPre := cfg.GetString("database.uc.0.prefix")
+	//discuzPre := cfg.GetString("database.discuz.0.prefix")
+	//xiunoPre := cfg.GetString("database.xiuno.0.prefix")
+
+	ucPre, discuzPre, xiunoPre := database.GetPrefix("uc"), database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
 	ucMemberTable := ucPre + "members"
 	dxMemberTable := discuzPre + "common_member"
@@ -32,6 +34,9 @@ func (t *user) ToConvert() (err error) {
 	r, err = database.GetDiscuzDB().Table(dxMemberTable+" m").LeftJoin(dxMemberStatusTable+" s", "s.uid = m.uid").LeftJoin(ucMemberTable+" u", "u.uid = m.uid").Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
+	if err != nil {
+		mlog.Log.Debug("", "表 %s 数据查询失败, %s", xiunoTable, err.Error())
+	}
 
 	if len(r) == 0 {
 		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
@@ -60,7 +65,7 @@ func (t *user) ToConvert() (err error) {
 		})
 	}
 
-	if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 10); err != nil {
+	if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
 		return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
 	} else {
 		count, _ := res.RowsAffected()

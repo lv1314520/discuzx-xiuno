@@ -52,6 +52,9 @@ func initialize() {
 
 	//日志配置
 	mlog.ReadLog()
+
+	//初始化前缀
+	database.InitPrefix()
 }
 
 /**

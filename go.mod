@@ -1,11 +1,8 @@
-module github.com/skiy/xiuno-tools
+module xiuno-tools
 
 go 1.12
 
-require (
-	github.com/go-ini/ini v1.42.0 // indirect
-	github.com/jinzhu/gorm v1.9.8 // indirect
-)
+require github.com/gogf/gf v1.7.0
 
 replace (
 	cloud.google.com/go => github.com/googleapis/google-cloud-go v0.37.0

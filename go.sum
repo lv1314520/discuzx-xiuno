@@ -20,6 +20,8 @@ github.com/gliderlabs/ssh v0.1.1/go.mod h1:U7qILu1NlMHj9FlMhZLlkCdDnU1DBEAqr0aev
 github.com/go-ini/ini v1.42.0 h1:TWr1wGj35+UiWHlBA8er89seFXxzwFn11spilrrj+38=
 github.com/go-ini/ini v1.42.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-sql-driver/mysql v1.4.1/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
+github.com/gogf/gf v1.7.0 h1:hhfawnjEiQLPuIXhX+7l+1mqc5ZYvJqvphq1YmpYDyk=
+github.com/gogf/gf v1.7.0/go.mod h1:41x91y5T+itylJH0NsW/CfTD87qeBoPe/BX3DZAwP0U=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 github.com/golang/build v0.0.0-20190311235527-86650285478d/go.mod h1:LS5++pZInCkeGSsPGP/1yB0yvU9gfqv2yD1PQgIbDYI=

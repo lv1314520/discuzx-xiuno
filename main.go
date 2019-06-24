@@ -23,7 +23,7 @@ func main() {
 :::
 ::: 执行过程中按 "Ctrl + Z" 结束本程序...
 :::
-::: Version:2.0.0    Updated:2019-05-01
+::: Version:2.0.0    Updated:2019-06-25
 :::
 `)
 
@@ -41,7 +41,7 @@ func main() {
 
 	fmt.Println(fmt.Sprintf(`
 :::
-::: 已将 Discuz!X 升级至 XiunoBBS
+::: 已将 Discuz!X 转换至 XiunoBBS
 ::: 总耗时: %v
 :::
 ::: 本程序开源地址:  https://github.com/skiy/xiuno-tools

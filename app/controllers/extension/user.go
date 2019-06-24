@@ -66,19 +66,19 @@ func (t *user) normalUser() (err error) {
 	}
 
 	if _, err := database.GetXiunoDB().Table(xiunoGroupTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("%s 原 %v 组(%v) 转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error()))
+		return errors.New(fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error()))
 	} else {
-		mlog.Log.Info("", fmt.Sprintf("%s 原 %v 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"]))
+		mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"]))
 	}
 
 	if res, err := database.GetXiunoDB().Table(xiunoUserTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("%s 原 %v 组(%v)的用户转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error()))
+		return errors.New(fmt.Sprintf("表 %s 原 “%v” 组(%v) 的用户转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error()))
 	} else {
 		count, _ := res.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("%s 原 %v 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据", xiunoGroupTable, r["name"], r["gid"], count))
+		mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据", xiunoGroupTable, r["name"], r["gid"], count))
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("修正 gid 为 101 的用户及用户组, 此次转换数据耗时: %v", time.Since(start)))
+	mlog.Log.Info("", fmt.Sprintf("表 %s 修正 gid 为 101 的用户及用户组成功, 耗时: %v", xiunoGroupTable, time.Since(start)))
 	return
 }
 

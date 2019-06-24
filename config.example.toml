@@ -2,11 +2,11 @@
 
 # 日志配置
 [log]
-    # 日志等级
-    level = "dev"
-    # 目录
+    # 日志等级 all.全部日志, prod.一般日志, info.正常日志
+    level = "all"
+    # 日志保存目录,会在此目录下生成一个当天的日志文件
     path = "logs"
-    # 是否输出错误位置
+    # 是否输出错误位置,转换出错时建议打开,以便配合作者修复 BUG
     trace = false
 
 # 数据库配置
@@ -21,7 +21,7 @@
         name = "xiuno"      # 数据库名
         prefix = "bbs_"     # 表前缀
         charset = "utf8"    # 字符集
-        debug = false     # 日志调试
+        debug = false     # 日志调试,建议关闭
 
     # Discuz!X
     [[database.discuz]]
@@ -33,7 +33,7 @@
         name = "dx"
         prefix = "pre_"
         charset = "utf8"
-        debug = false
+        debug = false    # 日志调试,建议关闭
 
     # UCenter
     [[database.uc]]
@@ -45,7 +45,7 @@
         name = "dx"
         prefix = "pre_ucenter_"
         charset = "utf8"
-        debug = false
+        debug = false    # 日志调试,建议关闭
 
 # 需要转换的表配置
 [tables]

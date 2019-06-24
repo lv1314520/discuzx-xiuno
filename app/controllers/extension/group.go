@@ -51,10 +51,10 @@ func (t *group) official() (err error) {
 
 	start = time.Now()
 	if r, err := database.GetXiunoDB().Table(xiunoTable).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("重置用户组(%s) gid 为 101 失败, %s", xiunoTable, err.Error()))
+		return errors.New(fmt.Sprintf("表 %s 重置用户组 gid 为 101 失败, %s", xiunoTable, err.Error()))
 	} else {
 		count, _ = r.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("重置用户组(%s) gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+		mlog.Log.Info("", fmt.Sprintf("表 %s 重置用户组 gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	}
 
 	// 不转换管理员 gid
@@ -72,10 +72,10 @@ func (t *group) official() (err error) {
 	}
 
 	if r, err := database.GetXiunoDB().Table(xiunoTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("%s 重置 uid 为 %d 的用户组 gid 为 1 失败, %s", xiunoTable, adminId, err.Error()))
+		return errors.New(fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 失败, %s", xiunoTable, adminId, err.Error()))
 	} else {
 		count, _ = r.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("%s 重置 uid 为 %d 的用户组gid 为 1 成功, 耗时: ", xiunoTable, adminId))
+		mlog.Log.Info("", fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 成功", xiunoTable, adminId))
 	}
 	return
 }

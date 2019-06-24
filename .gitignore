@@ -6,4 +6,5 @@ config.ini
 config.toml
 logs/
 go.sum
+xiuno-tools*
 

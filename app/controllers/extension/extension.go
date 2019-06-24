@@ -21,6 +21,7 @@ func (t *extension) Parsing() {
 
 	t.ShowError(NewGroup().Parsing())
 	t.ShowError(NewUser().Parsing())
+	t.ShowError(NewThreadPost().Parsing())
 }
 
 func (t *extension) ShowError(err error) {

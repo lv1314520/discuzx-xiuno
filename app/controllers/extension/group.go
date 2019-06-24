@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/container/gmap"
-	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
 	"strings"
 	"time"
@@ -89,8 +88,11 @@ func (t *group) discuzGroup() (err error) {
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.group.name")
 
 	fields := "gid,name"
-	var r gdb.Result
-	r, err = database.GetXiunoDB().Table(xiunoTable).Fields(fields).Select()
+
+	r, err := database.GetXiunoDB().Table(xiunoTable).Fields(fields).Select()
+	if err != nil {
+		return err
+	}
 
 	if len(r) == 0 {
 		mlog.Log.Debug("", "表 %s 无用户组可以转换", xiunoTable)

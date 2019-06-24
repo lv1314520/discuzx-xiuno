@@ -7,7 +7,7 @@
     # 目录
     path = "logs"
     # 是否输出错误位置
-    trace = true
+    trace = false
 
 # 数据库配置
 [database]
@@ -64,23 +64,23 @@
             # 表名
             name = "group"
             # 是否转换
-            convert = false
+            convert = true
             # 是否使用 xiunobbs 官方用户组
-            official = false
+            official = true
 
         # 版块表
         [tables.xiuno.forum]
             # 表名
             name = "forum"
             # 是否转换
-            convert = false
+            convert = true
 
         # 附件表
         [tables.xiuno.attach]
             # 表名
             name = "attach"
             # 是否转换
-            convert = false
+            convert = true
             # 每次更新条数(留空或 < 2, 则默认为 1 条), 单条导入时, 错误不会导致程序退出
             batch = 1
 
@@ -89,7 +89,7 @@
             # 表名
             name = "thread"
             # 是否转换
-            convert = false
+            convert = true
             # 每次更新条数(留空或 < 2, 则默认为 1 条)
             batch = 100
             # 取 >= TID 的数据。当上次转换出错时, 记录此 TID, 方便再次导入
@@ -111,26 +111,26 @@
             # 表名
             name = "thread_top"
             # 是否转换
-            convert = false
+            convert = true
 
         # 我的主题表
         [tables.xiuno.mythread]
             # 表名
             name = "mythread"
             # 是否转换
-            convert = false
+            convert = true
 
         # 我的帖子表
         [tables.xiuno.mypost]
             # 表名
             name = "mypost"
             # 是否转换
-            convert = false
+            convert = true
 
 # 扩展功能
 [extension]
     [forum]
-        # 是否导入论坛版主
+        # 是否导入论坛版主 (不建议使用)
         moderators = false
 
     [file]
@@ -151,24 +151,24 @@
 
     [extension.group]
         # 是否启用此功能
-        open = false
+        open = true
         # Discuz 游客用户组 ID
         guest_gid = 7
         # 管理员 UID
         admin_id = 1
-        # 删除用户的权限 1,2
+        # 添加"删除用户的权限"的用户组 gid: 1,2
         delete_user_power = "1,2"
 
     [extension.user]
-        # 是否修正用户主题数和帖子数(帖子数=主题+回复)
-        total = false
+        # 是否修正用户主题数和帖子数(帖子数=主题+回复),比较耗时
+        total = true
         # 修正 gid 为 101 的用户及用户组
-        normal_user = false
+        normal_user = true
 
-    [thread_post]
-        # 是否修正主题的 lastpid 和 lastuid
-        fix_last = false
+    [extension.thread_post]
+        # 是否修正主题的 lastpid 和 lastuid,比较耗时
+        fix_last = true
         # 是否修正主题内附件统计数量
-        thread_total = false
+        thread_attach_total = true
         # 是否修正帖子内附件统计数量
-        post_total = false
+        post_attach_total = true

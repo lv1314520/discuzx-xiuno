@@ -45,8 +45,10 @@ func (t *user) normalUser() (err error) {
 	xiunoUserTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 
 	fields := "gid,name"
-	var r gdb.Record
-	r, err = database.GetXiunoDB().Table(xiunoGroupTable).Where("creditsfrom = ? AND creditsto > ?", 0, 0).Fields(fields).OrderBy("gid ASC").One()
+	r, err := database.GetXiunoDB().Table(xiunoGroupTable).Where("creditsfrom = ? AND creditsto > ?", 0, 0).Fields(fields).OrderBy("gid ASC").One()
+	if err != nil {
+		return err
+	}
 
 	if len(r) == 0 {
 		mlog.Log.Debug("", "表 %s 无用户组可以转换", xiunoGroupTable)
@@ -96,6 +98,9 @@ func (t *user) threadPostStat() (err error) {
 	fields := "uid"
 	var r gdb.Result
 	r, err = xiunoDB.Table(xiunoUserTable).Fields(fields).Select()
+	if err != nil {
+		return err
+	}
 
 	if len(r) == 0 {
 		mlog.Log.Debug("", "表 %s 无用户可以转换主题和帖子数量", xiunoUserTable)

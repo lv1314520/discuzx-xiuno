@@ -44,9 +44,9 @@ func main() {
 ::: 已将 Discuz!X 升级至 XiunoBBS
 ::: 总耗时: %v
 :::
-::: 本程序开源地址: https://github.com/skiy/xiuno-tools
-::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
-::: QQ: 86999077 技术支持论坛: https://bbs.jadehive.com
+::: 本程序开源地址:  https://github.com/skiy/xiuno-tools
+::: 作者: Skiychan <dev@skiy.net>  https://www.skiy.net
+::: QQ: 869990770 技术支持论坛: https://bbs.jadehive.com
 :::
 ::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。
 :::`, time.Since(start)))

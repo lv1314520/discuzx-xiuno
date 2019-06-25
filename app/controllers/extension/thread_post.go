@@ -154,7 +154,7 @@ func (t *threadPost) fixThreadLast() (err error) {
 		}
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadable, count, time.Since(start)))
+	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start)))
 	return
 }
 

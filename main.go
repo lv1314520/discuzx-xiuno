@@ -38,6 +38,8 @@ func main() {
 
 	start := time.Now()
 
+	mlog.Log.Info("", "\n\n开始导入数据: %v", start.Format("2006-01-02 15:04:05"))
+
 	app.NewApp().Parsing()
 
 	mlog.Log.Info("", "已将 Discuz!X 转换至 XiunoBBS, 总耗时: %v", time.Since(start))

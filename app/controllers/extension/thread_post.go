@@ -1,6 +1,7 @@
 package extension
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 	"xiuno-tools/app/libraries/database"
@@ -13,6 +14,9 @@ import (
 type threadPost struct {
 }
 
+/*
+NewThreadPost ...
+*/
 func NewThreadPost() *threadPost {
 	t := &threadPost{}
 	return t
@@ -94,12 +98,13 @@ func (t *threadPost) fixThreadLastGroup() (err error) {
 			"lastuid": u["uid"],
 		}
 
-		if res2, err := xiunoDB.Table(xiunoThreadable).Data(d).Where(w).Update(); err != nil {
+		var res2 sql.Result
+		if res2, err = xiunoDB.Table(xiunoThreadable).Data(d).Where(w).Update(); err != nil {
 			return fmt.Errorf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadable, err.Error())
-		} else {
-			c, _ := res2.RowsAffected()
-			count += c
 		}
+
+		c, _ := res2.RowsAffected()
+		count += c
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadable, count, time.Since(start)))
@@ -146,12 +151,13 @@ func (t *threadPost) fixThreadLast() (err error) {
 			"lastuid": u["uid"],
 		}
 
-		if res2, err := xiunoDB.Table(xiunoThreadTable).Data(d).Where(w).Update(); err != nil {
+		var res2 sql.Result
+		if res2, err = xiunoDB.Table(xiunoThreadTable).Data(d).Where(w).Update(); err != nil {
 			return fmt.Errorf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadTable, err.Error())
-		} else {
-			c, _ := res2.RowsAffected()
-			count += c
 		}
+
+		c, _ := res2.RowsAffected()
+		count += c
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start)))
@@ -191,12 +197,13 @@ func (t *threadPost) threadAttachTotal() (err error) {
 			"images": u["images"],
 		}
 
-		if res, err := xiunoDB.Table(xiunoThreadTable).Data(d).Where(w).Update(); err != nil {
-			return fmt.Errorf("表 %s 更新主题的附件数(files)和图片数(images)失败, %s", xiunoThreadTable, err.Error())
-		} else {
-			c, _ := res.RowsAffected()
-			count += c
+		var res sql.Result
+		if res, err = xiunoDB.Table(xiunoThreadTable).Data(d).Where(w).Update(); err != nil {
+			return fmt.Errorf("表 %s 更新主题(tid: %v)的附件数(files)和图片数(images)失败, %s", xiunoThreadTable, u["tid"], err.Error())
 		}
+
+		c, _ := res.RowsAffected()
+		count += c
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 更新主题的附件数(files)和图片数(images)成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start)))
@@ -243,12 +250,13 @@ func (t *threadPost) postAttachTotal() (err error) {
 			}
 		}
 
-		if res, err := xiunoDB.Table(xiunoPostTable).Data(d).Where(w).Update(); err != nil {
+		var res sql.Result
+		if res, err = xiunoDB.Table(xiunoPostTable).Data(d).Where(w).Update(); err != nil {
 			return fmt.Errorf("表 %s 更新帖子的附件数(files)和图片数(images)失败, %s", xiunoPostTable, err.Error())
-		} else {
-			c, _ := res.RowsAffected()
-			count += c
 		}
+
+		c, _ := res.RowsAffected()
+		count += c
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的附件数(files)和图片数(images)成功, 本次更新: %d 条数据, 耗时: %v", xiunoPostTable, count, time.Since(start)))

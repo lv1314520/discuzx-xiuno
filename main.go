@@ -13,7 +13,8 @@ import (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	fmt.Println(`
+	fmt.Printf(`
+
 :::
 ::: 本项目开源地址: https://github.com/skiy/xiuno-tools
 ::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
@@ -24,6 +25,7 @@ func main() {
 :::
 ::: Version:2.0.0    Updated:2019-06-25
 :::
+
 `)
 
 	//配置初始化
@@ -38,17 +40,19 @@ func main() {
 
 	app.NewApp().Parsing()
 
-	fmt.Println(fmt.Sprintf(`
-:::
-::: 已将 Discuz!X 转换至 XiunoBBS
-::: 总耗时: %v
+	mlog.Log.Info("", "已将 Discuz!X 转换至 XiunoBBS, 总耗时: %v", time.Since(start))
+
+	fmt.Printf(`
+
 :::
 ::: 本程序开源地址:  https://github.com/skiy/xiuno-tools
 ::: 作者: Skiychan <dev@skiy.net>  https://www.skiy.net
 ::: QQ: 869990770 技术支持论坛: https://bbs.jadehive.com
 :::
 ::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。
-:::`, time.Since(start)))
+:::
+
+`)
 
 }
 

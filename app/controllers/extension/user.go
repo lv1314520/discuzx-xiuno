@@ -1,13 +1,13 @@
 package extension
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/database/gdb"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g"
+	"github.com/gogf/gf/g/database/gdb"
 )
 
 type user struct {
@@ -66,13 +66,13 @@ func (t *user) normalUser() (err error) {
 	}
 
 	if _, err := database.GetXiunoDB().Table(xiunoGroupTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error()))
+		return fmt.Errorf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error())
 	} else {
 		mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"]))
 	}
 
 	if res, err := database.GetXiunoDB().Table(xiunoUserTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 原 “%v” 组(%v) 的用户转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error()))
+		return fmt.Errorf("表 %s 原 “%v” 组(%v) 的用户转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error())
 	} else {
 		count, _ := res.RowsAffected()
 		mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据", xiunoGroupTable, r["name"], r["gid"], count))
@@ -128,7 +128,7 @@ func (t *user) threadPostStat() (err error) {
 		}
 
 		if res, err := xiunoDB.Table(xiunoUserTable).Data(d).Where(w).Update(); err != nil {
-			return errors.New(fmt.Sprintf("表 %s 用户帖子统计更新失败, %s", xiunoUserTable, err.Error()))
+			return fmt.Errorf("表 %s 用户帖子统计更新失败, %s", xiunoUserTable, err.Error())
 		} else {
 			c, _ := res.RowsAffected()
 			count += c

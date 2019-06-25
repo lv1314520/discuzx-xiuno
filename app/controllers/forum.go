@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/text/gstr"
-	"github.com/gogf/gf/g/util/gconv"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mcfg"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/text/gstr"
+	"github.com/gogf/gf/g/util/gconv"
 )
 
 type forum struct {
@@ -41,7 +41,7 @@ func (t *forum) ToConvert() (err error) {
 
 	xiunoDB := database.GetXiunoDB()
 	if _, err = xiunoDB.Exec("TRUNCATE " + xiunoTable); err != nil {
-		return errors.New(fmt.Sprintf("清空数据表(%s)失败, %s", xiunoTable, err.Error()))
+		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
 	var count int64
@@ -57,18 +57,18 @@ func (t *forum) ToConvert() (err error) {
 			"announcement": u["rules"],
 		}
 
-		seo_title := gstr.SubStr(gconv.String(u["seotitle"]), 0, 64)
-		seo_keywords := gstr.SubStr(gconv.String(u["keywords"]), 0, 64)
+		seoTitle := gstr.SubStr(gconv.String(u["seotitle"]), 0, 64)
+		seoKeywords := gstr.SubStr(gconv.String(u["keywords"]), 0, 64)
 
-		d["seo_title"] = seo_title
-		d["seo_keywords"] = seo_keywords
+		d["seo_title"] = seoTitle
+		d["seo_keywords"] = seoKeywords
 
 		dataList = append(dataList, d)
 	}
 
 	if len(dataList) > 0 {
 		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
-			return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+			return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
 		} else {
 			count, _ = res.RowsAffected()
 		}

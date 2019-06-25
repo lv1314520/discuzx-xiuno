@@ -1,14 +1,14 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mcfg"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/util/gconv"
 )
 
 type group struct {
@@ -47,7 +47,7 @@ func (t *group) ToConvert() (err error) {
 
 	xiunoDB := database.GetXiunoDB()
 	if _, err = xiunoDB.Exec("TRUNCATE " + xiunoTable); err != nil {
-		return errors.New(fmt.Sprintf("清空数据表(%s)失败, %s", xiunoTable, err.Error()))
+		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
 	var count int64
@@ -93,7 +93,7 @@ func (t *group) ToConvert() (err error) {
 
 	if len(dataList) > 0 {
 		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
-			return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+			return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
 		} else {
 			count, _ = res.RowsAffected()
 		}

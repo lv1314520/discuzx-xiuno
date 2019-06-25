@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"runtime"
 	"time"
@@ -79,15 +78,15 @@ func initialize() {
 */
 func checkConnectDB() (err error) {
 	if err = database.GetDiscuzDB().PingMaster(); err != nil {
-		return errors.New(fmt.Sprintf("%s(Discuz!X)", err.Error()))
+		return fmt.Errorf("%s(Discuz!X)", err.Error())
 	}
 
 	if err = database.GetUcDB().PingMaster(); err != nil {
-		return errors.New(fmt.Sprintf("%s(Discuz!UCenter)", err.Error()))
+		return fmt.Errorf("%s(Discuz!UCenter)", err.Error())
 	}
 
 	if err = database.GetXiunoDB().PingMaster(); err != nil {
-		return errors.New(fmt.Sprintf("%s(XiunoBBS)", err.Error()))
+		return fmt.Errorf("%s(XiunoBBS)", err.Error())
 	}
 
 	return

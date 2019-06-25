@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
-	"github.com/skiy/bbcode"
 	"time"
 	"xiuno-tools/app/libraries/common"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mcfg"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/util/gconv"
+	"github.com/skiy/bbcode"
 )
 
 type post struct {
@@ -43,7 +43,7 @@ func (t *post) ToConvert() (err error) {
 
 	xiunoDB := database.GetXiunoDB()
 	if _, err = xiunoDB.Exec("TRUNCATE " + xiunoTable); err != nil {
-		return errors.New(fmt.Sprintf("清空数据表(%s)失败, %s", xiunoTable, err.Error()))
+		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
 	var count int64
@@ -74,7 +74,7 @@ func (t *post) ToConvert() (err error) {
 			dataList = append(dataList, d)
 		} else {
 			if res, err := xiunoDB.Insert(xiunoTable, d); err != nil {
-				return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+				return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
 			} else {
 				c, _ := res.RowsAffected()
 				count += c
@@ -84,7 +84,7 @@ func (t *post) ToConvert() (err error) {
 
 	if len(dataList) > 0 {
 		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, batch); err != nil {
-			return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+			return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
 		} else {
 			count, _ = res.RowsAffected()
 		}

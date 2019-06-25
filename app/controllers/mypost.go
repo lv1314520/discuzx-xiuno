@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g/database/gdb"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mcfg"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g/database/gdb"
 )
 
 type mypost struct {
@@ -37,12 +37,12 @@ func (t *mypost) ToConvert() (err error) {
 
 	xiunoDB := database.GetXiunoDB()
 	if _, err = xiunoDB.Exec("TRUNCATE " + xiunoTable); err != nil {
-		return errors.New(fmt.Sprintf("清空数据表(%s)失败, %s", xiunoTable, err.Error()))
+		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
 	var count int64
 	if res, err := xiunoDB.Insert(xiunoTable, r); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 数据插入失败, %s", xiunoTable, err.Error()))
+		return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
 	} else {
 		count, _ = res.RowsAffected()
 	}

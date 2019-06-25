@@ -1,15 +1,15 @@
 package extension
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/container/gmap"
-	"github.com/gogf/gf/g/util/gconv"
 	"strings"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g"
+	"github.com/gogf/gf/g/container/gmap"
+	"github.com/gogf/gf/g/util/gconv"
 )
 
 type group struct {
@@ -51,7 +51,7 @@ func (t *group) official() (err error) {
 
 	start = time.Now()
 	if r, err := database.GetXiunoDB().Table(xiunoTable).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 重置用户组 gid 为 101 失败, %s", xiunoTable, err.Error()))
+		return fmt.Errorf("表 %s 重置用户组 gid 为 101 失败, %s", xiunoTable, err.Error())
 	} else {
 		count, _ = r.RowsAffected()
 		mlog.Log.Info("", fmt.Sprintf("表 %s 重置用户组 gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
@@ -72,7 +72,7 @@ func (t *group) official() (err error) {
 	}
 
 	if r, err := database.GetXiunoDB().Table(xiunoTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 失败, %s", xiunoTable, adminId, err.Error()))
+		return fmt.Errorf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 失败, %s", xiunoTable, adminId, err.Error())
 	} else {
 		count, _ = r.RowsAffected()
 		mlog.Log.Info("", fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 成功", xiunoTable, adminId))
@@ -147,10 +147,9 @@ func (t *group) discuzGroup() (err error) {
 	}
 
 	if _, err := database.GetXiunoDB().Table(xiunoTable).Where(w).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("%s 原 %s 组(%d) 转换为游客组 gid 为 0 失败, %s", xiunoTable, guestMap.Get(guestGid), guestGid, err.Error()))
-	} else {
-		mlog.Log.Info("", fmt.Sprintf("%s 原 %s 组(%d) 转换为游客组 gid 为 0 成功", xiunoTable, guestMap.Get(guestGid), guestGid))
+		return fmt.Errorf("%s 原 %s 组(%d) 转换为游客组 gid 为 0 失败, %s", xiunoTable, guestMap.Get(guestGid), guestGid, err.Error())
 	}
+	mlog.Log.Info("", fmt.Sprintf("%s 原 %s 组(%d) 转换为游客组 gid 为 0 成功", xiunoTable, guestMap.Get(guestGid), guestGid))
 
 	// 删除用户的权限
 	deleteUserPower := cfg.GetString("extension.group.delete_user_power")
@@ -176,7 +175,7 @@ func (t *group) discuzGroup() (err error) {
 	}
 
 	if _, err := database.GetXiunoDB().Table(xiunoTable).Where("gid IN (?)", powerArr).Data(d).Update(); err != nil {
-		return errors.New(fmt.Sprintf("%s 用户组(%v)增加删除用户权限失败, %s", xiunoTable, powerArr, err.Error()))
+		return fmt.Errorf("%s 用户组(%v)增加删除用户权限失败, %s", xiunoTable, powerArr, err.Error())
 	} else {
 		mlog.Log.Info("", fmt.Sprintf("%s 用户组(%v)增加删除用户权限成功", xiunoTable, powerArr))
 	}

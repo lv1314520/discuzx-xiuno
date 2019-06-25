@@ -1,13 +1,13 @@
 package extension
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/util/gconv"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mlog"
+
+	"github.com/gogf/gf/g"
+	"github.com/gogf/gf/g/util/gconv"
 )
 
 type threadPost struct {
@@ -43,9 +43,9 @@ func (t *threadPost) Parsing() (err error) {
 }
 
 /**
-是否修正主题的 lastpid 和 lastuid
+是否修正主题的 lastpid 和 lastuid (分组导入)
 */
-func (t *threadPost) fixThreadLast() (err error) {
+func (t *threadPost) fixThreadLastGroup() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")
@@ -64,14 +64,16 @@ func (t *threadPost) fixThreadLast() (err error) {
 		return
 	}
 
+	// 分组导入
 	var pidArr g.ArrayStr
 	for _, u := range r.ToList() {
 		pidArr = append(pidArr, gconv.String(u["max_pid"]))
 	}
 
 	// 获取最后一条帖子的 tid,uid,pid
-	fields_2 := "tid,pid,uid"
-	res, err := xiunoDB.Table(xiunoPostTable).Where("pid in (?)", pidArr).Fields(fields_2).Select()
+	fields2 := "tid,pid,uid"
+	res, err := xiunoDB.Table(xiunoPostTable).Where("pid in (?)", pidArr).Fields(fields2).Select()
+
 	if err != nil {
 		return err
 	}
@@ -93,7 +95,59 @@ func (t *threadPost) fixThreadLast() (err error) {
 		}
 
 		if res2, err := xiunoDB.Table(xiunoThreadable).Data(d).Where(w).Update(); err != nil {
-			return errors.New(fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadable, err.Error()))
+			return fmt.Errorf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadable, err.Error())
+		} else {
+			c, _ := res2.RowsAffected()
+			count += c
+		}
+	}
+
+	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadable, count, time.Since(start)))
+	return
+}
+
+/**
+是否修正主题的 lastpid 和 lastuid
+*/
+func (t *threadPost) fixThreadLast() (err error) {
+	start := time.Now()
+
+	xiunoPre := database.GetPrefix("xiuno")
+	xiunoPostTable := xiunoPre + cfg.GetString("tables.xiuno.post.name")
+	xiunoThreadable := xiunoPre + cfg.GetString("tables.xiuno.thread.name")
+	xiunoDB := database.GetXiunoDB()
+
+	fields := "max(pid) as max_pid"
+	r, err := xiunoDB.Table(xiunoPostTable).Fields(fields).GroupBy("tid").Select()
+	if err != nil {
+		return err
+	}
+
+	if len(r) == 0 {
+		mlog.Log.Debug("", "表 %s 无数据可以转换 lastpid 和 lastuid", xiunoPostTable)
+		return
+	}
+
+	var count int64
+	// 获取最后一条帖子的 tid,uid,pid
+	fields2 := "tid,pid,uid"
+	for _, p := range r.ToList() {
+		u, err := xiunoDB.Table(xiunoPostTable).Where(g.Map{"pid": p["max_pid"]}).Fields(fields2).One()
+		if err != nil {
+			return err
+		}
+
+		w := g.Map{
+			"tid": u["tid"],
+		}
+
+		d := g.Map{
+			"lastpid": u["pid"],
+			"lastuid": u["uid"],
+		}
+
+		if res2, err := xiunoDB.Table(xiunoThreadable).Data(d).Where(w).Update(); err != nil {
+			return fmt.Errorf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadable, err.Error())
 		} else {
 			c, _ := res2.RowsAffected()
 			count += c
@@ -118,7 +172,7 @@ func (t *threadPost) threadAttachTotal() (err error) {
 	var count int64
 	r, err := xiunoDB.Table(xiunoThreadTable+" t").InnerJoin(xiunoPostTable+" p", "p.isfirst = 1 AND p.tid = t.tid").Data("t.files = p.files, t.images = p.images").Update()
 	if err != nil {
-		return errors.New(fmt.Sprintf("表 %s 更新主题的附件数(files)和图片数(images)失败, %s", xiunoThreadTable, err.Error()))
+		return fmt.Errorf("表 %s 更新主题的附件数(files)和图片数(images)失败, %s", xiunoThreadTable, err.Error())
 	}
 	count, _ = r.RowsAffected()
 
@@ -167,7 +221,7 @@ func (t *threadPost) postAttachTotal() (err error) {
 		}
 
 		if res, err := xiunoDB.Table(xiunoPostTable).Data(d).Where(w).Update(); err != nil {
-			return errors.New(fmt.Sprintf("表 %s 更新帖子的附件数(files)和图片数(images)失败, %s", xiunoPostTable, err.Error()))
+			return fmt.Errorf("表 %s 更新帖子的附件数(files)和图片数(images)失败, %s", xiunoPostTable, err.Error())
 		} else {
 			c, _ := res.RowsAffected()
 			count += c

@@ -198,10 +198,10 @@
     [extension.thread_post]
         # 是否修正主题的 lastpid 和 lastuid, 比较耗时
         fix_last = true
+        # 是否修正帖子内附件统计数量
+        post_attach_total = true        
         # 是否修正主题内附件统计数量
         thread_attach_total = true
-        # 是否修正帖子内附件统计数量
-        post_attach_total = true
 
 ```
 

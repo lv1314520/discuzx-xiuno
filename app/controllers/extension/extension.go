@@ -19,9 +19,19 @@ func NewExtension() *extension {
 func (t *extension) Parsing() {
 	cfg = mcfg.GetCfg()
 
-	t.ShowError(NewGroup().Parsing())
-	t.ShowError(NewUser().Parsing())
-	t.ShowError(NewThreadPost().Parsing())
+	var ctrl Controller
+
+	ctrl = NewGroup()
+	t.ShowError(ctrl.Parsing())
+
+	ctrl = NewUser()
+	t.ShowError(ctrl.Parsing())
+
+	ctrl = NewThreadPost()
+	t.ShowError(ctrl.Parsing())
+
+	ctrl = NewForum()
+	t.ShowError(ctrl.Parsing())
 }
 
 func (t *extension) ShowError(err error) {

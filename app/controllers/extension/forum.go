@@ -1,0 +1,112 @@
+package extension
+
+import (
+	"fmt"
+	"github.com/gogf/gf/g"
+	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/util/gconv"
+	"strings"
+	"xiuno-tools/app/libraries/database"
+	"xiuno-tools/app/libraries/mlog"
+)
+
+type forum struct {
+}
+
+func (t *forum) Parsing() (err error) {
+	if cfg.GetBool("extension.forum.moderators") {
+		return t.moderators()
+	}
+	return
+}
+
+func (t *forum) moderators() (err error) {
+	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
+
+	dxForumField := discuzPre + "forum_forumfield"
+
+	fields := "fid,moderators"
+	var r gdb.Result
+	r, err = database.GetDiscuzDB().Table(dxForumField).Where("moderators != ?", "").Fields(fields).Select()
+
+	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.forum.name")
+	if err != nil {
+		mlog.Log.Debug("", "表 %s 版主数据查询失败, %s", xiunoTable, err.Error())
+	}
+
+	if len(r) == 0 {
+		mlog.Log.Debug("", "表 %s 无版主数据可以转换", xiunoTable)
+		return nil
+	}
+
+	forumModArr := map[int][]string{}
+	var moderArr g.SliceStr
+	for _, u := range r.ToList() {
+		moder := strings.Split(gconv.String(u["moderators"]), "	")
+
+		// 有版主
+		if len(moder) > 0 {
+			forumModArr[gconv.Int(u["fid"])] = moder
+			moderArr = append(moderArr, moder...)
+		}
+	}
+
+	if len(moderArr) == 0 {
+		mlog.Log.Debug("", "表 %s 无版主(moder)可以转换", xiunoTable)
+		return nil
+	}
+
+	fields2 := "DISTINCT uid, username"
+	r, err = database.GetDiscuzDB().Table(dxForumField).Where("username in (?)", moderArr).Fields(fields2).Select()
+	if err != nil {
+		mlog.Log.Debug("", "表 %s 版主用户名查询失败, %s", xiunoTable, err.Error())
+	}
+
+	if len(r) == 0 {
+		mlog.Log.Debug("", "表 %s 无版主用户可以转换", xiunoTable)
+		return nil
+	}
+
+	uidArr := g.MapStrStr{}
+	for _, u := range r.ToList() {
+		uidArr[gconv.String(u["username"])] = gconv.String(u["uid"])
+	}
+
+	var modUIDArr g.SliceStr
+	for fid, moders := range forumModArr {
+		if len(moders) > 0 {
+			for _, u := range moders {
+				if uidArr[u] != "" {
+					modUIDArr = append(modUIDArr, uidArr[u])
+				}
+
+				if len(modUIDArr) == 0 {
+					continue
+				}
+
+				w := g.Map{
+					"fid": fid,
+				}
+
+				d := g.Map{
+					"moduids": strings.Join(modUIDArr, ","),
+				}
+
+				if _, err := database.GetXiunoDB().Table(xiunoTable).Data(d).Where(w).Update(); err != nil {
+					return fmt.Errorf("表 %s 更新版主失败, %s", xiunoTable, err.Error())
+				}
+			}
+		}
+	}
+
+	mlog.Log.Info("", fmt.Sprintf("表 %s 更新版主成功", xiunoTable))
+	return
+}
+
+/*
+NewForum ...
+*/
+func NewForum() *forum {
+	t := &forum{}
+	return t
+}

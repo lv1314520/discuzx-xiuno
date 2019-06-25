@@ -38,14 +38,13 @@ func main() {
 
 	start := time.Now()
 
-	mlog.Log.Info("", "\n\n%v 开始导入数据>>>", start.Format("2006-01-02 15:04:05"))
+	mlog.Log.Info("", "开始导入数据 ...")
 
 	app.NewApp().Parsing()
 
-	mlog.Log.Info("", "已将 Discuz!X 转换至 XiunoBBS, 总耗时: %v", time.Since(start))
+	mlog.Log.Info("", "已将 Discuz!X 转换至 XiunoBBS, 总耗时: %v\n\n", time.Since(start))
 
 	fmt.Printf(`
-
 :::
 ::: 本程序开源地址:  https://github.com/skiy/xiuno-tools
 ::: 作者: Skiychan <dev@skiy.net>  https://www.skiy.net

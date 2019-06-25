@@ -32,11 +32,11 @@
 
 # 日志配置
 [log]
-    # 日志等级
+    # 日志等级 all.全部日志, prod.一般日志, info.正常日志, error.错误日志
     level = "all"
-    # 目录
+    # 日志保存目录,会在此目录下生成一个当天的日志文件
     path = "logs"
-    # 是否输出错误位置
+    # 是否输出错误位置,转换出错时建议打开,以便配合作者修复 BUG
     trace = false
 
 # 数据库配置
@@ -51,7 +51,7 @@
         name = "xiuno"      # 数据库名
         prefix = "bbs_"     # 表前缀
         charset = "utf8"    # 字符集
-        debug = false     # 日志调试
+        debug = false     # 日志调试,建议关闭
 
     # Discuz!X
     [[database.discuz]]
@@ -63,7 +63,7 @@
         name = "dx"
         prefix = "pre_"
         charset = "utf8"
-        debug = false
+        debug = false    # 日志调试,建议关闭
 
     # UCenter
     [[database.uc]]
@@ -75,7 +75,7 @@
         name = "dx"
         prefix = "pre_ucenter_"
         charset = "utf8"
-        debug = false
+        debug = false    # 日志调试,建议关闭
 
 # 需要转换的表配置
 [tables]
@@ -120,7 +120,7 @@
             name = "thread"
             # 是否转换
             convert = true
-            # 每次更新条数(留空或 < 2, 则默认为 1 条)
+            # 每次更新条数(留空或 < 2, 则默认为 1 条; 数据过大时, 建议设置为 1, 否则可能会导致 Killed)
             batch = 100
             # 取 >= TID 的数据。当上次转换出错时, 记录此 TID, 方便再次导入
             last_tid = 0
@@ -130,8 +130,8 @@
             # 表名
             name = "post"
             # 是否转换
-            convert = false
-            # 每次更新条数(留空或 < 2, 则默认为 1 条)
+            convert = true
+            # 每次更新条数(留空或 < 2, 则默认为 1 条; 数据过大时, 建议设置为 1, 否则可能会导致 Killed)
             batch = 100
             # 取 >= PID 的数据。当上次转换出错时, 记录此 PID, 方便再次导入
             last_pid = 0
@@ -190,13 +190,13 @@
         delete_user_power = "1,2"
 
     [extension.user]
-        # 是否修正用户主题数和帖子数(帖子数=主题+回复),比较耗时
+        # 是否修正用户主题数和帖子数(帖子数=主题+回复), 非常耗时
         total = true
         # 修正 gid 为 101 的用户及用户组
         normal_user = true
 
     [extension.thread_post]
-        # 是否修正主题的 lastpid 和 lastuid,比较耗时
+        # 是否修正主题的 lastpid 和 lastuid, 比较耗时
         fix_last = true
         # 是否修正主题内附件统计数量
         thread_attach_total = true

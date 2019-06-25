@@ -10,7 +10,7 @@
 > 版主转换
 
 ### 编译指南
-- 拉取主项目 ```go get -v github.com/skiy/xiuno-tools``` 
+- 拉取主项目 ```git clone https://github.com/skiy/xiuno-tools.git``` 
 - 进入项目目录, 执行 ```go get```
 - 编译程序 ```go install``` 或者 ```go build```
 - 完成，文件在 ```$GOPATH/bin``` 或在 ```当前目录(go build)``` 下
@@ -23,6 +23,7 @@
 **工具使用教程**
 - 先建一个 xiuno4 论坛。
 - 下载本程序（选择运行平台），Linux、MacOS 需要可执行权限。
+- 配置```confit.toml```, 执行本程序 ```./xiuno-tools```(Windows 平台下, 建议使用 ```cmd```控制台, 执行```xiuno-tools.exe```)
 - 登录后台，记得更新缓存统计。
 
 ### 配置文件说明
@@ -32,7 +33,7 @@
 # 日志配置
 [log]
     # 日志等级
-    level = "dev"
+    level = "all"
     # 目录
     path = "logs"
     # 是否输出错误位置

@@ -100,7 +100,7 @@
             # 表名
             name = "post"
             # 是否转换
-            convert = false
+            convert = true
             # 每次更新条数(留空或 < 2, 则默认为 1 条)
             batch = 100
             # 取 >= PID 的数据。当上次转换出错时, 记录此 PID, 方便再次导入

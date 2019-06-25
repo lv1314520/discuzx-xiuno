@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/util/gconv"
 	"time"
 	"xiuno-tools/app/libraries/common"
 	"xiuno-tools/app/libraries/database"
@@ -49,18 +50,28 @@ func (t *user) ToConvert() (err error) {
 
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
+		password := gconv.String(u["password"])
+		if password == "" {
+			password = "mustResetPassword"
+		}
+
+		salt := gconv.String(u["salt"])
+		if salt == "" {
+			salt = "20190625"
+		}
+
 		d := gdb.Map{
 			"uid":         u["uid"],
 			"gid":         u["groupid"],
 			"email":       u["email"],
 			"username":    u["username"],
-			"password":    u["password"],
-			"salt":        u["salt"],
+			"password":    password,
+			"salt":        salt,
 			"credits":     u["credits"],
-			"create_ip":   common.Ip2long(u["regip"].(string)),
-			"create_date": u["create_date"],
-			"login_ip":    common.Ip2long(u["lastip"].(string)),
-			"login_date":  u["lastvisit"],
+			"create_ip":   common.Ip2long(gconv.String(u["regip"])),
+			"create_date": gconv.Int(u["create_date"]),
+			"login_ip":    common.Ip2long(gconv.String(u["lastip"])),
+			"login_date":  gconv.Int(u["lastvisit"]),
 		}
 
 		// 批量插入数量

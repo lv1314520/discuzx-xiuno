@@ -4,8 +4,13 @@ go 1.12
 
 require (
 	github.com/gogf/gf v1.7.0
+	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/skiy/bbcode v0.0.0-20180807171629-48be21ce690c
-	google.golang.org/appengine v0.0.0-00010101000000-000000000000 // indirect
+	golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4 // indirect
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
+	golang.org/x/sys v0.0.0-20190624142023-c5567b49c5d0 // indirect
+	golang.org/x/text v0.3.2 // indirect
+	google.golang.org/appengine v1.6.1 // indirect
 )
 
 replace (

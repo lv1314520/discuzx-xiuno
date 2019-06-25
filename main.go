@@ -38,7 +38,7 @@ func main() {
 
 	start := time.Now()
 
-	mlog.Log.Info("", "\n\n开始导入数据: %v", start.Format("2006-01-02 15:04:05"))
+	mlog.Log.Info("", "\n\n%v 开始导入数据>>>", start.Format("2006-01-02 15:04:05"))
 
 	app.NewApp().Parsing()
 

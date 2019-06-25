@@ -186,6 +186,16 @@ func (t *threadPost) threadAttachTotal() (err error) {
 		return
 	}
 
+	// ALTER TABLE `bbs_thread` CHANGE `images` `images` SMALLINT(6) NOT NULL DEFAULT '0';
+	// ALTER TABLE `bbs_thread` CHANGE `files` `files` SMALLINT(6) NOT NULL DEFAULT '0';
+	if _, err = xiunoDB.Exec("ALTER TABLE `bbs_thread` CHANGE `images` `images` SMALLINT(6) NOT NULL DEFAULT '0'"); err != nil {
+		return fmt.Errorf("表 %s 转换 images 字段为 SMALLINT(6) 失败, %s", xiunoThreadTable, err.Error())
+	}
+
+	if _, err = xiunoDB.Exec("ALTER TABLE `bbs_thread` CHANGE `files` `files` SMALLINT(6) NOT NULL DEFAULT '0'"); err != nil {
+		return fmt.Errorf("表 %s 转换 files 字段为 SMALLINT(6) 失败, %s", xiunoThreadTable, err.Error())
+	}
+
 	var count int64
 	for _, u := range r.ToList() {
 		w := g.Map{
@@ -199,7 +209,7 @@ func (t *threadPost) threadAttachTotal() (err error) {
 
 		var res sql.Result
 		if res, err = xiunoDB.Table(xiunoThreadTable).Data(d).Where(w).Update(); err != nil {
-			return fmt.Errorf("表 %s 更新主题(tid: %v)的附件数(files)和图片数(images)失败, %s", xiunoThreadTable, u["tid"], err.Error())
+			return fmt.Errorf("表 %s 更新主题的附件数(files)和图片数(images)失败, %s", xiunoThreadTable, err.Error())
 		}
 
 		c, _ := res.RowsAffected()

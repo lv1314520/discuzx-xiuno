@@ -8,9 +8,9 @@ import (
 )
 
 /*
-Ip2long IP 转整型
+IP2Long IP 转整型
 */
-func Ip2long(ipstr string) uint32 {
+func IP2Long(ipstr string) uint32 {
 	ip := net.ParseIP(ipstr)
 	if ip == nil {
 		return 0
@@ -20,9 +20,9 @@ func Ip2long(ipstr string) uint32 {
 }
 
 /*
-Long2ip 整型转 IP
+Long2IP 整型转 IP
 */
-func Long2ip(ipLong uint32) string {
+func Long2IP(ipLong uint32) string {
 	ipByte := make([]byte, 4)
 	binary.BigEndian.PutUint32(ipByte, ipLong)
 	ip := net.IP(ipByte)

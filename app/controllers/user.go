@@ -68,9 +68,9 @@ func (t *user) ToConvert() (err error) {
 			"password":    password,
 			"salt":        salt,
 			"credits":     u["credits"],
-			"create_ip":   common.Ip2long(gconv.String(u["regip"])),
+			"create_ip":   common.IP2Long(gconv.String(u["regip"])),
 			"create_date": gconv.Int(u["regdate"]),
-			"login_ip":    common.Ip2long(gconv.String(u["lastip"])),
+			"login_ip":    common.IP2Long(gconv.String(u["lastip"])),
 			"login_date":  gconv.Int(u["lastvisit"]),
 		}
 

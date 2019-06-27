@@ -51,7 +51,7 @@ func (t *post) ToConvert() (err error) {
 
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
-		userip := common.Ip2long(gconv.String(u["useip"]))
+		userip := common.IP2Long(gconv.String(u["useip"]))
 		message_fmt := gconv.String(u["message"])
 
 		if message_fmt != "" {

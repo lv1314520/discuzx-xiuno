@@ -85,7 +85,7 @@ func (t *User) sameUCenter() (err error) {
 
 		salt := gconv.String(u["salt"])
 		if salt == "" {
-			salt = "20190625"
+			salt = common.GetRandomString("numeric", 6)
 		}
 
 		d := gdb.Map{
@@ -96,9 +96,9 @@ func (t *User) sameUCenter() (err error) {
 			"password":    password,
 			"salt":        salt,
 			"credits":     u["credits"],
-			"create_ip":   common.Ip2long(gconv.String(u["regip"])),
-			"create_date": gconv.Int(u["create_date"]),
-			"login_ip":    common.Ip2long(gconv.String(u["lastip"])),
+			"create_ip":   common.IP2Long(gconv.String(u["regip"])),
+			"create_date": gconv.Int(u["regdate"]),
+			"login_ip":    common.IP2Long(gconv.String(u["lastip"])),
 			"login_date":  gconv.Int(u["lastvisit"]),
 		}
 

@@ -14,29 +14,33 @@ import (
 
 /*
 User User
- */
+*/
 type User struct {
 }
 
 /*
 ToConvert user ToConvert
- */
+*/
 func (t *User) ToConvert() (err error) {
 	cfg := mcfg.GetCfg()
 
 	if cfg.GetString("database.discuz.0.host") == cfg.GetString("database.uc.0.host") &&
 		cfg.GetString("database.discuz.0.port") == cfg.GetString("database.uc.0.port") &&
 		cfg.GetString("database.discuz.0.name") == cfg.GetString("database.uc.0.name") {
-		mlog.Log.Debug("", "%v", "same")
+
+		mlog.Log.Debug("", "Discuz & UCenter 是同一个数据库")
 
 		return t.sameUCenter()
 	}
 
-	mlog.Log.Debug("", "%v", "other")
+	mlog.Log.Debug("", "Discuz & UCenter 不是同一个数据库")
 
 	return t.otherUCenter()
 }
 
+/*
+sameUCenter UCenter 与 Discuz!X 同一个库
+*/
 func (t *User) sameUCenter() (err error) {
 	start := time.Now()
 
@@ -50,7 +54,7 @@ func (t *User) sameUCenter() (err error) {
 
 	fields := "m.uid,m.groupid,m.email,m.username,m.credits,m.regdate,s.regip,s.lastip,s.lastvisit,u.password,u.salt"
 	var r gdb.Result
-	r, err = database.GetDiscuzDB().Table(dxMemberTable + " m").LeftJoin(dxMemberStatusTable+" s", "s.uid = m.uid").LeftJoin(ucMemberTable+" u", "u.uid = m.uid").Fields(fields).Select()
+	r, err = database.GetDiscuzDB().Table(dxMemberTable+" m").LeftJoin(dxMemberStatusTable+" s", "s.uid = m.uid").LeftJoin(ucMemberTable+" u", "u.uid = m.uid").Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
@@ -68,8 +72,8 @@ func (t *User) sameUCenter() (err error) {
 	}
 
 	if cfg.GetBool("tables.xiuno.user.drop_index_email") {
-		if _, err = xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
-			return fmt.Errorf("表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
+		if _, err := xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
+			mlog.Log.Warning("", "表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
 		}
 	}
 
@@ -129,6 +133,9 @@ func (t *User) sameUCenter() (err error) {
 	return
 }
 
+/*
+otherUCenter UCenter 与 Discuz!X 不同一个库
+*/
 func (t *User) otherUCenter() (err error) {
 	start := time.Now()
 
@@ -142,7 +149,7 @@ func (t *User) otherUCenter() (err error) {
 
 	fields := "m.uid,m.groupid,m.email,m.username,m.credits,m.regdate,s.regip,s.lastip,s.lastvisit"
 	var r gdb.Result
-	r, err = database.GetDiscuzDB().Table(dxMemberTable + " m").LeftJoin(dxMemberStatusTable+" s", "s.uid = m.uid").Fields(fields).Select()
+	r, err = database.GetDiscuzDB().Table(dxMemberTable+" m").LeftJoin(dxMemberStatusTable+" s", "s.uid = m.uid").Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
@@ -160,8 +167,8 @@ func (t *User) otherUCenter() (err error) {
 	}
 
 	if cfg.GetBool("tables.xiuno.user.drop_index_email") {
-		if _, err = xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
-			return fmt.Errorf("表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
+		if _, err := xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
+			mlog.Log.Warning("", "表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
 		}
 	}
 
@@ -177,14 +184,14 @@ func (t *User) otherUCenter() (err error) {
 			"uid": u["uid"],
 		}
 		r2, err := database.GetUcDB().Table(ucMemberTable).Where(w2).Fields(fields2).One()
-		// 有错误, 或者无数据
-		if err == nil || r2 != nil {
+		// 无错误,且有数据
+		if err == nil && r2 != nil {
 			password = gconv.String(r2["password"])
 			salt = gconv.String(r2["salt"])
 		}
 
 		if salt == "" {
-			salt = "20190625"
+			salt = common.GetRandomString("numeric", 6)
 		}
 
 		d := gdb.Map{
@@ -195,9 +202,9 @@ func (t *User) otherUCenter() (err error) {
 			"password":    password,
 			"salt":        salt,
 			"credits":     u["credits"],
-			"create_ip":   common.Ip2long(gconv.String(u["regip"])),
-			"create_date": gconv.Int(u["create_date"]),
-			"login_ip":    common.Ip2long(gconv.String(u["lastip"])),
+			"create_ip":   common.IP2Long(gconv.String(u["regip"])),
+			"create_date": gconv.Int(u["regdate"]),
+			"login_ip":    common.IP2Long(gconv.String(u["lastip"])),
 			"login_date":  gconv.Int(u["lastvisit"]),
 		}
 
@@ -216,7 +223,7 @@ func (t *User) otherUCenter() (err error) {
 
 /*
 NewUser User init
- */
+*/
 func NewUser() *User {
 	t := &User{}
 	return t

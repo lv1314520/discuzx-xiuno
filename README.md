@@ -5,9 +5,8 @@
 ### 开发进度
 - 基础构架 ✔
 - 数据转换 ✔
-- 附件转换
+- 附件迁移
 - 数据优化 ✔
-> 版主转换
 
 ### 编译指南
 - 拉取主项目 ```git clone https://github.com/skiy/xiuno-tools.git``` 
@@ -59,8 +58,8 @@
         host = "127.0.0.1"
         port = "3306"
         user = "root"
-        pass = "123456"
-        name = "dx"
+        pass = ""
+        name = "discuzx"
         prefix = "pre_"
         charset = "utf8"
         debug = false    # 日志调试,建议关闭
@@ -71,8 +70,8 @@
         host = "127.0.0.1"
         port = "3306"
         user = "root"
-        pass = "123456"
-        name = "dx"
+        pass = ""
+        name = "discuzx"
         prefix = "pre_ucenter_"
         charset = "utf8"
         debug = false    # 日志调试,建议关闭
@@ -86,8 +85,12 @@
             name = "user"
             # 是否转换
             convert = true
-            # 每次更新条数(留空或 < 2, 则默认为 1 条)
+            # 每次更新条数(留空或 < 2, 则默认为 1 条), 当 ucenter 与 discuz!X 不同一个库中, batch 则默认为 1 条, 不作批量导入
             batch = 100
+            # 去除 email 的唯一索引(Discuz!X 遗留问题, 若存在多用户用同一个 email 时,则需要去除索引)
+            # 建议先 false, 用工具进去 MySQL 执行 SELECT count(*) c,uid,email FROM `pre_common_member` GROUP BY email ORDER BY `c` DESC
+            # 若 c > 1 的数据很多, 则可以开启; 否则, 可以手动将重复的 email 修改掉, 不必开启
+            drop_index_email = false
 
         # 用户组表
         [tables.xiuno.group]
@@ -199,7 +202,7 @@
         # 是否修正主题的 lastpid 和 lastuid, 比较耗时
         fix_last = true
         # 是否修正帖子内附件统计数量
-        post_attach_total = true        
+        post_attach_total = true
         # 是否修正主题内附件统计数量
         thread_attach_total = true
 

@@ -26,6 +26,7 @@
 - 登录后台，记得更新缓存统计。
 
 ### 配置文件说明
+>请认真查阅配置文件的注释，主要修改 database (数据库)、tables.xiuno.user (用户表) 及 extension.file (附件迁移) 这几部分。 
 ```toml
 [setting]
 
@@ -85,12 +86,13 @@
             name = "user"
             # 是否转换
             convert = true
-            # 每次更新条数(留空或 < 2, 则默认为 1 条), 当 ucenter 与 discuz!X 不同一个库中, batch 则默认为 1 条, 不作批量导入
+            # 每次更新条数(留空或 < 2, 则默认为 1 条), 当 ucenter 与 discuz!X 不同一个库中 或 multiple_email 值为 2 时, batch 则默认为 1 条, 不作批量导入
             batch = 100
-            # 去除 email 的唯一索引(Discuz!X 遗留问题, 若存在多用户用同一个 email 时,则需要去除索引)
-            # 建议先 false, 用工具进去 MySQL 执行 SELECT count(*) c,uid,email FROM `pre_common_member` GROUP BY email ORDER BY `c` DESC
-            # 若 c > 1 的数据很多, 则可以开启; 否则, 可以手动将重复的 email 修改掉, 不必开启
-            drop_index_email = false
+            # 去除 email 的唯一索引(Discuz!X 遗留问题, 若存在多用户用同一个 email 时, 则需要去除索引 或 修改重复的 email)
+            # 建议先默认 0, 用工具进去 MySQL 执行 SELECT count(*) c,uid,email FROM `pre_common_member` GROUP BY email ORDER BY `c` DESC
+            # 若 c > 1 的数据很多, 则可以设置为 1; 否则, 可以手动将重复的 email 修改掉, 默认 0 即可
+            # 0. 正常流程, 1. 去除索引方式, 2. 在重复的 email 前添加 UID_(若 UID 为 555 的用户 email: abc@qq.com 重复, 将变更为 555_abc@qq.com)
+            multiple_email = 0
 
         # 用户组表
         [tables.xiuno.group]
@@ -162,11 +164,11 @@
 
 # 扩展功能
 [extension]
-    [forum]
+    [extension.forum]
         # 是否导入论坛版主 (不建议使用)
         moderators = false
 
-    [file]
+    [extension.file]
         # 是否启用转移附件文件功能
         open = false
 

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 	"xiuno-tools/app/libraries/common"
 	"xiuno-tools/app/libraries/database"
@@ -71,7 +72,9 @@ func (t *User) sameUCenter() (err error) {
 		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
-	if cfg.GetBool("tables.xiuno.user.drop_index_email") {
+	multipleEmailFlag := cfg.GetInt("tables.xiuno.user.multiple_email")
+	// 清除索引方式
+	if multipleEmailFlag == 1 {
 		if _, err := xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
 			mlog.Log.Warning("", "表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
 		}
@@ -80,6 +83,12 @@ func (t *User) sameUCenter() (err error) {
 	var count int64
 	batch := cfg.GetInt("tables.xiuno.user.batch")
 
+	// 修改 email 方式去重, 只能一条条地加
+	if multipleEmailFlag == 2 {
+		batch = 1
+	}
+
+	preg := `for key 'email'`
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
 		password := gconv.String(u["password"])
@@ -92,10 +101,13 @@ func (t *User) sameUCenter() (err error) {
 			salt = common.GetRandomString("numeric", 6)
 		}
 
+		uid := gconv.Int(u["uid"])
+		email := gconv.String(u["email"])
+
 		d := gdb.Map{
-			"uid":         u["uid"],
+			"uid":         uid,
 			"gid":         u["groupid"],
-			"email":       u["email"],
+			"email":       email,
 			"username":    u["username"],
 			"password":    password,
 			"salt":        salt,
@@ -112,7 +124,18 @@ func (t *User) sameUCenter() (err error) {
 		} else {
 			res, err := xiunoDB.Insert(xiunoTable, d)
 			if err != nil {
-				return fmt.Errorf("表 %s 数据导入失败, %s", xiunoTable, err.Error())
+				// 修改 email 方式, 则再重新提交一次
+				if multipleEmailFlag == 2 {
+					// 错误是 email 重复
+					if isMul, _ := regexp.MatchString(preg, err.Error()); isMul {
+						d["email"] = fmt.Sprintf("%d_%s", uid, email)
+						res, err = xiunoDB.Insert(xiunoTable, d)
+					}
+				}
+
+				if err != nil {
+					return fmt.Errorf("表 %s 数据导入失败, %s", xiunoTable, err.Error())
+				}
 			}
 
 			c, _ := res.RowsAffected()
@@ -166,7 +189,9 @@ func (t *User) otherUCenter() (err error) {
 		return fmt.Errorf("表 %s 清空失败, %s", xiunoTable, err.Error())
 	}
 
-	if cfg.GetBool("tables.xiuno.user.drop_index_email") {
+	multipleEmailFlag := cfg.GetInt("tables.xiuno.user.multiple_email")
+	// 清除索引方式
+	if multipleEmailFlag == 1 {
 		if _, err := xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
 			mlog.Log.Warning("", "表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
 		}
@@ -174,6 +199,7 @@ func (t *User) otherUCenter() (err error) {
 
 	var count int64
 	fields2 := "password,salt"
+	preg := `for key 'email'`
 
 	for _, u := range r.ToList() {
 		password := "mustResetPassword" // 默认密码
@@ -194,10 +220,13 @@ func (t *User) otherUCenter() (err error) {
 			salt = common.GetRandomString("numeric", 6)
 		}
 
+		uid := gconv.Int(u["uid"])
+		email := gconv.String(u["email"])
+
 		d := gdb.Map{
-			"uid":         u["uid"],
+			"uid":         uid,
 			"gid":         u["groupid"],
-			"email":       u["email"],
+			"email":       email,
 			"username":    u["username"],
 			"password":    password,
 			"salt":        salt,
@@ -210,7 +239,18 @@ func (t *User) otherUCenter() (err error) {
 
 		res, err := xiunoDB.Insert(xiunoTable, d)
 		if err != nil {
-			return fmt.Errorf("表 %s 数据导入失败, %s", xiunoTable, err.Error())
+			// 修改 email 方式, 则再重新提交一次
+			if multipleEmailFlag == 2 {
+				// 错误是 email 重复
+				if isMul, _ := regexp.MatchString(preg, err.Error()); isMul {
+					d["email"] = fmt.Sprintf("%d_%s", uid, email)
+					res, err = xiunoDB.Insert(xiunoTable, d)
+				}
+			}
+
+			if err != nil {
+				return fmt.Errorf("表 %s 数据导入失败, %s", xiunoTable, err.Error())
+			}
 		}
 
 		c, _ := res.RowsAffected()

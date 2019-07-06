@@ -12,10 +12,12 @@ import (
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-type forum struct {
+// Forum 版块
+type Forum struct {
 }
 
-func (t *forum) ToConvert() (err error) {
+// ToConvert 转换
+func (t *Forum) ToConvert() (err error) {
 	start := time.Now()
 
 	cfg := mcfg.GetCfg()
@@ -27,7 +29,7 @@ func (t *forum) ToConvert() (err error) {
 
 	fields := "f.fid,f.name,f.rank,f.threads,f.todayposts,e.description,e.rules,e.seotitle,e.keywords"
 	var r gdb.Result
-	r, err = database.GetDiscuzDB().Table(dxForumTable+" f").LeftJoin(dxForumField+" e", "e.fid = f.fid").Fields(fields).Select()
+	r, err = database.GetDiscuzDB().Table(dxForumTable+" f").LeftJoin(dxForumField+" e", "e.fid = f.fid").Where("f.type = ? AND f.status = ?", "forum", 1).Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.forum.name")
 	if err != nil {
@@ -67,18 +69,19 @@ func (t *forum) ToConvert() (err error) {
 	}
 
 	if len(dataList) > 0 {
-		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
+		res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100)
+		if err != nil {
 			return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-		} else {
-			count, _ = res.RowsAffected()
 		}
+		count, _ = res.RowsAffected()
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	return
 }
 
-func NewForum() *forum {
-	t := &forum{}
+// NewForum Forum init
+func NewForum() *Forum {
+	t := &Forum{}
 	return t
 }

@@ -10,17 +10,23 @@ import (
 	"xiuno-tools/app/libraries/mlog"
 )
 
-type forum struct {
+/*
+Forum 版块
+*/
+type Forum struct {
 }
 
-func (t *forum) Parsing() (err error) {
+/*
+Parsing 解析
+*/
+func (t *Forum) Parsing() (err error) {
 	if cfg.GetBool("extension.forum.moderators") {
 		return t.moderators()
 	}
 	return
 }
 
-func (t *forum) moderators() (err error) {
+func (t *Forum) moderators() (err error) {
 	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
 	dxForumField := discuzPre + "forum_forumfield"
@@ -104,9 +110,9 @@ func (t *forum) moderators() (err error) {
 }
 
 /*
-NewForum ...
+NewForum Forum init
 */
-func NewForum() *forum {
-	t := &forum{}
+func NewForum() *Forum {
+	t := &Forum{}
 	return t
 }

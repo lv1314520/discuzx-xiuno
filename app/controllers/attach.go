@@ -2,21 +2,26 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/util/gconv"
 	"path"
 	"strings"
 	"time"
 	"xiuno-tools/app/libraries/database"
 	"xiuno-tools/app/libraries/mcfg"
 	"xiuno-tools/app/libraries/mlog"
-
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
 )
 
-type attach struct {
+/*
+Attach 附件
+*/
+type Attach struct {
 }
 
-func (t *attach) ToConvert() (err error) {
+/*
+ToConvert 附件转换
+*/
+func (t *Attach) ToConvert() (err error) {
 	start := time.Now()
 
 	cfg := mcfg.GetCfg()
@@ -49,7 +54,7 @@ func (t *attach) ToConvert() (err error) {
 		r, err = database.GetDiscuzDB().Table(tbname).Fields(fields).Select()
 
 		if len(r) == 0 {
-			mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
+			mlog.Log.Debug("", "表 %s 无数据可以转换(%s)", xiunoTable, tbname)
 			continue
 		}
 
@@ -94,12 +99,12 @@ func (t *attach) ToConvert() (err error) {
 
 		if len(dataList) > 0 {
 			// 批量插入
-			if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, batch); err != nil {
+			res, err := xiunoDB.BatchInsert(xiunoTable, dataList, batch)
+			if err != nil {
 				return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-			} else {
-				c, _ := res.RowsAffected()
-				count += c
 			}
+			c, _ := res.RowsAffected()
+			count += c
 		}
 	}
 
@@ -111,10 +116,10 @@ func (t *attach) ToConvert() (err error) {
 	return nil
 }
 
-/**
-获取文件后缀
+/*
+FileExt 获取文件后缀
 */
-func (t *attach) FileExt(filename string) string {
+func (t *Attach) FileExt(filename string) string {
 	fileSuffix := path.Ext(filename)
 	suffix := strings.Replace(fileSuffix, ".", "", -1)
 
@@ -138,7 +143,10 @@ func (t *attach) FileExt(filename string) string {
 	return fileext
 }
 
-func NewAttach() *attach {
-	t := &attach{}
+/*
+NewAttach Attach init
+*/
+func NewAttach() *Attach {
+	t := &Attach{}
 	return t
 }

@@ -62,7 +62,7 @@
             # 建议先默认 0, 用工具进去 MySQL 执行 SELECT count(*) c,uid,email FROM `pre_common_member` GROUP BY email ORDER BY `c` DESC
             # 若 c > 1 的数据很多, 则可以设置为 1; 否则, 可以手动将重复的 email 修改掉, 默认 0 即可
             # 0. 正常流程, 1. 去除索引方式, 2. 在重复的 email 前添加 UID_(若 UID 为 555 的用户 email: abc@qq.com 重复, 将变更为 555_abc@qq.com)
-            multiple_email = 0
+            multiple_email = 2
 
         # 用户组表
         [tables.xiuno.group]
@@ -140,11 +140,12 @@
 
     [extension.file]
         # 是否启用转移附件文件功能
-        open = false
+        enable = false
 
         # XiunoBBS 论坛绝对路径
+        # 若未配置, 则附件、头像及版块 icon 等资源将会复制到当前目录的 uploads 目录下, 迁移完成后，复制到 XiunoBBS 根目录即可
         xiuno_path = ""
-        # Discuz!X 论坛绝对路径
+        # Discuz!X 论坛绝对路径 (Windows 平台请使用 \\ 代替 \)
         discuzx_path = ""
 
         # 附件转移
@@ -156,7 +157,7 @@
 
     [extension.group]
         # 是否启用此功能
-        open = true
+        enable = true
         # Discuz 游客用户组 ID
         guest_gid = 7
         # 管理员 UID

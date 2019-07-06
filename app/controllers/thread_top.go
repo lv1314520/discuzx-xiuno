@@ -11,10 +11,16 @@ import (
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-type threadTop struct {
+/*
+ThreadTop 置顶
+*/
+type ThreadTop struct {
 }
 
-func (t *threadTop) ToConvert() (err error) {
+/*
+ToConvert 转换
+*/
+func (t *ThreadTop) ToConvert() (err error) {
 	start := time.Now()
 
 	cfg := mcfg.GetCfg()
@@ -50,18 +56,25 @@ func (t *threadTop) ToConvert() (err error) {
 
 		dataList = append(dataList, u)
 	}
-
-	if res, err := xiunoDB.Insert(xiunoTable, dataList); err != nil {
-		return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-	} else {
-		count, _ = res.RowsAffected()
+	if len(dataList) == 0 {
+		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
+		return nil
 	}
+
+	res, err := xiunoDB.Insert(xiunoTable, dataList)
+	if err != nil {
+		return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
+	}
+	count, _ = res.RowsAffected()
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	return
 }
 
-func NewThreadTop() *threadTop {
-	t := &threadTop{}
+/*
+NewThreadTop ThreadTop init
+*/
+func NewThreadTop() *ThreadTop {
+	t := &ThreadTop{}
 	return t
 }

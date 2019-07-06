@@ -12,17 +12,26 @@ import (
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-type group struct {
+/*
+Group 用户组
+*/
+type Group struct {
 }
 
-func NewGroup() *group {
-	t := &group{}
+/*
+NewGroup Group init
+*/
+func NewGroup() *Group {
+	t := &Group{}
 	return t
 }
 
-func (t *group) Parsing() (err error) {
+/*
+Parsing 解析
+*/
+func (t *Group) Parsing() (err error) {
 	// 是否用户用户组变更
-	if !cfg.GetBool("extension.group.open") {
+	if !cfg.GetBool("extension.group.enable") {
 		return
 	}
 
@@ -37,7 +46,7 @@ func (t *group) Parsing() (err error) {
 /**
 官方组转换
 */
-func (t *group) official() (err error) {
+func (t *Group) official() (err error) {
 	xiunoPre := database.GetPrefix("xiuno")
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 
@@ -50,16 +59,16 @@ func (t *group) official() (err error) {
 	}
 
 	start = time.Now()
-	if r, err := database.GetXiunoDB().Table(xiunoTable).Data(d).Update(); err != nil {
+	r, err := database.GetXiunoDB().Table(xiunoTable).Data(d).Update()
+	if err != nil {
 		return fmt.Errorf("表 %s 重置用户组 gid 为 101 失败, %s", xiunoTable, err.Error())
-	} else {
-		count, _ = r.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("表 %s 重置用户组 gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	}
+	count, _ = r.RowsAffected()
+	mlog.Log.Info("", fmt.Sprintf("表 %s 重置用户组 gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 
 	// 不转换管理员 gid
-	adminId := cfg.GetInt("extension.group.admin_id")
-	if adminId <= 0 {
+	adminID := cfg.GetInt("extension.group.admin_id")
+	if adminID <= 0 {
 		return
 	}
 
@@ -68,22 +77,23 @@ func (t *group) official() (err error) {
 	}
 
 	w := g.Map{
-		"uid": adminId,
+		"uid": adminID,
 	}
 
-	if r, err := database.GetXiunoDB().Table(xiunoTable).Where(w).Data(d).Update(); err != nil {
-		return fmt.Errorf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 失败, %s", xiunoTable, adminId, err.Error())
-	} else {
-		count, _ = r.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 成功", xiunoTable, adminId))
+	r, err = database.GetXiunoDB().Table(xiunoTable).Where(w).Data(d).Update()
+	if err != nil {
+		return fmt.Errorf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 失败, %s", xiunoTable, adminID, err.Error())
 	}
+
+	count, _ = r.RowsAffected()
+	mlog.Log.Info("", fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 成功", xiunoTable, adminID))
 	return
 }
 
 /**
 Discuz 用户组数据修正
 */
-func (t *group) discuzGroup() (err error) {
+func (t *Group) discuzGroup() (err error) {
 	xiunoPre := database.GetPrefix("xiuno")
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.group.name")
 
@@ -174,10 +184,11 @@ func (t *group) discuzGroup() (err error) {
 		"allowdeleteuser": 1,
 	}
 
-	if _, err := database.GetXiunoDB().Table(xiunoTable).Where("gid IN (?)", powerArr).Data(d).Update(); err != nil {
+	_, err = database.GetXiunoDB().Table(xiunoTable).Where("gid IN (?)", powerArr).Data(d).Update()
+	if err != nil {
 		return fmt.Errorf("%s 用户组(%v)增加删除用户权限失败, %s", xiunoTable, powerArr, err.Error())
-	} else {
-		mlog.Log.Info("", fmt.Sprintf("%s 用户组(%v)增加删除用户权限成功", xiunoTable, powerArr))
 	}
+
+	mlog.Log.Info("", fmt.Sprintf("%s 用户组(%v)增加删除用户权限成功", xiunoTable, powerArr))
 	return
 }

@@ -8,15 +8,24 @@ import (
 
 var cfg *gcfg.Config
 
-type extension struct {
+/*
+Extension Extension
+*/
+type Extension struct {
 }
 
-func NewExtension() *extension {
-	t := &extension{}
+/*
+NewExtension Extension init
+*/
+func NewExtension() *Extension {
+	t := &Extension{}
 	return t
 }
 
-func (t *extension) Parsing() {
+/*
+Parsing Parsing
+*/
+func (t *Extension) Parsing() {
 	cfg = mcfg.GetCfg()
 
 	var ctrl Controller
@@ -32,9 +41,15 @@ func (t *extension) Parsing() {
 
 	ctrl = NewForum()
 	t.ShowError(ctrl.Parsing())
+
+	ctrl = NewFile()
+	t.ShowError(ctrl.Parsing())
 }
 
-func (t *extension) ShowError(err error) {
+/*
+ShowError ShowError
+*/
+func (t *Extension) ShowError(err error) {
 	if err != nil {
 		mlog.Log.Warning("", "%s", err.Error())
 	}

@@ -19,9 +19,10 @@ func main() {
 :::
 ::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
 ::: 本项目讨论帖：https://bbs.jadehive.com/thread-8059.htm
+:::
 ::: 执行过程中按 "Ctrl + Z" 结束本程序...
 :::
-::: Version:2.0.0    Updated:2019-07-06
+::: Version: 2.0.0    Updated: 2019-07-07s
 :::
 
 `)

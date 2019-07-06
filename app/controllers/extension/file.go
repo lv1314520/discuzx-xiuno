@@ -50,7 +50,7 @@ func (t *File) Parsing() (err error) {
 			err = fmt.Errorf("文件保存目录 (%s) 创建失败, %s", xiunoPath, err.Error())
 			return
 		}
-		mlog.Log.Warning("", "XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下: %s, 转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可", xiunoPath)
+		mlog.Log.Warning("", "XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下的 files 目录下。转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可")
 	}
 
 	xiunoPath = strings.TrimRight(xiunoPath, "\\")

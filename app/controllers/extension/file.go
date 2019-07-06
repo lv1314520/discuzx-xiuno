@@ -57,7 +57,7 @@ func (t *File) Parsing() (err error) {
 		mlog.Log.Info("", "XiunoBBS 站点路径 (xiuno_path) 不是文件夹, 附件将移到至当前目录")
 	}
 
-	mlog.Log.Info("", "附件将迁移至目录: %s", t.XiunoPath)
+	mlog.Log.Info("", "附件、头像、版块 ICON 将迁移至目录: %s", t.XiunoPath)
 
 	if strings.EqualFold(t.XiunoPath, t.DiscuzPath) {
 		return errors.New("Discuz!X 目录与附件迁移目录不能相同")
@@ -77,7 +77,14 @@ func (t *File) Parsing() (err error) {
 		}
 	}
 
-	return
+	// 版块 ICON 迁移
+	if cfg.GetBool("extension.file.icon") {
+		if err := t.forumIcons(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // NewFile File init
@@ -88,8 +95,8 @@ func NewFile() *File {
 
 // attachFiles 迁移附件、图片文件
 func (t *File) attachFiles() (err error) {
-	xnAttachPath := t.XiunoPath + "upload/attach/"
-	dxAttachPath := t.DiscuzPath + "data/attachment/forum/"
+	xnAttachPath := t.XiunoPath + "upload/attach"
+	dxAttachPath := t.DiscuzPath + "data/attachment/forum"
 
 	if !gfile.IsDir(dxAttachPath) {
 		return fmt.Errorf("Discuz!X 论坛附件目录(%s)不存在", dxAttachPath)
@@ -179,7 +186,7 @@ func (t *File) avatarImages() (err error) {
 		}
 
 		if err = mfile.CopyFile(dxAvatarImagePath, xnAvatarFilePath); err != nil {
-			err = fmt.Errorf("\n迁移用户(%s)的头像 (%s) \n至 (%s) 失败, \n原因: %s", uid, dxAvatarImagePath, xnAvatarFilePath, err.Error())
+			err = fmt.Errorf("\n迁移用户 (%s) 的头像 (%s) \n至 (%s) 失败, \n原因: %s", uid, dxAvatarImagePath, xnAvatarFilePath, err.Error())
 			return
 		}
 
@@ -201,5 +208,78 @@ func (t *File) avatarImages() (err error) {
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 用户头像, 本次更新: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	return nil
+}
+
+// forumIcons
+func (t *File) forumIcons() (err error) {
+	xnIconPath := t.XiunoPath + "upload/forum"
+	dxIconPath := t.DiscuzPath + "data/attachment/common"
+
+	if !gfile.IsDir(dxIconPath) {
+		return fmt.Errorf("Discuz!X 论坛版块 ICON 目录 (%s) 不存在", dxIconPath)
+	}
+
+	if err := gfile.Remove(xnIconPath); err != nil {
+		mlog.Log.Warning("", "迁移版块 ICON 目录 (%s) 删除失败, %s", xnIconPath, err.Error())
+	}
+
+	if err := gfile.Mkdir(xnIconPath); err != nil {
+		return fmt.Errorf("版块 ICON 目录 (%s) 创建失败, %s", xnIconPath, err.Error())
+	}
+
+	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
+
+	dxForumField := discuzPre + "forum_forumfield"
+
+	fields := "fid,icon"
+	var r gdb.Result
+	r, err = database.GetDiscuzDB().Table(dxForumField).Where("icon != ?", "").Fields(fields).Select()
+
+	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.forum.name")
+	if err != nil {
+		mlog.Log.Debug("", "表 %s 版块 ICON 数据查询失败, %s", xiunoTable, err.Error())
+	}
+
+	if len(r) == 0 {
+		mlog.Log.Debug("", "表 %s 无版块 ICON 数据可以迁移", xiunoTable)
+		return nil
+	}
+
+	xiunoDB := database.GetXiunoDB()
+
+	timestamp := time.Now().Unix()
+
+	for _, u := range r.ToList() {
+		fid := gconv.Int(u["fid"])
+		iconURL := gconv.String(u["icon"])
+
+		xnIconPathFile := fmt.Sprintf("%s/%d.png", xnIconPath, fid)
+		dxIconPathFile := fmt.Sprintf("%s/%s", dxIconPath, iconURL)
+
+		if !gfile.IsFile(dxIconPathFile) {
+			err = fmt.Errorf("版块 (%d) ICON不存在: %s ", fid, dxIconPathFile)
+			return
+		}
+
+		if err = mfile.CopyFile(dxIconPathFile, xnIconPathFile); err != nil {
+			err = fmt.Errorf("\n迁移版块 (%d) ICON (%s) \n至 (%s) 失败, \n原因: %s", fid, dxIconPath, xnIconPath, err.Error())
+			return
+		}
+
+		d := g.Map{
+			"icon": timestamp,
+		}
+
+		w := g.Map{
+			"fid": fid,
+		}
+
+		if _, err := xiunoDB.Table(xiunoTable).Data(d).Where(w).Update(); err != nil {
+			return fmt.Errorf("表 %s 版块 ICON, , %s", xiunoTable, err.Error())
+		}
+	}
+
+	mlog.Log.Info("", fmt.Sprintf("表 %s 版块 ICON 更新成功", xiunoTable))
 	return nil
 }

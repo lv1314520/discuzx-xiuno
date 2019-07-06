@@ -5,7 +5,7 @@
 ### 开发进度
 - 基础构架 ✔
 - 数据转换 ✔
-- 附件迁移
+- 附件迁移 ✔
 - 数据优化 ✔
 
 ### 编译指南
@@ -32,8 +32,8 @@
 
 # 日志配置
 [log]
-    # 日志等级 all.全部日志, prod.一般日志, info.正常日志, error.错误日志
-    level = "all"
+    # 日志等级 all.全部日志, prod.一般日志(warning,error), alert.提示日志(warning,error,info), warning.警告日志, info.正常日志, error.错误日志
+    level = "alert"
     # 日志保存目录,会在此目录下生成一个当天的日志文件
     path = "logs"
     # 是否输出错误位置,转换出错时建议打开,以便配合作者修复 BUG
@@ -59,7 +59,7 @@
         host = "127.0.0.1"
         port = "3306"
         user = "root"
-        pass = ""
+        pass = "123456"
         name = "discuzx"
         prefix = "pre_"
         charset = "utf8"
@@ -71,7 +71,7 @@
         host = "127.0.0.1"
         port = "3306"
         user = "root"
-        pass = ""
+        pass = "123456"
         name = "discuzx"
         prefix = "pre_ucenter_"
         charset = "utf8"
@@ -92,7 +92,7 @@
             # 建议先默认 0, 用工具进去 MySQL 执行 SELECT count(*) c,uid,email FROM `pre_common_member` GROUP BY email ORDER BY `c` DESC
             # 若 c > 1 的数据很多, 则可以设置为 1; 否则, 可以手动将重复的 email 修改掉, 默认 0 即可
             # 0. 正常流程, 1. 去除索引方式, 2. 在重复的 email 前添加 UID_(若 UID 为 555 的用户 email: abc@qq.com 重复, 将变更为 555_abc@qq.com)
-            multiple_email = 0
+            multiple_email = 2
 
         # 用户组表
         [tables.xiuno.group]
@@ -170,23 +170,24 @@
 
     [extension.file]
         # 是否启用转移附件文件功能
-        open = false
+        enable = false
 
         # XiunoBBS 论坛绝对路径
+        # 若未配置, 则附件、头像及版块 icon 等资源将会复制到当前目录的 uploads 目录下, 迁移完成后，复制到 XiunoBBS 根目录即可
         xiuno_path = ""
-        # Discuz!X 论坛绝对路径
+        # Discuz!X 论坛绝对路径 (Windows 平台请使用 \\ 代替 \)
         discuzx_path = ""
 
         # 附件转移
-        attach = false
+        attach = true
         # 头像转移
-        avatar = false
+        avatar = true
         # 版块 ICON 转移
-        icon = false
+        icon = true
 
     [extension.group]
         # 是否启用此功能
-        open = true
+        enable = true
         # Discuz 游客用户组 ID
         guest_gid = 7
         # 管理员 UID

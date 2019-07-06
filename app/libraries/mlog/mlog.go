@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// Log logger
 	Log   *Mlogger
 	level = map[string]int{
 		"all":           glog.LEVEL_ALL,
@@ -22,14 +23,17 @@ var (
 		"warning":       glog.LEVEL_WARN,
 		"error":         glog.LEVEL_ERRO,
 		"critical":      glog.LEVEL_CRIT,
+		"alert":         glog.LEVEL_PROD | glog.LEVEL_INFO,
 	}
 )
 
+// InitLog log init
 func InitLog() *Mlogger {
 	Log = NewLogger()
 	return Log
 }
 
+// ReadLog read log config
 func ReadLog() *Mlogger {
 	cfg := mcfg.GetCfg()
 
@@ -55,10 +59,12 @@ func ReadLog() *Mlogger {
 	return Log
 }
 
+// Debugln debug
 func Debugln(flag string, v ...interface{}) {
 	Log.Debug(flag, fmt.Sprintln(v...))
 }
 
+// Fatalln fatal
 func Fatalln(flag string, v ...interface{}) {
 	Log.Fatal(flag, fmt.Sprintln(v...))
 }

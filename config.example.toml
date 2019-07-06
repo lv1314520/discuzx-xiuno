@@ -2,8 +2,8 @@
 
 # 日志配置
 [log]
-    # 日志等级 all.全部日志, prod.一般日志, info.正常日志, error.错误日志
-    level = "all"
+    # 日志等级 all.全部日志, prod.一般日志(warning,error), alert.提示日志(warning,error,info), warning.警告日志, info.正常日志, error.错误日志
+    level = "alert"
     # 日志保存目录,会在此目录下生成一个当天的日志文件
     path = "logs"
     # 是否输出错误位置,转换出错时建议打开,以便配合作者修复 BUG
@@ -29,7 +29,7 @@
         host = "127.0.0.1"
         port = "3306"
         user = "root"
-        pass = ""
+        pass = "123456"
         name = "discuzx"
         prefix = "pre_"
         charset = "utf8"
@@ -41,7 +41,7 @@
         host = "127.0.0.1"
         port = "3306"
         user = "root"
-        pass = ""
+        pass = "123456"
         name = "discuzx"
         prefix = "pre_ucenter_"
         charset = "utf8"
@@ -149,11 +149,11 @@
         discuzx_path = ""
 
         # 附件转移
-        attach = false
+        attach = true
         # 头像转移
-        avatar = false
+        avatar = true
         # 版块 ICON 转移
-        icon = false
+        icon = true
 
     [extension.group]
         # 是否启用此功能

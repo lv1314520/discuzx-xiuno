@@ -142,10 +142,11 @@
         # 是否启用转移附件文件功能
         enable = false
 
+        # Windows 平台的目录请使用 \\ 或 / 代替 \, 比如 C:\\dist\\abc 或 C:/dist/abc
         # XiunoBBS 论坛绝对路径
-        # 若未配置, 则附件、头像及版块 icon 等资源将会复制到当前目录的 uploads 目录下, 迁移完成后，复制到 XiunoBBS 根目录即可
+        # 若不配置, 则附件、头像及版块 icon 等资源将会复制到当前目录的 files 目录下, 迁移完成后，复制 files 下的 upload 到 XiunoBBS 根目录覆盖即可
         xiuno_path = ""
-        # Discuz!X 论坛绝对路径 (Windows 平台请使用 \\ 代替 \)
+        # Discuz!X 论坛绝对路径
         discuzx_path = ""
 
         # 附件转移

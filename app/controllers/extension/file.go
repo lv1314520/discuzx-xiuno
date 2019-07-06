@@ -3,10 +3,6 @@ package extension
 import (
 	"errors"
 	"fmt"
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/os/gfile"
-	"github.com/gogf/gf/g/util/gconv"
 	"strings"
 	"time"
 	"xiuno-tools/app/libraries/database"
@@ -14,6 +10,11 @@ import (
 	"xiuno-tools/app/libraries/mfile"
 	"xiuno-tools/app/libraries/mlog"
 	"xiuno-tools/app/libraries/mstr"
+
+	"github.com/gogf/gf/g"
+	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/g/os/gfile"
+	"github.com/gogf/gf/g/util/gconv"
 )
 
 // File 文件迁移
@@ -33,7 +34,8 @@ func (t *File) Parsing() (err error) {
 		return errors.New("Discuz!X 站点路径 (discuzx_path) 未配置")
 	}
 
-	t.DiscuzPath = strings.TrimRight(discuzPath, gfile.Separator) + gfile.Separator
+	discuzPath = strings.TrimRight(discuzPath, "\\")
+	t.DiscuzPath = strings.TrimRight(discuzPath, "/")
 	if !gfile.IsDir(t.DiscuzPath) {
 		return errors.New("Discuz!X 站点路径 (discuzx_path) 不是文件夹")
 	}
@@ -43,7 +45,7 @@ func (t *File) Parsing() (err error) {
 	xiunoPath := cfg.GetString("extension.file.xiuno_path")
 	if xiunoPath == "" {
 		// 工具当前目录
-		xiunoPath = gfile.Pwd() + gfile.Separator + "files"
+		xiunoPath = gfile.Pwd() + "/files"
 		if err = gfile.Mkdir(xiunoPath); err != nil {
 			err = fmt.Errorf("文件保存目录 (%s) 创建失败, %s", xiunoPath, err.Error())
 			return
@@ -51,7 +53,8 @@ func (t *File) Parsing() (err error) {
 		mlog.Log.Warning("", "XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下: %s, 转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可", xiunoPath)
 	}
 
-	t.XiunoPath = strings.TrimRight(xiunoPath, gfile.Separator) + gfile.Separator
+	xiunoPath = strings.TrimRight(xiunoPath, "\\")
+	t.XiunoPath = strings.TrimRight(xiunoPath, "/")
 	if !gfile.IsDir(t.XiunoPath) {
 		mlog.Log.Info("", "XiunoBBS 站点路径 (xiuno_path) 不是文件夹, 附件将移到至当前目录")
 	}
@@ -94,15 +97,15 @@ func NewFile() *File {
 
 // attachFiles 迁移附件、图片文件
 func (t *File) attachFiles() (err error) {
-	xnAttachPath := t.XiunoPath + "upload/attach"
-	dxAttachPath := t.DiscuzPath + "data/attachment/forum"
+	xnAttachPath := t.XiunoPath + "/upload/attach"
+	dxAttachPath := t.DiscuzPath + "/data/attachment/forum"
 
 	if !gfile.IsDir(dxAttachPath) {
-		return fmt.Errorf("Discuz!X 论坛附件目录(%s)不存在", dxAttachPath)
+		return fmt.Errorf("Discuz!X 论坛附件目录 (%s) 不存在", dxAttachPath)
 	}
 
 	if err := gfile.Remove(xnAttachPath); err != nil {
-		mlog.Log.Warning("", "迁移附件目录(%s)删除失败, %s", xnAttachPath, err.Error())
+		mlog.Log.Warning("", "迁移附件目录 (%s) 删除失败, %s", xnAttachPath, err.Error())
 	}
 
 	if err = mfile.CopyDir(dxAttachPath, xnAttachPath); err != nil {
@@ -110,14 +113,14 @@ func (t *File) attachFiles() (err error) {
 		return
 	}
 
-	mlog.Log.Debug("", "\n迁移附件 (%s) \n至 (%s) 成功", dxAttachPath, xnAttachPath)
+	mlog.Log.Info("", "迁移附件、图片、文件操作成功")
 	return nil
 }
 
 // avatarImages 迁移头像
 func (t *File) avatarImages() (err error) {
-	xnAvatarPath := t.XiunoPath + "upload/avatar"
-	dxAvatarPath := t.DiscuzPath + "uc_server/data/avatar"
+	xnAvatarPath := t.XiunoPath + "/upload/avatar"
+	dxAvatarPath := t.DiscuzPath + "/uc_server/data/avatar"
 
 	if !gfile.IsDir(dxAvatarPath) {
 		return fmt.Errorf("Discuz!X 论坛头像目录 (%s) 不存在", dxAvatarPath)
@@ -146,7 +149,7 @@ func (t *File) avatarImages() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 头像数据查询失败, %s", xiunoTable, err.Error())
+		return fmt.Errorf("表 %s 头像数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
@@ -212,8 +215,8 @@ func (t *File) avatarImages() (err error) {
 
 // forumIcons
 func (t *File) forumIcons() (err error) {
-	xnIconPath := t.XiunoPath + "upload/forum"
-	dxIconPath := t.DiscuzPath + "data/attachment/common"
+	xnIconPath := t.XiunoPath + "/upload/forum"
+	dxIconPath := t.DiscuzPath + "/data/attachment/common"
 
 	if !gfile.IsDir(dxIconPath) {
 		return fmt.Errorf("Discuz!X 论坛版块 ICON 目录 (%s) 不存在", dxIconPath)
@@ -237,7 +240,7 @@ func (t *File) forumIcons() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.forum.name")
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 版块 ICON 数据查询失败, %s", xiunoTable, err.Error())
+		return fmt.Errorf("表 %s 版块 ICON 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {

@@ -20,7 +20,7 @@
 程序必须有**可执行权限**。   
 
 **工具使用教程**
-- ***操作前, 请仔细查阅 config.toml 配置文件***
+- **操作前, 请仔细查阅 config.toml 配置文件**
 - 先建一个 xiuno4 论坛。
 - 下载本程序（选择运行平台），Linux、MacOS 需要可执行权限。
 - 配置```confit.toml```, 执行本程序 ```./xiuno-tools```(Windows 平台下, 建议使用 ```cmd```控制台, 执行```xiuno-tools.exe```)
@@ -173,10 +173,11 @@
         # 是否启用转移附件文件功能
         enable = false
 
+        # Windows 平台的目录请使用 \\ 或 / 代替 \, 比如 C:\\dist\\abc 或 C:/dist/abc
         # XiunoBBS 论坛绝对路径
-        # 若未配置, 则附件、头像及版块 icon 等资源将会复制到当前目录的 uploads 目录下, 迁移完成后，复制到 XiunoBBS 根目录即可
+        # 若不配置, 则附件、头像及版块 icon 等资源将会复制到当前目录的 files 目录下, 迁移完成后，复制 files 下的 upload 到 XiunoBBS 根目录覆盖即可
         xiuno_path = ""
-        # Discuz!X 论坛绝对路径 (Windows 平台请使用 \\ 代替 \)
+        # Discuz!X 论坛绝对路径
         discuzx_path = ""
 
         # 附件转移
@@ -211,9 +212,6 @@
         thread_attach_total = true
 
 ```
-
-### 注意事项
-本程序使用 ***```go mod```*** 标准库，需要 ***```go1.11 +```*** 的开发环境。
 
 ### 更新日志
 

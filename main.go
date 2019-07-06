@@ -14,16 +14,14 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	fmt.Printf(`
-
 :::
-::: 本项目开源地址: https://github.com/skiy/xiuno-tools
+::: Discuz!X 3.x 转 XiunoBBS 4.x 工具
+:::
 ::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
 ::: 本项目讨论帖：https://bbs.jadehive.com/thread-8059.htm
-:::
-:::
 ::: 执行过程中按 "Ctrl + Z" 结束本程序...
 :::
-::: Version:2.0.0    Updated:2019-06-25
+::: Version:2.0.0    Updated:2019-07-06
 :::
 
 `)
@@ -42,13 +40,13 @@ func main() {
 
 	app.NewApp().Parsing()
 
-	mlog.Log.Info("", "已将 Discuz!X 转换至 XiunoBBS, 总耗时: %v\n\n", time.Since(start))
+	mlog.Log.Info("", "已将 Discuz!X 转换至 XiunoBBS, 总耗时: %v\n", time.Since(start))
 
 	fmt.Printf(`
 :::
-::: 本程序开源地址:  https://github.com/skiy/xiuno-tools
-::: 作者: Skiychan <dev@skiy.net>  https://www.skiy.net
-::: QQ: 869990770 技术支持论坛: https://bbs.jadehive.com
+::: 本项目开源地址: https://github.com/skiy/xiuno-tools
+::: 开发者 QQ: 869990770 技术支持论坛: https://bbs.jadehive.com
+::: 如需技术支持请加 QQ 群: 891844359
 :::
 ::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。
 :::

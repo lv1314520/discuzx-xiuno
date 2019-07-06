@@ -36,6 +36,8 @@ func (t *Forum) moderators() (err error) {
 	r, err = database.GetDiscuzDB().Table(dxForumField).Where("moderators != ?", "").Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.forum.name")
+	xiunoUserTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
+
 	if err != nil {
 		mlog.Log.Debug("", "表 %s 版主数据查询失败, %s", xiunoTable, err.Error())
 	}
@@ -63,7 +65,7 @@ func (t *Forum) moderators() (err error) {
 	}
 
 	fields2 := "DISTINCT uid, username"
-	r, err = database.GetDiscuzDB().Table(dxForumField).Where("username in (?)", moderArr).Fields(fields2).Select()
+	r, err = database.GetXiunoDB().Table(xiunoUserTable).Where("username in (?)", moderArr).Fields(fields2).Select()
 	if err != nil {
 		mlog.Log.Debug("", "表 %s 版主用户名查询失败, %s", xiunoTable, err.Error())
 	}

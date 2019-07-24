@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"runtime"
 	"time"
-	"xiuno-tools/app"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 :::
 ::: 执行过程中按 "Ctrl + Z" 结束本程序...
 :::
-::: Version: 2.0.0    Updated: 2019-07-07s
+::: Version: 2.0.1    Updated: 2019-07-24
 :::
 
 `)
@@ -94,11 +94,4 @@ func checkConnectDB() (err error) {
 	}
 
 	return
-}
-
-/**
-检测配置文件参数是否完整
-*/
-func checkCfg() {
-
 }

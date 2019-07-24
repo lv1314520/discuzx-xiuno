@@ -2,23 +2,26 @@ package extension
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/database/gdb"
 )
 
-type user struct {
+// User User
+type User struct {
 }
 
-func NewUser() *user {
-	t := &user{}
+// NewUser User init
+func NewUser() *User {
+	t := &User{}
 	return t
 }
 
-func (t *user) Parsing() (err error) {
+// Parsing Parsing
+func (t *User) Parsing() (err error) {
 	// 修正 gid 为 101 的用户及用户组
 	if cfg.GetBool("extension.user.normal_user") {
 		if err := t.normalUser(); err != nil {
@@ -34,10 +37,8 @@ func (t *user) Parsing() (err error) {
 	return
 }
 
-/**
-修正 gid 为 101 的用户及用户组
-*/
-func (t *user) normalUser() (err error) {
+// normalUser 修正 gid 为 101 的用户及用户组
+func (t *User) normalUser() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")
@@ -65,27 +66,24 @@ func (t *user) normalUser() (err error) {
 		"gid": r["gid"],
 	}
 
-	if _, err := database.GetXiunoDB().Table(xiunoGroupTable).Where(w).Data(d).Update(); err != nil {
+	_, err = database.GetXiunoDB().Table(xiunoGroupTable).Where(w).Data(d).Update()
+	if err != nil {
 		return fmt.Errorf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error())
-	} else {
-		mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"]))
 	}
+	mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"]))
 
-	if res, err := database.GetXiunoDB().Table(xiunoUserTable).Where(w).Data(d).Update(); err != nil {
+	res, err := database.GetXiunoDB().Table(xiunoUserTable).Where(w).Data(d).Update()
+	if err != nil {
 		return fmt.Errorf("表 %s 原 “%v” 组(%v) 的用户转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error())
-	} else {
-		count, _ := res.RowsAffected()
-		mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据", xiunoGroupTable, r["name"], r["gid"], count))
 	}
+	count, _ := res.RowsAffected()
+	mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据, 耗时: %v", xiunoGroupTable, r["name"], r["gid"], count, time.Since(start)))
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 修正 gid 为 101 的用户及用户组成功, 耗时: %v", xiunoGroupTable, time.Since(start)))
 	return
 }
 
-/**
-修正用户主题和帖子数量, 帖子包含主题和回复
-*/
-func (t *user) threadPostStat() (err error) {
+// threadPostStat 修正用户主题和帖子数量, 帖子包含主题和回复
+func (t *User) threadPostStat() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")
@@ -127,12 +125,12 @@ func (t *user) threadPostStat() (err error) {
 			"posts":   posts,
 		}
 
-		if res, err := xiunoDB.Table(xiunoUserTable).Data(d).Where(w).Update(); err != nil {
+		res, err := xiunoDB.Table(xiunoUserTable).Data(d).Where(w).Update()
+		if err != nil {
 			return fmt.Errorf("表 %s 用户帖子统计更新失败, %s", xiunoUserTable, err.Error())
-		} else {
-			c, _ := res.RowsAffected()
-			count += c
 		}
+		c, _ := res.RowsAffected()
+		count += c
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 用户帖子统计, 本次更新: %d 条数据, 耗时: %v", xiunoUserTable, count, time.Since(start)))

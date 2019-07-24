@@ -2,24 +2,20 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-/*
-ThreadTop 置顶
-*/
+// ThreadTop 置顶
 type ThreadTop struct {
 }
 
-/*
-ToConvert 转换
-*/
+// ToConvert 转换
 func (t *ThreadTop) ToConvert() (err error) {
 	start := time.Now()
 
@@ -50,12 +46,13 @@ func (t *ThreadTop) ToConvert() (err error) {
 	var count int64
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
-		if gconv.Int(u["top"]) == 0 {
+		top := gconv.Int(u["top"])
+		if top != 1 && top != 2 && top != 3 {
 			continue
 		}
-
 		dataList = append(dataList, u)
 	}
+
 	if len(dataList) == 0 {
 		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
 		return nil
@@ -71,9 +68,7 @@ func (t *ThreadTop) ToConvert() (err error) {
 	return
 }
 
-/*
-NewThreadTop ThreadTop init
-*/
+// NewThreadTop ThreadTop init
 func NewThreadTop() *ThreadTop {
 	t := &ThreadTop{}
 	return t

@@ -137,5 +137,5 @@ MySQL [dx]> desc pre_forum_post;
 ## 备注
 - 使用到 xiuno 的三表: bbs_post, bbs_mypost
 - message_fmt 由 message内容并由ubb转html所得
-- ✔align、table、font 的ubb标签暂时无法解析 [fixed:e1a5369](https://github.com/skiy/xiuno-tools/commit/e1a5369f971fe8a63004be98252d991b95628b5d#diff-a326317fa878eefa847b26611a802539) with [golib:ff1986](https://github.com/skiy/golib/commit/ff1986321d5b440d17c5ea00d67ff99b0523d29d)
+- ✔align、table、font 的ubb标签暂时无法解析
 - 图片数及附件数从 attach 表中提取

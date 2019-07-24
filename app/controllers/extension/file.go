@@ -3,13 +3,13 @@ package extension
 import (
 	"errors"
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mfile"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/xiuno-tools/app/libraries/mstr"
 	"strings"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mfile"
-	"xiuno-tools/app/libraries/mlog"
-	"xiuno-tools/app/libraries/mstr"
 
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/database/gdb"

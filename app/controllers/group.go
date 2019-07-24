@@ -2,19 +2,21 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-type group struct {
+// Group Group
+type Group struct {
 }
 
-func (t *group) ToConvert() (err error) {
+// ToConvert ToConvert
+func (t *Group) ToConvert() (err error) {
 	cfg := mcfg.GetCfg()
 
 	// 使用 XiunoBBS 官方用户组, 则不转换
@@ -92,18 +94,19 @@ func (t *group) ToConvert() (err error) {
 	}
 
 	if len(dataList) > 0 {
-		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100); err != nil {
+		res, err := xiunoDB.BatchInsert(xiunoTable, dataList, 100)
+		if err != nil {
 			return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-		} else {
-			count, _ = res.RowsAffected()
 		}
+		count, _ = res.RowsAffected()
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	return
 }
 
-func NewGroup() *group {
-	t := &group{}
+// NewGroup Group init
+func NewGroup() *Group {
+	t := &Group{}
 	return t
 }

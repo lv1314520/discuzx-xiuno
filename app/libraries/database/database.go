@@ -3,7 +3,7 @@ package database
 import (
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/database/gdb"
-	"xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
 )
 
 func GetUcDB() (db gdb.DB) {

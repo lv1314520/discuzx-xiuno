@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/gogf/gf/g/container/gmap"
-	"xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
 )
 
 var (

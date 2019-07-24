@@ -2,33 +2,28 @@ package extension
 
 import (
 	"github.com/gogf/gf/g/os/gcfg"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 )
 
-var cfg *gcfg.Config
+var (
+	cfg  *gcfg.Config
+	ctrl Controller
+)
 
-/*
-Extension Extension
-*/
+// Extension Extension
 type Extension struct {
 }
 
-/*
-NewExtension Extension init
-*/
+// NewExtension Extension init
 func NewExtension() *Extension {
 	t := &Extension{}
 	return t
 }
 
-/*
-Parsing Parsing
-*/
+// Parsing Parsing
 func (t *Extension) Parsing() {
 	cfg = mcfg.GetCfg()
-
-	var ctrl Controller
 
 	ctrl = NewGroup()
 	t.ShowError(ctrl.Parsing())
@@ -46,9 +41,7 @@ func (t *Extension) Parsing() {
 	t.ShowError(ctrl.Parsing())
 }
 
-/*
-ShowError ShowError
-*/
+// ShowError ShowError
 func (t *Extension) ShowError(err error) {
 	if err != nil {
 		mlog.Log.Warning("", "%s", err.Error())

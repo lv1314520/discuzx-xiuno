@@ -2,21 +2,23 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/common"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/common"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
 	"github.com/skiy/bbcode"
 )
 
-type post struct {
+// Post Post
+type Post struct {
 }
 
-func (t *post) ToConvert() (err error) {
+// ToConvert ToConvert
+func (t *Post) ToConvert() (err error) {
 	start := time.Now()
 
 	cfg := mcfg.GetCfg()
@@ -52,10 +54,10 @@ func (t *post) ToConvert() (err error) {
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
 		userip := common.IP2Long(gconv.String(u["useip"]))
-		message_fmt := gconv.String(u["message"])
+		messageFmt := gconv.String(u["message"])
 
-		if message_fmt != "" {
-			message_fmt = t.BBCodeToHtml(message_fmt) //处理message中的附件
+		if messageFmt != "" {
+			messageFmt = t.BBCodeToHTML(messageFmt) //处理message中的附件
 		}
 
 		d := gdb.Map{
@@ -65,44 +67,43 @@ func (t *post) ToConvert() (err error) {
 			"isfirst":     u["first"],
 			"create_date": u["dateline"],
 			"userip":      userip,
-			"message":     message_fmt,
-			"message_fmt": message_fmt,
+			"message":     messageFmt,
+			"message_fmt": messageFmt,
 		}
 
 		// 批量插入数量
 		if batch > 1 {
 			dataList = append(dataList, d)
 		} else {
-			if res, err := xiunoDB.Insert(xiunoTable, d); err != nil {
+			res, err := xiunoDB.Insert(xiunoTable, d)
+			if err != nil {
 				return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-			} else {
-				c, _ := res.RowsAffected()
-				count += c
 			}
+			c, _ := res.RowsAffected()
+			count += c
 		}
 	}
 
 	if len(dataList) > 0 {
-		if res, err := xiunoDB.BatchInsert(xiunoTable, dataList, batch); err != nil {
+		res, err := xiunoDB.BatchInsert(xiunoTable, dataList, batch)
+		if err != nil {
 			return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-		} else {
-			count, _ = res.RowsAffected()
 		}
+		count, _ = res.RowsAffected()
 	}
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	return
 }
 
-func NewPost() *post {
-	t := &post{}
+// NewPost Post init
+func NewPost() *Post {
+	t := &Post{}
 	return t
 }
 
-/**
-bbcode 转 html
-*/
-func (t *post) BBCodeToHtml(msg string) string {
+// BBCodeToHTML bbcode 转 html
+func (t *Post) BBCodeToHTML(msg string) string {
 	compiler := bbcode.NewCompiler(true, true)
 
 	//转 table
@@ -219,13 +220,13 @@ func (t *post) BBCodeToHtml(msg string) string {
 
 		value := node.GetOpeningTag().Value
 		if value == "" {
-			attachId := bbcode.CompileText(node)
+			attachID := bbcode.CompileText(node)
 
-			if len(attachId) > 0 {
-				r, err := database.GetXiunoDB().Table(xiunoTable).Where("aid = ?", attachId).Fields("isimage,filename").One()
+			if len(attachID) > 0 {
+				r, err := database.GetXiunoDB().Table(xiunoTable).Where("aid = ?", attachID).Fields("isimage,filename").One()
 
 				if err != nil {
-					mlog.Log.Warning("", "查询附件(aid: %s)失败, %s", attachId, err.Error())
+					mlog.Log.Warning("", "查询附件(aid: %s)失败, %s", attachID, err.Error())
 				} else if r != nil {
 
 					isimage := r["isimage"].Int()
@@ -236,7 +237,7 @@ func (t *post) BBCodeToHtml(msg string) string {
 						closeFlag = false
 					} else {
 						out.Name = "a"
-						out.Attrs["href"] = "?attach-download-" + attachId + ".htm" //bbcode.ValidURL(filename)
+						out.Attrs["href"] = "?attach-download-" + attachID + ".htm" //bbcode.ValidURL(filename)
 						out.Attrs["target"] = "_blank"
 						out.Value = "附件: "
 

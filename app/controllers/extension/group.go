@@ -2,33 +2,27 @@ package extension
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"strings"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/container/gmap"
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-/*
-Group 用户组
-*/
+// Group 用户组
 type Group struct {
 }
 
-/*
-NewGroup Group init
-*/
+// NewGroup Group init
 func NewGroup() *Group {
 	t := &Group{}
 	return t
 }
 
-/*
-Parsing 解析
-*/
+// Parsing 解析
 func (t *Group) Parsing() (err error) {
 	// 是否用户用户组变更
 	if !cfg.GetBool("extension.group.enable") {
@@ -43,18 +37,15 @@ func (t *Group) Parsing() (err error) {
 	return t.discuzGroup()
 }
 
-/**
-官方组转换
-*/
+// official 官方组转换
 func (t *Group) official() (err error) {
 	xiunoPre := database.GetPrefix("xiuno")
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 
 	var start time.Time
 	var count int64
-	var d g.Map
 
-	d = g.Map{
+	var d = g.Map{
 		"gid": 101,
 	}
 
@@ -90,9 +81,7 @@ func (t *Group) official() (err error) {
 	return
 }
 
-/**
-Discuz 用户组数据修正
-*/
+// discuzGroup Discuz 用户组数据修正
 func (t *Group) discuzGroup() (err error) {
 	xiunoPre := database.GetPrefix("xiuno")
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.group.name")

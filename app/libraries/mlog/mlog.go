@@ -3,7 +3,7 @@ package mlog
 import (
 	"fmt"
 	"github.com/gogf/gf/g/os/glog"
-	"xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
 )
 
 var (

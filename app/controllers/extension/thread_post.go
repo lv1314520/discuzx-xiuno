@@ -3,26 +3,26 @@ package extension
 import (
 	"database/sql"
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-type threadPost struct {
+// ThreadPost ThreadPost
+type ThreadPost struct {
 }
 
-/*
-NewThreadPost ...
-*/
-func NewThreadPost() *threadPost {
-	t := &threadPost{}
+// NewThreadPost ThreadPost init
+func NewThreadPost() *ThreadPost {
+	t := &ThreadPost{}
 	return t
 }
 
-func (t *threadPost) Parsing() (err error) {
+// Parsing Parsing
+func (t *ThreadPost) Parsing() (err error) {
 	// 是否修正主题的 lastpid 和 lastuid
 	if cfg.GetBool("extension.thread_post.fix_last") {
 		if err := t.fixThreadLast(); err != nil {
@@ -46,10 +46,8 @@ func (t *threadPost) Parsing() (err error) {
 	return
 }
 
-/**
-是否修正主题的 lastpid 和 lastuid (分组导入)
-*/
-func (t *threadPost) fixThreadLastGroup() (err error) {
+// fixThreadLastGroup 是否修正主题的 lastpid 和 lastuid (分组导入)
+func (t *ThreadPost) fixThreadLastGroup() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")
@@ -111,10 +109,8 @@ func (t *threadPost) fixThreadLastGroup() (err error) {
 	return
 }
 
-/**
-是否修正主题的 lastpid 和 lastuid
-*/
-func (t *threadPost) fixThreadLast() (err error) {
+// fixThreadLast 是否修正主题的 lastpid 和 lastuid
+func (t *ThreadPost) fixThreadLast() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")
@@ -164,10 +160,8 @@ func (t *threadPost) fixThreadLast() (err error) {
 	return
 }
 
-/**
-修正主题内附件统计数量
-*/
-func (t *threadPost) threadAttachTotal() (err error) {
+// threadAttachTotal 修正主题内附件统计数量
+func (t *ThreadPost) threadAttachTotal() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")
@@ -220,10 +214,8 @@ func (t *threadPost) threadAttachTotal() (err error) {
 	return
 }
 
-/**
-修正帖子内附件统计数量
-*/
-func (t *threadPost) postAttachTotal() (err error) {
+// postAttachTotal 修正帖子内附件统计数量
+func (t *ThreadPost) postAttachTotal() (err error) {
 	start := time.Now()
 
 	xiunoPre := database.GetPrefix("xiuno")

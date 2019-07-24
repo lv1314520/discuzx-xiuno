@@ -2,26 +2,22 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/common"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"regexp"
 	"time"
-	"xiuno-tools/app/libraries/common"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
 )
 
-/*
-User User
-*/
+// User User
 type User struct {
 }
 
-/*
-ToConvert user ToConvert
-*/
+// ToConvert user ToConvert
 func (t *User) ToConvert() (err error) {
 	cfg := mcfg.GetCfg()
 
@@ -39,9 +35,7 @@ func (t *User) ToConvert() (err error) {
 	return t.otherUCenter()
 }
 
-/*
-sameUCenter UCenter 与 Discuz!X 同一个库
-*/
+// sameUCenter UCenter 与 Discuz!X 同一个库
 func (t *User) sameUCenter() (err error) {
 	start := time.Now()
 
@@ -89,6 +83,8 @@ func (t *User) sameUCenter() (err error) {
 	}
 
 	preg := `for key 'email'`
+	reg, _ := regexp.Compile(preg)
+
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
 		password := gconv.String(u["password"])
@@ -127,7 +123,7 @@ func (t *User) sameUCenter() (err error) {
 				// 修改 email 方式, 则再重新提交一次
 				if multipleEmailFlag == 2 {
 					// 错误是 email 重复
-					if isMul, _ := regexp.MatchString(preg, err.Error()); isMul {
+					if isNil := reg.FindString(err.Error()); isNil != "" {
 						d["email"] = fmt.Sprintf("%d_%s", uid, email)
 						res, err = xiunoDB.Insert(xiunoTable, d)
 					}
@@ -156,9 +152,7 @@ func (t *User) sameUCenter() (err error) {
 	return
 }
 
-/*
-otherUCenter UCenter 与 Discuz!X 不同一个库
-*/
+// otherUCenter UCenter 与 Discuz!X 不同一个库
 func (t *User) otherUCenter() (err error) {
 	start := time.Now()
 
@@ -199,7 +193,9 @@ func (t *User) otherUCenter() (err error) {
 
 	var count int64
 	fields2 := "password,salt"
+
 	preg := `for key 'email'`
+	reg, _ := regexp.Compile(preg)
 
 	for _, u := range r.ToList() {
 		password := "mustResetPassword" // 默认密码
@@ -242,7 +238,7 @@ func (t *User) otherUCenter() (err error) {
 			// 修改 email 方式, 则再重新提交一次
 			if multipleEmailFlag == 2 {
 				// 错误是 email 重复
-				if isMul, _ := regexp.MatchString(preg, err.Error()); isMul {
+				if isNil := reg.FindString(err.Error()); isNil != "" {
 					d["email"] = fmt.Sprintf("%d_%s", uid, email)
 					res, err = xiunoDB.Insert(xiunoTable, d)
 				}
@@ -261,9 +257,7 @@ func (t *User) otherUCenter() (err error) {
 	return
 }
 
-/*
-NewUser User init
-*/
+// NewUser User init
 func NewUser() *User {
 	t := &User{}
 	return t

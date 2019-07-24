@@ -3,21 +3,24 @@ package app
 import (
 	"errors"
 	"fmt"
-	"xiuno-tools/app/controllers"
-	"xiuno-tools/app/controllers/extension"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/xiuno-tools/app/controllers"
+	"github.com/skiy/xiuno-tools/app/controllers/extension"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 )
 
-type app struct {
+// App App
+type App struct {
 }
 
-func NewApp() *app {
-	t := &app{}
+// NewApp App init
+func NewApp() *App {
+	t := &App{}
 	return t
 }
 
-func (t *app) Parsing() {
+// Parsing Parsing
+func (t *App) Parsing() {
 	tablesName := [...]string{
 		"user",
 		"group",
@@ -57,10 +60,8 @@ func (t *app) Parsing() {
 	extension.NewExtension().Parsing()
 }
 
-/**
-返回控制器
-*/
-func (t *app) ctrl(name string) (ctrl controllers.Controller, err error) {
+// ctrl 返回控制器
+func (t *App) ctrl(name string) (ctrl controllers.Controller, err error) {
 	switch name {
 	case "user":
 		ctrl = controllers.NewUser()

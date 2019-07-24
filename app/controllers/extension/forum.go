@@ -5,20 +5,16 @@ import (
 	"github.com/gogf/gf/g"
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"strings"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mlog"
 )
 
-/*
-Forum 版块
-*/
+// Forum 版块
 type Forum struct {
 }
 
-/*
-Parsing 解析
-*/
+// Parsing 解析
 func (t *Forum) Parsing() (err error) {
 	if cfg.GetBool("extension.forum.moderators") {
 		return t.moderators()
@@ -26,6 +22,7 @@ func (t *Forum) Parsing() (err error) {
 	return
 }
 
+// moderators 版主
 func (t *Forum) moderators() (err error) {
 	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -111,9 +108,7 @@ func (t *Forum) moderators() (err error) {
 	return
 }
 
-/*
-NewForum Forum init
-*/
+// NewForum Forum init
 func NewForum() *Forum {
 	t := &Forum{}
 	return t

@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/text/gstr"

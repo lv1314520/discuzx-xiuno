@@ -2,18 +2,20 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 
 	"github.com/gogf/gf/g/database/gdb"
 )
 
-type mypost struct {
+// Mypost Mypost
+type Mypost struct {
 }
 
-func (t *mypost) ToConvert() (err error) {
+// ToConvert ToConvert
+func (t *Mypost) ToConvert() (err error) {
 	start := time.Now()
 
 	cfg := mcfg.GetCfg()
@@ -41,17 +43,18 @@ func (t *mypost) ToConvert() (err error) {
 	}
 
 	var count int64
-	if res, err := xiunoDB.Insert(xiunoTable, r); err != nil {
+	res, err := xiunoDB.Insert(xiunoTable, r)
+	if err != nil {
 		return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-	} else {
-		count, _ = res.RowsAffected()
 	}
+	count, _ = res.RowsAffected()
 
 	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
 	return
 }
 
-func NewMypost() *mypost {
-	t := &mypost{}
+// NewMypost Mypost init
+func NewMypost() *Mypost {
+	t := &Mypost{}
 	return t
 }

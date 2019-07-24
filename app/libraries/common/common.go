@@ -7,9 +7,7 @@ import (
 	"time"
 )
 
-/*
-IP2Long IP 转整型
-*/
+// IP2Long IP 转整型
 func IP2Long(ipstr string) uint32 {
 	ip := net.ParseIP(ipstr)
 	if ip == nil {
@@ -19,9 +17,7 @@ func IP2Long(ipstr string) uint32 {
 	return binary.BigEndian.Uint32(ip)
 }
 
-/*
-Long2IP 整型转 IP
-*/
+// Long2IP 整型转 IP
 func Long2IP(ipLong uint32) string {
 	ipByte := make([]byte, 4)
 	binary.BigEndian.PutUint32(ipByte, ipLong)
@@ -29,9 +25,7 @@ func Long2IP(ipLong uint32) string {
 	return ip.String()
 }
 
-/*
-GetRandomString 生成指定长度随机字符串
-*/
+// GetRandomString 生成指定长度随机字符串
 func GetRandomString(t string, l int) string {
 	pool := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 

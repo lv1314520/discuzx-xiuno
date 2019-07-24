@@ -11,8 +11,9 @@
 ### 编译指南
 - 拉取主项目 ```git clone https://github.com/skiy/xiuno-tools.git``` 
 - 进入项目目录, 执行 ```go get```
-- 编译程序 ```go install``` 或者 ```go build```
-- 完成，文件在 ```$GOPATH/bin``` 或在 ```当前目录(go build)``` 下
+- 编译程序 ```go build```
+- 完成，文件在 ```当前目录(go build)``` 下
+- 将 ```config.example.toml``` 更名为 ```config.toml```
 
 **温馨提示:**
 > 如果已配置好``GOBIN``或者将 ``$GOPATH/bin`` 环境变量，   

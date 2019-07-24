@@ -4,23 +4,19 @@ import (
 	"fmt"
 	"github.com/gogf/gf/g/database/gdb"
 	"github.com/gogf/gf/g/util/gconv"
+	"github.com/skiy/xiuno-tools/app/libraries/database"
+	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
+	"github.com/skiy/xiuno-tools/app/libraries/mlog"
 	"path"
 	"strings"
 	"time"
-	"xiuno-tools/app/libraries/database"
-	"xiuno-tools/app/libraries/mcfg"
-	"xiuno-tools/app/libraries/mlog"
 )
 
-/*
-Attach 附件
-*/
+// Attach 附件
 type Attach struct {
 }
 
-/*
-ToConvert 附件转换
-*/
+// ToConvert 附件转换
 func (t *Attach) ToConvert() (err error) {
 	start := time.Now()
 
@@ -37,10 +33,6 @@ func (t *Attach) ToConvert() (err error) {
 		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
-	if err != nil {
-		mlog.Log.Debug("", "表 %s 数据查询失败, %s", xiunoTable, err.Error())
-	}
-
 	var r gdb.Result
 	var count int64
 	var failureData []string
@@ -52,6 +44,10 @@ func (t *Attach) ToConvert() (err error) {
 	for i := 0; i < 10; i++ {
 		tbname := fmt.Sprintf("%s_%d", dxAttachmentTable, i)
 		r, err = database.GetDiscuzDB().Table(tbname).Fields(fields).Select()
+
+		if err != nil {
+			return fmt.Errorf("表 %s 数据查询失败, %s", tbname, err.Error())
+		}
 
 		if len(r) == 0 {
 			mlog.Log.Debug("", "表 %s 无数据可以转换(%s)", xiunoTable, tbname)
@@ -116,9 +112,7 @@ func (t *Attach) ToConvert() (err error) {
 	return nil
 }
 
-/*
-FileExt 获取文件后缀
-*/
+// FileExt 获取文件后缀
 func (t *Attach) FileExt(filename string) string {
 	fileSuffix := path.Ext(filename)
 	suffix := strings.Replace(fileSuffix, ".", "", -1)
@@ -143,9 +137,7 @@ func (t *Attach) FileExt(filename string) string {
 	return fileext
 }
 
-/*
-NewAttach Attach init
-*/
+// NewAttach Attach init
 func NewAttach() *Attach {
 	t := &Attach{}
 	return t

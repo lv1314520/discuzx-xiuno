@@ -82,8 +82,11 @@ func (t *User) sameUCenter() (err error) {
 		batch = 1
 	}
 
-	preg := `for key 'email'`
-	reg, _ := regexp.Compile(preg)
+	emailMul := `for key 'email'`
+	regEmailMul, _ := regexp.Compile(emailMul)
+
+	emailLong := `Data too long for column 'email'`
+	regEmailLong, _ := regexp.Compile(emailLong)
 
 	dataList := gdb.List{}
 	for _, u := range r.ToList() {
@@ -120,12 +123,25 @@ func (t *User) sameUCenter() (err error) {
 		} else {
 			res, err := xiunoDB.Insert(xiunoTable, d)
 			if err != nil {
-				// 修改 email 方式, 则再重新提交一次
-				if multipleEmailFlag == 2 {
+				var isDo bool
+
+				// email 过长
+				if isNil := regEmailLong.FindString(err.Error()); isNil != "" {
+					if _, err := xiunoDB.Exec("ALTER TABLE `" + xiunoTable + "` CHANGE `email` `email` CHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '邮箱'"); err != nil {
+						mlog.Log.Warning("", "表 %s 更改 email 长度为 255 失败, %s", xiunoTable, err.Error())
+					}
+
+					res, err = xiunoDB.Insert(xiunoTable, d)
+					isDo = true
+				}
+
+				// email 重复, 修改 email 方式, 则再重新提交一次
+				if !isDo && multipleEmailFlag == 2 {
 					// 错误是 email 重复
-					if isNil := reg.FindString(err.Error()); isNil != "" {
+					if isNil := regEmailMul.FindString(err.Error()); isNil != "" {
 						d["email"] = fmt.Sprintf("%d_%s", uid, email)
 						res, err = xiunoDB.Insert(xiunoTable, d)
+						isDo = true
 					}
 				}
 
@@ -194,8 +210,11 @@ func (t *User) otherUCenter() (err error) {
 	var count int64
 	fields2 := "password,salt"
 
-	preg := `for key 'email'`
-	reg, _ := regexp.Compile(preg)
+	emailMul := `for key 'email'`
+	regEmailMul, _ := regexp.Compile(emailMul)
+
+	emailLong := `Data too long for column 'email'`
+	regEmailLong, _ := regexp.Compile(emailLong)
 
 	for _, u := range r.ToList() {
 		password := "mustResetPassword" // 默认密码
@@ -235,12 +254,25 @@ func (t *User) otherUCenter() (err error) {
 
 		res, err := xiunoDB.Insert(xiunoTable, d)
 		if err != nil {
-			// 修改 email 方式, 则再重新提交一次
-			if multipleEmailFlag == 2 {
+			var isDo bool
+
+			// email 过长
+			if isNil := regEmailLong.FindString(err.Error()); isNil != "" {
+				if _, err := xiunoDB.Exec("ALTER TABLE `" + xiunoTable + "` CHANGE `email` `email` CHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '邮箱'"); err != nil {
+					mlog.Log.Warning("", "表 %s 更改 email 长度为 255 失败, %s", xiunoTable, err.Error())
+				}
+
+				res, err = xiunoDB.Insert(xiunoTable, d)
+				isDo = true
+			}
+
+			// email 重复, 修改 email 方式, 则再重新提交一次
+			if !isDo && multipleEmailFlag == 2 {
 				// 错误是 email 重复
-				if isNil := reg.FindString(err.Error()); isNil != "" {
+				if isNil := regEmailMul.FindString(err.Error()); isNil != "" {
 					d["email"] = fmt.Sprintf("%d_%s", uid, email)
 					res, err = xiunoDB.Insert(xiunoTable, d)
+					isDo = true
 				}
 			}
 

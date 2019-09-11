@@ -29,6 +29,10 @@
 
 ### 配置文件说明
 >请认真查阅配置文件的注释，主要修改 database (数据库)、tables.xiuno.user (用户表) 及 extension.file (附件迁移) 这几部分。 
+
+<details>
+<summary>配置文件内容</summary>
+
 ```toml
 [setting]
 
@@ -64,7 +68,7 @@
         pass = "123456"
         name = "discuzx"
         prefix = "pre_"
-        charset = "utf8"
+        charset = "utf8" # 与 XiunoBBS 保持一致
         debug = false    # 日志调试,建议关闭
 
     # UCenter
@@ -76,7 +80,7 @@
         pass = "123456"
         name = "discuzx"
         prefix = "pre_ucenter_"
-        charset = "utf8"
+        charset = "utf8" # 与 XiunoBBS 保持一致
         debug = false    # 日志调试,建议关闭
 
 # 需要转换的表配置
@@ -213,6 +217,7 @@
         thread_attach_total = true
 
 ```
+</details>
 
 ### 更新日志
 

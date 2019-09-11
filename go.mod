@@ -1,6 +1,6 @@
 module github.com/skiy/xiuno-tools
 
-go 1.12
+go 1.13
 
 require (
 	github.com/gogf/gf v1.7.3

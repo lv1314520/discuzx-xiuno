@@ -1,4 +1,4 @@
-package mstr
+package lstr
 
 // SubStr 截取字符串
 func SubStr(str string, start int, end int) string {

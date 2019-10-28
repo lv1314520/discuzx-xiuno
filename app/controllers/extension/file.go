@@ -1,8 +1,9 @@
 package extension
 
 import (
+	"database/sql"
 	"discuzx-xiuno/app/libraries/database"
-	"discuzx-xiuno/app/libraries/mstr"
+	"discuzx-xiuno/app/libraries/lstr"
 	"errors"
 	"fmt"
 	"github.com/skiy/gfutils/lcfg"
@@ -50,7 +51,7 @@ func (t *File) Parsing() (err error) {
 			err = fmt.Errorf("文件保存目录 (%s) 创建失败, %s", xiunoPath, err.Error())
 			return
 		}
-		llog.Log.Noticef("XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下的 files 目录下。转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可")
+		llog.Log.Infof("XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下的 files 目录下。转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可")
 	}
 
 	xiunoPath = strings.TrimRight(xiunoPath, "\\")
@@ -149,6 +150,11 @@ func (t *File) avatarImages() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Infof("表 %s 头像数据查询失败, %s", xiunoTable, err.Error())
+			return nil
+		}
+
 		return fmt.Errorf("表 %s 头像数据查询失败, %s", xiunoTable, err.Error())
 	}
 
@@ -167,7 +173,7 @@ func (t *File) avatarImages() (err error) {
 		realUID := fmt.Sprintf("%09s", uid)
 
 		// XiunoBBS avatar rule
-		dir1 := mstr.SubStr(realUID, 0, 3)
+		dir1 := lstr.SubStr(realUID, 0, 3)
 		avatarImagesPath := fmt.Sprintf("%s/%s/", xnAvatarPath, dir1)
 		xnAvatarFilePath := fmt.Sprintf("%s%s.png", avatarImagesPath, uid)
 
@@ -177,9 +183,9 @@ func (t *File) avatarImages() (err error) {
 		}
 
 		// Discuz!X avatar rule
-		dir2 := mstr.SubStr(realUID, 3, 2)
-		dir3 := mstr.SubStr(realUID, 5, 2)
-		dir4 := mstr.SubStr(realUID, -2, 0)
+		dir2 := lstr.SubStr(realUID, 3, 2)
+		dir3 := lstr.SubStr(realUID, 5, 2)
+		dir4 := lstr.SubStr(realUID, -2, 0)
 		dxAvatarImagePath := fmt.Sprintf("%s/%s/%s/%s/%s_avatar_big.jpg", dxAvatarPath, dir1, dir2, dir3, dir4)
 
 		if !gfile.IsFile(dxAvatarImagePath) {

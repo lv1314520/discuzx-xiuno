@@ -1,12 +1,12 @@
 package extension
 
 import (
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/util/gconv"
+	"github.com/skiy/gfutils/llog"
 	"strings"
 )
 
@@ -36,17 +36,17 @@ func (t *Forum) moderators() (err error) {
 	xiunoUserTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 版主数据查询失败, %s", xiunoTable, err.Error())
+		llog.Log.Debugf("表 %s 版主数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无版主数据可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无版主数据可以转换", xiunoTable)
 		return nil
 	}
 
 	forumModArr := map[int][]string{}
 	var moderArr g.SliceStr
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		moder := strings.Split(gconv.String(u["moderators"]), "	")
 
 		// 有版主
@@ -57,23 +57,23 @@ func (t *Forum) moderators() (err error) {
 	}
 
 	if len(moderArr) == 0 {
-		mlog.Log.Debug("", "表 %s 无版主(moder)可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无版主(moder)可以转换", xiunoTable)
 		return nil
 	}
 
 	fields2 := "DISTINCT uid, username"
 	r, err = database.GetXiunoDB().Table(xiunoUserTable).Where("username in (?)", moderArr).Fields(fields2).Select()
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 版主用户名查询失败, %s", xiunoTable, err.Error())
+		llog.Log.Debugf("表 %s 版主用户名查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无版主用户可以转换", xiunoTable)
+		llog.Log.Debug("表 %s 无版主用户可以转换", xiunoTable)
 		return nil
 	}
 
 	uidArr := g.MapStrStr{}
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		uidArr[gconv.String(u["username"])] = gconv.String(u["uid"])
 	}
 
@@ -104,7 +104,7 @@ func (t *Forum) moderators() (err error) {
 		}
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 更新版主成功", xiunoTable))
+	llog.Log.Infof("表 %s 更新版主成功", xiunoTable)
 	return
 }
 

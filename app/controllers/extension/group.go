@@ -1,15 +1,15 @@
 package extension
 
 import (
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/llog"
 	"strings"
 	"time"
 
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/container/gmap"
-	"github.com/gogf/gf/g/util/gconv"
+	"github.com/gogf/gf/container/gmap"
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/util/gconv"
 )
 
 // Group 用户组
@@ -55,7 +55,7 @@ func (t *Group) official() (err error) {
 		return fmt.Errorf("表 %s 重置用户组 gid 为 101 失败, %s", xiunoTable, err.Error())
 	}
 	count, _ = r.RowsAffected()
-	mlog.Log.Info("", fmt.Sprintf("表 %s 重置用户组 gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 重置用户组 gid 为 101 成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start))
 
 	// 不转换管理员 gid
 	adminID := cfg.GetInt("extension.group.admin_id")
@@ -77,7 +77,7 @@ func (t *Group) official() (err error) {
 	}
 
 	count, _ = r.RowsAffected()
-	mlog.Log.Info("", fmt.Sprintf("表 %s 重置 uid 为 %d 的用户组 gid 为 1 成功", xiunoTable, adminID))
+	llog.Log.Infof("表 %s 重置 uid 为 %d 的用户组 gid 为 1 成功", xiunoTable, adminID)
 	return
 }
 
@@ -94,7 +94,7 @@ func (t *Group) discuzGroup() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无用户组可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无用户组可以转换", xiunoTable)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (t *Group) discuzGroup() (err error) {
 	var d, w g.Map
 	var adminMap, powerArr g.ArrayStr
 
-	for _, v := range r.ToList() {
+	for _, v := range r.List() {
 		guestMap.Set(v["gid"], v["name"])
 
 		// 内置游客组 ID
@@ -133,7 +133,7 @@ func (t *Group) discuzGroup() (err error) {
 
 	// 不存在此用户组
 	if !guestMap.Contains(guestGid) {
-		mlog.Log.Debug("", "表 %s 无用户组(%d)可以转换为游客组", xiunoTable, guestGid)
+		llog.Log.Debugf("表 %s 无用户组(%d)可以转换为游客组", xiunoTable, guestGid)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (t *Group) discuzGroup() (err error) {
 	if _, err := database.GetXiunoDB().Table(xiunoTable).Where(w).Data(d).Update(); err != nil {
 		return fmt.Errorf("%s 原 %s 组(%d) 转换为游客组 gid 为 0 失败, %s", xiunoTable, guestMap.Get(guestGid), guestGid, err.Error())
 	}
-	mlog.Log.Info("", fmt.Sprintf("%s 原 %s 组(%d) 转换为游客组 gid 为 0 成功", xiunoTable, guestMap.Get(guestGid), guestGid))
+	llog.Log.Infof("%s 原 %s 组(%d) 转换为游客组 gid 为 0 成功", xiunoTable, guestMap.Get(guestGid), guestGid)
 
 	// 删除用户的权限
 	deleteUserPower := cfg.GetString("extension.group.delete_user_power")
@@ -178,6 +178,6 @@ func (t *Group) discuzGroup() (err error) {
 		return fmt.Errorf("%s 用户组(%v)增加删除用户权限失败, %s", xiunoTable, powerArr, err.Error())
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("%s 用户组(%v)增加删除用户权限成功", xiunoTable, powerArr))
+	llog.Log.Infof("%s 用户组(%v)增加删除用户权限成功", xiunoTable, powerArr)
 	return
 }

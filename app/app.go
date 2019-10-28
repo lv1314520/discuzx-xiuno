@@ -1,12 +1,12 @@
 package app
 
 import (
+	"discuzx-xiuno/app/controllers"
+	"discuzx-xiuno/app/controllers/extension"
 	"errors"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/controllers"
-	"github.com/skiy/xiuno-tools/app/controllers/extension"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/llog"
 )
 
 // App App
@@ -43,15 +43,15 @@ func (t *App) Parsing() {
 		cfgOffset := fmt.Sprintf("tables.xiuno.%s", table)
 
 		// 是否转换
-		if mcfg.GetCfg().GetBool(fmt.Sprintf("%s.convert", cfgOffset)) {
+		if lcfg.Get().GetBool(fmt.Sprintf("%s.convert", cfgOffset)) {
 			// 转换控制器
 			if ctrl, err = t.ctrl(table); err != nil {
-				mlog.Log.Warning("", "%s(%s)", err.Error(), table)
+				llog.Log.Noticef("%s(%s)", err.Error(), table)
 				continue
 			}
 
 			if err = ctrl.ToConvert(); err != nil {
-				mlog.Log.Fatal("", "转换数据表(%s)失败: %s", table, err.Error())
+				llog.Log.Fatalf("转换数据表(%s)失败: %s", table, err.Error())
 			}
 		}
 	}

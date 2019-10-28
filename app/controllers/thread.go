@@ -1,15 +1,15 @@
 package controllers
 
 import (
+	"discuzx-xiuno/app/libraries/common"
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/common"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/llog"
 	"time"
 
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/util/gconv"
 )
 
 // Thread Thread
@@ -20,7 +20,7 @@ type Thread struct {
 func (t *Thread) ToConvert() (err error) {
 	start := time.Now()
 
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -31,15 +31,15 @@ func (t *Thread) ToConvert() (err error) {
 
 	fields := "t.fid,t.tid,t.displayorder,t.authorid,t.subject,t.dateline,t.lastpost,t.views,t.replies,t.closed,p.useip,p.pid"
 	var r gdb.Result
-	r, err = database.GetDiscuzDB().Table(dxThreadTable+" t").LeftJoin(dxPostTable+" p", "p.tid = t.tid").Where("p.first = ?", 1).Where("t.tid >= ?", lastTid).OrderBy("tid ASC, pid DESC").Fields(fields).Select()
+	r, err = database.GetDiscuzDB().Table(dxThreadTable+" t").LeftJoin(dxPostTable+" p", "p.tid = t.tid").Where("p.first = ?", 1).Where("t.tid >= ?", lastTid).OrderBy("t.tid ASC, p.pid DESC").Fields(fields).Select()
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.thread.name")
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 数据查询失败, %s", xiunoTable, err.Error())
+		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
 		return nil
 	}
 
@@ -54,7 +54,9 @@ func (t *Thread) ToConvert() (err error) {
 	var prepTid int
 
 	dataList := gdb.List{}
-	for _, u := range r.ToList() {
+	countMax := len(r.List())
+
+	for _, u := range r.List() {
 		userip := common.IP2Long(gconv.String(u["useip"]))
 		tid := gconv.Int(u["tid"])
 
@@ -101,7 +103,7 @@ func (t *Thread) ToConvert() (err error) {
 		count, _ = res.RowsAffected()
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 数据导入成功, 本次导入: %d/%d 条数据, 耗时: %v", xiunoTable, count, countMax, time.Since(start))
 	return
 }
 

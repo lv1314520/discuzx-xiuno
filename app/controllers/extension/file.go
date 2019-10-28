@@ -1,20 +1,20 @@
 package extension
 
 import (
+	"discuzx-xiuno/app/libraries/database"
+	"discuzx-xiuno/app/libraries/mstr"
 	"errors"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mfile"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
-	"github.com/skiy/xiuno-tools/app/libraries/mstr"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/lfile"
+	"github.com/skiy/gfutils/llog"
 	"strings"
 	"time"
 
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/os/gfile"
-	"github.com/gogf/gf/g/util/gconv"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/os/gfile"
+	"github.com/gogf/gf/util/gconv"
 )
 
 // File 文件迁移
@@ -40,7 +40,7 @@ func (t *File) Parsing() (err error) {
 		return errors.New("Discuz!X 站点路径 (discuzx_path) 不是文件夹")
 	}
 
-	mlog.Log.Info("", "Discuz!X 的站点路径为: %s", t.DiscuzPath)
+	llog.Log.Infof("Discuz!X 的站点路径为: %s", t.DiscuzPath)
 
 	xiunoPath := cfg.GetString("extension.file.xiuno_path")
 	if xiunoPath == "" {
@@ -50,16 +50,16 @@ func (t *File) Parsing() (err error) {
 			err = fmt.Errorf("文件保存目录 (%s) 创建失败, %s", xiunoPath, err.Error())
 			return
 		}
-		mlog.Log.Warning("", "XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下的 files 目录下。转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可")
+		llog.Log.Noticef("XiunoBBS 站点路径 (xiuno_path) 未配置, 附件将移到至当前目录下的 files 目录下。转换成功后, 请将此目录下的 upload 复制到 XiunoBBS 根目录覆盖即可")
 	}
 
 	xiunoPath = strings.TrimRight(xiunoPath, "\\")
 	t.XiunoPath = strings.TrimRight(xiunoPath, "/")
 	if !gfile.IsDir(t.XiunoPath) {
-		mlog.Log.Info("", "XiunoBBS 站点路径 (xiuno_path) 不是文件夹, 附件将移到至当前目录")
+		llog.Log.Infof("XiunoBBS 站点路径 (xiuno_path) 不是文件夹, 附件将移到至当前目录")
 	}
 
-	mlog.Log.Info("", "附件、头像、版块 ICON 将迁移至目录: %s", t.XiunoPath)
+	llog.Log.Infof("附件、头像、版块 ICON 将迁移至目录: %s", t.XiunoPath)
 
 	if strings.EqualFold(t.XiunoPath, t.DiscuzPath) {
 		return errors.New("Discuz!X 目录与附件迁移目录不能相同")
@@ -105,15 +105,15 @@ func (t *File) attachFiles() (err error) {
 	}
 
 	if err := gfile.Remove(xnAttachPath); err != nil {
-		mlog.Log.Warning("", "迁移附件目录 (%s) 删除失败, %s", xnAttachPath, err.Error())
+		llog.Log.Noticef("迁移附件目录 (%s) 删除失败, %s", xnAttachPath, err.Error())
 	}
 
-	if err = mfile.CopyDir(dxAttachPath, xnAttachPath); err != nil {
+	if err = lfile.CopyDir(dxAttachPath, xnAttachPath); err != nil {
 		err = fmt.Errorf("\n迁移附件 (%s) \n至 (%s) 失败, \n原因: %s", dxAttachPath, xnAttachPath, err.Error())
 		return
 	}
 
-	mlog.Log.Info("", "迁移附件、图片、文件操作成功")
+	llog.Log.Infof("迁移附件、图片、文件操作成功")
 	return nil
 }
 
@@ -127,12 +127,12 @@ func (t *File) avatarImages() (err error) {
 	}
 
 	if err := gfile.Remove(xnAvatarPath); err != nil {
-		mlog.Log.Warning("", "迁移头像目录 (%s) 删除失败, %s", xnAvatarPath, err.Error())
+		llog.Log.Noticef("迁移头像目录 (%s) 删除失败, %s", xnAvatarPath, err.Error())
 	}
 
 	start := time.Now()
 
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -153,7 +153,7 @@ func (t *File) avatarImages() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无头像数据可以迁移", xiunoTable)
+		llog.Log.Debugf("表 %s 无头像数据可以迁移", xiunoTable)
 		return nil
 	}
 
@@ -162,7 +162,7 @@ func (t *File) avatarImages() (err error) {
 	var count int64
 	timestamp := time.Now().Unix()
 
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		uid := gconv.String(u["uid"])
 		realUID := fmt.Sprintf("%09s", uid)
 
@@ -187,7 +187,7 @@ func (t *File) avatarImages() (err error) {
 			return
 		}
 
-		if err = mfile.CopyFile(dxAvatarImagePath, xnAvatarFilePath); err != nil {
+		if err = lfile.CopyFile(dxAvatarImagePath, xnAvatarFilePath); err != nil {
 			err = fmt.Errorf("\n迁移用户 (%s) 的头像 (%s) \n至 (%s) 失败, \n原因: %s", uid, dxAvatarImagePath, xnAvatarFilePath, err.Error())
 			return
 		}
@@ -209,7 +209,7 @@ func (t *File) avatarImages() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 用户头像, 本次更新: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 用户头像, 本次更新: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start))
 	return nil
 }
 
@@ -223,7 +223,7 @@ func (t *File) forumIcons() (err error) {
 	}
 
 	if err := gfile.Remove(xnIconPath); err != nil {
-		mlog.Log.Warning("", "迁移版块 ICON 目录 (%s) 删除失败, %s", xnIconPath, err.Error())
+		llog.Log.Noticef("迁移版块 ICON 目录 (%s) 删除失败, %s", xnIconPath, err.Error())
 	}
 
 	if err := gfile.Mkdir(xnIconPath); err != nil {
@@ -244,7 +244,7 @@ func (t *File) forumIcons() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无版块 ICON 数据可以迁移", xiunoTable)
+		llog.Log.Debugf("表 %s 无版块 ICON 数据可以迁移", xiunoTable)
 		return nil
 	}
 
@@ -252,7 +252,7 @@ func (t *File) forumIcons() (err error) {
 
 	timestamp := time.Now().Unix()
 
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		fid := gconv.Int(u["fid"])
 		iconURL := gconv.String(u["icon"])
 
@@ -264,7 +264,7 @@ func (t *File) forumIcons() (err error) {
 			return
 		}
 
-		if err = mfile.CopyFile(dxIconPathFile, xnIconPathFile); err != nil {
+		if err = lfile.CopyFile(dxIconPathFile, xnIconPathFile); err != nil {
 			err = fmt.Errorf("\n迁移版块 (%d) ICON (%s) \n至 (%s) 失败, \n原因: %s", fid, dxIconPath, xnIconPath, err.Error())
 			return
 		}
@@ -282,6 +282,6 @@ func (t *File) forumIcons() (err error) {
 		}
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 版块 ICON 更新成功", xiunoTable))
+	llog.Log.Infof("表 %s 版块 ICON 更新成功", xiunoTable)
 	return nil
 }

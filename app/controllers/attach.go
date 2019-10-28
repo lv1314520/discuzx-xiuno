@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/util/gconv"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/llog"
 	"path"
 	"strings"
 	"time"
@@ -20,7 +20,7 @@ type Attach struct {
 func (t *Attach) ToConvert() (err error) {
 	start := time.Now()
 
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -50,12 +50,12 @@ func (t *Attach) ToConvert() (err error) {
 		}
 
 		if len(r) == 0 {
-			mlog.Log.Debug("", "表 %s 无数据可以转换(%s)", xiunoTable, tbname)
+			llog.Log.Debugf("表 %s 无数据可以转换(%s)", xiunoTable, tbname)
 			continue
 		}
 
 		dataList := gdb.List{}
-		for _, u := range r.ToList() {
+		for _, u := range r.List() {
 			filetype := t.FileExt(gconv.String(u["filename"]))
 
 			isimage := gconv.Int(u["isimage"])
@@ -84,7 +84,7 @@ func (t *Attach) ToConvert() (err error) {
 			} else {
 				if res, err := xiunoDB.Insert(xiunoTable, d); err != nil {
 					//return fmt.Errorf("表 %s 数据插入失败, %s", xiunoTable, err.Error())
-					mlog.Log.Warning("", "表 %s 数据插入失败, %s", xiunoTable, err.Error())
+					llog.Log.Noticef("表 %s 数据插入失败, %s", xiunoTable, err.Error())
 					failureData = append(failureData, fmt.Sprintf("%s(aid:%v)", tbname, u["aid"]))
 				} else {
 					c, _ := res.RowsAffected()
@@ -104,10 +104,10 @@ func (t *Attach) ToConvert() (err error) {
 		}
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start))
 
 	if len(failureData) > 0 {
-		mlog.Log.Warning("", "导入失败的数据: %v", failureData)
+		llog.Log.Noticef("导入失败的数据: %v", failureData)
 	}
 	return nil
 }

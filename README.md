@@ -68,7 +68,7 @@
         pass = "123456"
         name = "discuzx"
         prefix = "pre_"
-        charset = "utf8" # 与 XiunoBBS 保持一致
+        charset = "utf8" # 与 不可改动
         debug = false    # 日志调试,建议关闭
 
     # UCenter
@@ -80,7 +80,7 @@
         pass = "123456"
         name = "discuzx"
         prefix = "pre_ucenter_"
-        charset = "utf8" # 与 XiunoBBS 保持一致
+        charset = "utf8" # 不可改动
         debug = false    # 日志调试,建议关闭
 
 # 需要转换的表配置

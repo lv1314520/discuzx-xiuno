@@ -1,13 +1,13 @@
 package extension
 
 import (
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/llog"
 	"time"
 
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/database/gdb"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/frame/g"
 )
 
 // User User
@@ -52,7 +52,7 @@ func (t *User) normalUser() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无用户组可以转换", xiunoGroupTable)
+		llog.Log.Debugf("表 %s 无用户组可以转换", xiunoGroupTable)
 		return
 	}
 
@@ -70,14 +70,14 @@ func (t *User) normalUser() (err error) {
 	if err != nil {
 		return fmt.Errorf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error())
 	}
-	mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"]))
+	llog.Log.Infof("表 %s 原 “%v” 组(%v) 转换为普通用户组 gid 为 101 成功", xiunoGroupTable, r["name"], r["gid"])
 
 	res, err := database.GetXiunoDB().Table(xiunoUserTable).Where(w).Data(d).Update()
 	if err != nil {
 		return fmt.Errorf("表 %s 原 “%v” 组(%v) 的用户转换为普通用户组 gid 为 101 失败, %s", xiunoGroupTable, r["name"], r["gid"], err.Error())
 	}
 	count, _ := res.RowsAffected()
-	mlog.Log.Info("", fmt.Sprintf("表 %s 原 “%v” 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据, 耗时: %v", xiunoGroupTable, r["name"], r["gid"], count, time.Since(start)))
+	llog.Log.Infof("表 %s 原 “%v” 组(%v)的用户转换为普通用户组 gid 为 101 成功, 本次更新: %d 条数据, 耗时: %v", xiunoGroupTable, r["name"], r["gid"], count, time.Since(start))
 
 	return
 }
@@ -101,12 +101,12 @@ func (t *User) threadPostStat() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无用户可以转换主题和帖子数量", xiunoUserTable)
+		llog.Log.Debugf("表 %s 无用户可以转换主题和帖子数量", xiunoUserTable)
 		return
 	}
 
 	var count int64
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		w := g.Map{
 			"uid": u["uid"],
 		}
@@ -133,6 +133,6 @@ func (t *User) threadPostStat() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 用户帖子统计, 本次更新: %d 条数据, 耗时: %v", xiunoUserTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 用户帖子统计, 本次更新: %d 条数据, 耗时: %v", xiunoUserTable, count, time.Since(start))
 	return
 }

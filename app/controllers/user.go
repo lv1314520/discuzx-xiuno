@@ -1,16 +1,16 @@
 package controllers
 
 import (
+	"discuzx-xiuno/app/libraries/common"
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/common"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/llog"
 	"regexp"
 	"time"
 
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/util/gconv"
 )
 
 // User User
@@ -19,19 +19,19 @@ type User struct {
 
 // ToConvert user ToConvert
 func (t *User) ToConvert() (err error) {
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	if cfg.GetString("database.discuz.0.host") == cfg.GetString("database.uc.0.host") &&
 		cfg.GetString("database.discuz.0.port") == cfg.GetString("database.uc.0.port") &&
+		cfg.GetString("database.discuz.0.user") == cfg.GetString("database.uc.0.user") &&
 		cfg.GetString("database.discuz.0.name") == cfg.GetString("database.uc.0.name") {
 
-		mlog.Log.Debug("", "Discuz & UCenter 是同一个数据库")
+		llog.Log.Debugf("Discuz & UCenter 是同一个数据库")
 
 		return t.sameUCenter()
 	}
 
-	mlog.Log.Debug("", "Discuz & UCenter 不是同一个数据库")
-
+	llog.Log.Debugf("Discuz & UCenter 不是同一个数据库")
 	return t.otherUCenter()
 }
 
@@ -39,7 +39,7 @@ func (t *User) ToConvert() (err error) {
 func (t *User) sameUCenter() (err error) {
 	start := time.Now()
 
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	ucPre, discuzPre, xiunoPre := database.GetPrefix("uc"), database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -53,11 +53,11 @@ func (t *User) sameUCenter() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 数据查询失败, %s", xiunoTable, err.Error())
+		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
 		return nil
 	}
 
@@ -70,7 +70,7 @@ func (t *User) sameUCenter() (err error) {
 	// 清除索引方式
 	if multipleEmailFlag == 1 {
 		if _, err := xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
-			mlog.Log.Warning("", "表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
+			llog.Log.Noticef("表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
 		}
 	}
 
@@ -89,7 +89,7 @@ func (t *User) sameUCenter() (err error) {
 	regEmailLong, _ := regexp.Compile(emailLong)
 
 	dataList := gdb.List{}
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		password := gconv.String(u["password"])
 		if password == "" {
 			password = "mustResetPassword"
@@ -128,7 +128,7 @@ func (t *User) sameUCenter() (err error) {
 				// email 过长
 				if isNil := regEmailLong.FindString(err.Error()); isNil != "" {
 					if _, err := xiunoDB.Exec("ALTER TABLE `" + xiunoTable + "` CHANGE `email` `email` CHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '邮箱'"); err != nil {
-						mlog.Log.Warning("", "表 %s 更改 email 长度为 255 失败, %s", xiunoTable, err.Error())
+						llog.Log.Noticef("表 %s 更改 email 长度为 255 失败, %s", xiunoTable, err.Error())
 					}
 
 					res, err = xiunoDB.Insert(xiunoTable, d)
@@ -164,7 +164,7 @@ func (t *User) sameUCenter() (err error) {
 		count, _ = res.RowsAffected()
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start))
 	return
 }
 
@@ -172,7 +172,7 @@ func (t *User) sameUCenter() (err error) {
 func (t *User) otherUCenter() (err error) {
 	start := time.Now()
 
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	ucPre, discuzPre, xiunoPre := database.GetPrefix("uc"), database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -186,11 +186,11 @@ func (t *User) otherUCenter() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 数据查询失败, %s", xiunoTable, err.Error())
+		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
 		return nil
 	}
 
@@ -203,7 +203,7 @@ func (t *User) otherUCenter() (err error) {
 	// 清除索引方式
 	if multipleEmailFlag == 1 {
 		if _, err := xiunoDB.Exec("ALTER TABLE " + xiunoTable + " DROP INDEX email"); err != nil {
-			mlog.Log.Warning("", "表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
+			llog.Log.Noticef("表 %s 清除 email 唯一索引失败, %s", xiunoTable, err.Error())
 		}
 	}
 
@@ -216,7 +216,7 @@ func (t *User) otherUCenter() (err error) {
 	emailLong := `Data too long for column 'email'`
 	regEmailLong, _ := regexp.Compile(emailLong)
 
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		password := "mustResetPassword" // 默认密码
 		salt := ""                      // 盐值
 
@@ -259,7 +259,7 @@ func (t *User) otherUCenter() (err error) {
 			// email 过长
 			if isNil := regEmailLong.FindString(err.Error()); isNil != "" {
 				if _, err := xiunoDB.Exec("ALTER TABLE `" + xiunoTable + "` CHANGE `email` `email` CHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '邮箱'"); err != nil {
-					mlog.Log.Warning("", "表 %s 更改 email 长度为 255 失败, %s", xiunoTable, err.Error())
+					llog.Log.Noticef("表 %s 更改 email 长度为 255 失败, %s", xiunoTable, err.Error())
 				}
 
 				res, err = xiunoDB.Insert(xiunoTable, d)
@@ -285,7 +285,7 @@ func (t *User) otherUCenter() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Info("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start))
 	return
 }
 

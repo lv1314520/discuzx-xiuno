@@ -2,8 +2,7 @@
 .idea/
 .vscode
 
-config.ini
-config.toml
+config.*.toml
 logs/
 dist/
 go.sum

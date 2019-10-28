@@ -1,9 +1,9 @@
 package extension
 
 import (
-	"github.com/gogf/gf/g/os/gcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/gogf/gf/os/gcfg"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/llog"
 )
 
 var (
@@ -23,7 +23,7 @@ func NewExtension() *Extension {
 
 // Parsing Parsing
 func (t *Extension) Parsing() {
-	cfg = mcfg.GetCfg()
+	cfg = lcfg.Get()
 
 	ctrl = NewGroup()
 	t.ShowError(ctrl.Parsing())
@@ -44,6 +44,6 @@ func (t *Extension) Parsing() {
 // ShowError ShowError
 func (t *Extension) ShowError(err error) {
 	if err != nil {
-		mlog.Log.Warning("", "%s", err.Error())
+		llog.Log.Noticef("%s", err.Error())
 	}
 }

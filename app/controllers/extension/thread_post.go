@@ -2,13 +2,13 @@ package extension
 
 import (
 	"database/sql"
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/llog"
 	"time"
 
-	"github.com/gogf/gf/g"
-	"github.com/gogf/gf/g/util/gconv"
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/util/gconv"
 )
 
 // ThreadPost ThreadPost
@@ -62,13 +62,13 @@ func (t *ThreadPost) fixThreadLastGroup() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无数据可以转换 lastpid 和 lastuid", xiunoPostTable)
+		llog.Log.Debugf("表 %s 无数据可以转换 lastpid 和 lastuid", xiunoPostTable)
 		return
 	}
 
 	// 分组导入
 	var pidArr g.ArrayStr
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		pidArr = append(pidArr, gconv.String(u["max_pid"]))
 	}
 
@@ -81,7 +81,7 @@ func (t *ThreadPost) fixThreadLastGroup() (err error) {
 	}
 
 	if len(res) == 0 {
-		mlog.Log.Debug("", "表 %s 找不到 lastpid 和 lastuid", xiunoPostTable)
+		llog.Log.Debugf("表 %s 找不到 lastpid 和 lastuid", xiunoPostTable)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (t *ThreadPost) fixThreadLastGroup() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadable, count, time.Since(start))
 	return
 }
 
@@ -125,14 +125,14 @@ func (t *ThreadPost) fixThreadLast() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无数据可以转换 lastpid 和 lastuid", xiunoPostTable)
+		llog.Log.Debugf("表 %s 无数据可以转换 lastpid 和 lastuid", xiunoPostTable)
 		return
 	}
 
 	var count int64
 	// 获取最后一条帖子的 tid,uid,pid
 	fields2 := "tid,pid,uid"
-	for _, p := range r.ToList() {
+	for _, p := range r.List() {
 		u, err := xiunoDB.Table(xiunoPostTable).Where(g.Map{"pid": p["max_pid"]}).Fields(fields2).One()
 		if err != nil {
 			return err
@@ -156,7 +156,7 @@ func (t *ThreadPost) fixThreadLast() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start))
 	return
 }
 
@@ -176,7 +176,7 @@ func (t *ThreadPost) threadAttachTotal() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无 files 和 images 数据可以更新至 %s", xiunoPostTable, xiunoThreadTable)
+		llog.Log.Debugf("表 %s 无 files 和 images 数据可以更新至 %s", xiunoPostTable, xiunoThreadTable)
 		return
 	}
 
@@ -191,7 +191,7 @@ func (t *ThreadPost) threadAttachTotal() (err error) {
 	}
 
 	var count int64
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		w := g.Map{
 			"tid": u["tid"],
 		}
@@ -210,7 +210,7 @@ func (t *ThreadPost) threadAttachTotal() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 更新主题的附件数(files)和图片数(images)成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 更新主题的附件数(files)和图片数(images)成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start))
 	return
 }
 
@@ -230,13 +230,13 @@ func (t *ThreadPost) postAttachTotal() (err error) {
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 找不到附件数和图片数", xiunoAttachTable)
+		llog.Log.Debugf("表 %s 找不到附件数和图片数", xiunoAttachTable)
 		return
 	}
 
 	var count int64
 	var w, d g.Map
-	for _, u := range r.ToList() {
+	for _, u := range r.List() {
 		w = g.Map{
 			"pid": u["pid"],
 		}
@@ -261,6 +261,6 @@ func (t *ThreadPost) postAttachTotal() (err error) {
 		count += c
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 更新帖子的附件数(files)和图片数(images)成功, 本次更新: %d 条数据, 耗时: %v", xiunoPostTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 更新帖子的附件数(files)和图片数(images)成功, 本次更新: %d 条数据, 耗时: %v", xiunoPostTable, count, time.Since(start))
 	return
 }

@@ -1,15 +1,16 @@
 package controllers
 
 import (
+	"database/sql"
+	"discuzx-xiuno/app/libraries/common"
+	"discuzx-xiuno/app/libraries/database"
 	"fmt"
-	"github.com/skiy/xiuno-tools/app/libraries/common"
-	"github.com/skiy/xiuno-tools/app/libraries/database"
-	"github.com/skiy/xiuno-tools/app/libraries/mcfg"
-	"github.com/skiy/xiuno-tools/app/libraries/mlog"
+	"github.com/skiy/gfutils/lcfg"
+	"github.com/skiy/gfutils/llog"
 	"time"
 
-	"github.com/gogf/gf/g/database/gdb"
-	"github.com/gogf/gf/g/util/gconv"
+	"github.com/gogf/gf/database/gdb"
+	"github.com/gogf/gf/util/gconv"
 	"github.com/skiy/bbcode"
 )
 
@@ -21,7 +22,7 @@ type Post struct {
 func (t *Post) ToConvert() (err error) {
 	start := time.Now()
 
-	cfg := mcfg.GetCfg()
+	cfg := lcfg.Get()
 
 	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
@@ -35,11 +36,11 @@ func (t *Post) ToConvert() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.post.name")
 	if err != nil {
-		mlog.Log.Debug("", "表 %s 数据查询失败, %s", xiunoTable, err.Error())
+		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
 	if len(r) == 0 {
-		mlog.Log.Debug("", "表 %s 无数据可以转换", xiunoTable)
+		llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
 		return nil
 	}
 
@@ -52,7 +53,9 @@ func (t *Post) ToConvert() (err error) {
 	batch := cfg.GetInt("tables.xiuno.post.batch")
 
 	dataList := gdb.List{}
-	for _, u := range r.ToList() {
+	countMax := len(r.List())
+
+	for _, u := range r.List() {
 		userip := common.IP2Long(gconv.String(u["useip"]))
 		messageFmt := gconv.String(u["message"])
 
@@ -92,7 +95,7 @@ func (t *Post) ToConvert() (err error) {
 		count, _ = res.RowsAffected()
 	}
 
-	mlog.Log.Info("", fmt.Sprintf("表 %s 数据导入成功, 本次导入: %d 条数据, 耗时: %v", xiunoTable, count, time.Since(start)))
+	llog.Log.Infof("表 %s 数据导入成功, 本次导入: %d/%d 条数据, 耗时: %v", xiunoTable, count, countMax, time.Since(start))
 	return
 }
 
@@ -209,7 +212,7 @@ func (t *Post) BBCodeToHTML(msg string) string {
 	})
 
 	//处理message中的附件
-	xiunoTable := database.GetPrefix("xiuno") + mcfg.GetCfg().GetString("tables.xiuno.attach.name")
+	xiunoTable := database.GetPrefix("xiuno") + lcfg.Get().GetString("tables.xiuno.attach.name")
 
 	compiler.SetTag("attach", func(node *bbcode.BBCodeNode) (*bbcode.HTMLTag, bool) {
 
@@ -224,9 +227,10 @@ func (t *Post) BBCodeToHTML(msg string) string {
 
 			if len(attachID) > 0 {
 				r, err := database.GetXiunoDB().Table(xiunoTable).Where("aid = ?", attachID).Fields("isimage,filename").One()
-
 				if err != nil {
-					mlog.Log.Warning("", "查询附件(aid: %s)失败, %s", attachID, err.Error())
+					if err != sql.ErrNoRows {
+						llog.Log.Noticef("查询附件(aid: %s)失败, %s", attachID, err.Error())
+					}
 				} else if r != nil {
 
 					isimage := r["isimage"].Int()

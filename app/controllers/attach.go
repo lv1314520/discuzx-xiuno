@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"discuzx-xiuno/app/libraries/database"
 	"fmt"
 	"github.com/gogf/gf/database/gdb"
@@ -46,6 +47,10 @@ func (t *Attach) ToConvert() (err error) {
 		r, err = database.GetDiscuzDB().Table(tbname).Fields(fields).Select()
 
 		if err != nil {
+			if err == sql.ErrNoRows {
+				llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
+				return nil
+			}
 			return fmt.Errorf("表 %s 数据查询失败, %s", tbname, err.Error())
 		}
 

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"discuzx-xiuno/app/libraries/common"
 	"discuzx-xiuno/app/libraries/database"
 	"fmt"
@@ -53,6 +54,11 @@ func (t *User) sameUCenter() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
+			return nil
+		}
+
 		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
@@ -105,7 +111,7 @@ func (t *User) sameUCenter() (err error) {
 
 		d := gdb.Map{
 			"uid":         uid,
-			"gid":         u["groupid"],
+			"gid":         common.FixGID(u["groupid"]),
 			"email":       email,
 			"username":    u["username"],
 			"password":    password,
@@ -186,6 +192,11 @@ func (t *User) otherUCenter() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.user.name")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
+			return nil
+		}
+
 		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
@@ -240,7 +251,7 @@ func (t *User) otherUCenter() (err error) {
 
 		d := gdb.Map{
 			"uid":         uid,
-			"gid":         u["groupid"],
+			"gid":         common.FixGID(u["groupid"]),
 			"email":       email,
 			"username":    u["username"],
 			"password":    password,

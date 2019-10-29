@@ -157,19 +157,15 @@
         icon = true
 
     [extension.group]
-        # 是否启用此功能
-        enable = true
-        # Discuz 游客用户组 ID
-        guest_gid = 7
         # 管理员 UID
         admin_id = 1
-        # 添加"删除用户的权限"的用户组 gid: 1,2
-        delete_user_power = "1,2"
 
     [extension.user]
+        # 是否修正主题 (post.first 全部为0,第一条变更为主题)
+        fix_thread = true
         # 是否修正用户主题数和帖子数(帖子数=主题+回复), 非常耗时
         total = true
-        # 修正 gid 为 101 的用户及用户组
+        # 修正最低等级积分的用户 gid 为 101 的用户组
         normal_user = true
 
     [extension.thread_post]

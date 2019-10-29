@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"discuzx-xiuno/app/libraries/database"
 	"fmt"
 	"github.com/skiy/gfutils/lcfg"
@@ -33,6 +34,10 @@ func (t *Forum) ToConvert() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.forum.name")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
+			return nil
+		}
 		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 

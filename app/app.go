@@ -36,8 +36,6 @@ func (t *App) Parsing() {
 	var err error
 	var ctrl controllers.Controller
 
-	//mlog.Debugln("", mcfg.GetCfg().GetArray("tables.xiuno"))
-
 	// 遍历表
 	for _, table := range tablesName {
 		cfgOffset := fmt.Sprintf("tables.xiuno.%s", table)

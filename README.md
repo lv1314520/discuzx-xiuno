@@ -1,4 +1,4 @@
-### Xiuno Tools
+### Discuz!X To XiunoBBS
 ------
 基于 ```Go``` 语言的 ```discuz!x 3.x To xiunobbs 4.x``` 转换工具
 
@@ -9,22 +9,22 @@
 - 数据优化 ✔
 
 ### 编译指南
-- 拉取主项目 ```git clone https://github.com/skiy/xiuno-tools.git``` 
+- 拉取主项目 ```git clone https://github.com/skiy/discuzx-xiuno.git``` 
 - 进入项目目录, 执行 ```go get```
 - 编译程序 ```go build```
 - 完成，文件在 ```当前目录(go build)``` 下
-- 将 ```config.example.toml``` 更名为 ```config.toml```
+- 修改配置文件信息 ```config.toml```
 
 **温馨提示:**
 > 如果已配置好``GOBIN``或者将 ``$GOPATH/bin`` 环境变量，   
-即可以在任何目录下执行 **``xiuno-tools``** 启动本程序。   
+即可以在任何目录下执行 **``discuzx-xiuno``** 启动本程序。   
 程序必须有**可执行权限**。   
 
 **工具使用教程**
 - **操作前, 请仔细查阅 config.toml 配置文件**
 - 先建一个 xiuno4 论坛。
 - 下载本程序（选择运行平台），Linux、MacOS 需要可执行权限。
-- 配置```confit.toml```, 执行本程序 ```./xiuno-tools```(Windows 平台下, 建议使用 ```cmd```控制台, 执行```xiuno-tools.exe```)
+- 配置```confit.toml```, 执行本程序 ```./discuzx-xiuno```(Windows 平台下, 建议使用 ```powershell```控制台, 执行```discuzx-xiuno.exe```)
 - 登录后台，记得更新缓存统计。
 
 ### 配置文件说明
@@ -68,7 +68,7 @@
         pass = "123456"
         name = "discuzx"
         prefix = "pre_"
-        charset = "utf8" # 与 不可改动
+        charset = "utf8" # 不可改动
         debug = false    # 日志调试,建议关闭
 
     # UCenter
@@ -193,19 +193,15 @@
         icon = true
 
     [extension.group]
-        # 是否启用此功能
-        enable = true
-        # Discuz 游客用户组 ID
-        guest_gid = 7
         # 管理员 UID
         admin_id = 1
-        # 添加"删除用户的权限"的用户组 gid: 1,2
-        delete_user_power = "1,2"
 
     [extension.user]
+        # 是否修正主题 (post.first 全部为0,第一条变更为主题)
+        fix_thread = true
         # 是否修正用户主题数和帖子数(帖子数=主题+回复), 非常耗时
         total = true
-        # 修正 gid 为 101 的用户及用户组
+        # 修正最低等级积分的用户 gid 为 101 的用户组
         normal_user = true
 
     [extension.thread_post]
@@ -218,8 +214,6 @@
 
 ```
 </details>
-
-### 更新日志
 
 ### 使用到的开源项目
 - XiunoBBS https://bbs.xiuno.com
@@ -235,4 +229,4 @@ Email : dev@skiy.net
 Link  : https://www.skiy.net    
 
 ### 开源协议
-MIT 协议
+MIT

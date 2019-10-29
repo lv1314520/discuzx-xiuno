@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/binary"
+	"github.com/gogf/gf/util/gconv"
 	"math/rand"
 	"net"
 	"time"
@@ -56,4 +57,38 @@ func GetRandomString(t string, l int) string {
 	}
 
 	return string(result)
+}
+
+// FixGID 修正自用义用户组
+func FixGID(val interface{}) int {
+	gid := gconv.Int(val)
+
+	// 系统组 对应关系
+	// Dx  xn
+	// 1 -> 1 管理员
+	// 2 -> 2 超级版主
+	// 3 -> 4 版主
+	// 4 -> 7 (禁止发言->禁止)
+	// 5 -> 7 (禁止访问->禁止)
+	// 6 -> 7 (用户IP禁止->禁止)
+	// 7 -> 0 游客
+	// 8 -> 6 等待验证
+	// 其余所有的组都 + 100
+
+	switch gid {
+	case 1:
+	case 2:
+	case 3:
+		gid = 4
+	case 4, 5, 6:
+		gid = 7
+	case 7:
+		gid = 0
+	case 8:
+		gid = 6
+	default:
+		gid += 100
+	}
+
+	return gid
 }

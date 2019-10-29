@@ -56,11 +56,11 @@ func main() {
 ::: Discuz!X 3.x 转 XiunoBBS 4.x 工具
 :::
 ::: 作者: Skiychan <dev@skiy.net> https://www.skiy.net
-::: 本项目讨论帖：https://bbs.uhila.com/thread-8059.htm
+::: 本项目讨论帖：https://bbs.jadehive.com/thread-8059.htm
 :::
 ::: 执行过程中按 "Ctrl + Z" 结束本程序...
 :::
-::: Version: %s    Updated: 2019-10-29
+::: Version: %s    Updated: 2019-10-30
 :::
 
 `, version)
@@ -82,8 +82,8 @@ func main() {
 
 	fmt.Printf(`
 :::
-::: 本项目开源地址: https://github.com/skiy/xiuno-tools
-::: 开发者 QQ: 869990770 技术支持论坛: https://bbs.uhila.com
+::: 本项目开源地址: https://github.com/skiy/discuzx-xiuno
+::: 开发者 QQ: 869990770 技术支持论坛: https://bbs.jadehive.com
 ::: 如需技术支持请加 QQ 群: 891844359
 :::
 ::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。

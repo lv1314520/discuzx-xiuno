@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"database/sql"
+	"discuzx-xiuno/app/libraries/common"
 	"discuzx-xiuno/app/libraries/database"
 	"fmt"
 	"github.com/skiy/gfutils/lcfg"
@@ -19,15 +21,40 @@ type Group struct {
 func (t *Group) ToConvert() (err error) {
 	cfg := lcfg.Get()
 
+	officialSQL := `
+TRUNCATE TABLE bbs_group;
+INSERT INTO bbs_group (gid, name, creditsfrom, creditsto, allowread, allowthread, allowpost, allowattach, allowdown, allowtop, allowupdate, allowdelete, allowmove, allowbanuser, allowdeleteuser, allowviewip) VALUES
+(0, '游客组', 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(1, '管理员组', 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+(2, '超级版主组', 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+(4, '版主组', 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1),
+(5, '实习版主组', 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
+(6, '待验证用户组', 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(7, '禁止用户组', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(101, '一级用户组', 0, 50, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(102, '二级用户组', 50, 200, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(103, '三级用户组', 200, 1000, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(104, '四级用户组', 1000, 10000, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+(105, '五级用户组', 10000, 10000000, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0);
+`
+
+	xiunoDB := database.GetXiunoDB()
+
+	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
+
+	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.group.name")
+
+	// 重置官方用户组
+	if _, err = xiunoDB.Exec(officialSQL); err != nil {
+		return fmt.Errorf("重置官方用户组(%s)失败, %s", xiunoTable, err.Error())
+	}
+
 	// 使用 XiunoBBS 官方用户组, 则不转换
 	if cfg.GetBool("tables.xiuno.group.official") {
 		return
 	}
 
 	start := time.Now()
-	fmt.Println(start)
-
-	discuzPre, xiunoPre := database.GetPrefix("discuz"), database.GetPrefix("xiuno")
 
 	dxGroupTable := discuzPre + "common_usergroup"
 	dxGroupField := discuzPre + "common_usergroup_field"
@@ -37,8 +64,12 @@ func (t *Group) ToConvert() (err error) {
 	var r gdb.Result
 	r, err = database.GetDiscuzDB().Table(dxGroupTable+" u").LeftJoin(dxGroupField+" f", "f.groupid = u.groupid").LeftJoin(dxAdminGroup+" a", "a.admingid = u.groupid").Fields(fields).Select()
 
-	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.group.name")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
+			return nil
+		}
+
 		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 
@@ -47,8 +78,8 @@ func (t *Group) ToConvert() (err error) {
 		return nil
 	}
 
-	xiunoDB := database.GetXiunoDB()
-	if _, err = xiunoDB.Exec("TRUNCATE " + xiunoTable); err != nil {
+	// 删除 101 以外的用户组
+	if _, err = xiunoDB.Table(xiunoTable).Where("gid > ", 101).Delete(); err != nil {
 		return fmt.Errorf("清空数据表(%s)失败, %s", xiunoTable, err.Error())
 	}
 
@@ -57,8 +88,15 @@ func (t *Group) ToConvert() (err error) {
 	for _, u := range r.List() {
 		allowtop := gconv.Int(u["allowstickthread"])
 
+		gid := common.FixGID(u["groupid"])
+
+		// 小于默认用户组则全跳过
+		if gid < 102 {
+			continue
+		}
+
 		d := gdb.Map{
-			"gid":          u["groupid"],
+			"gid":          gid,
 			"name":         u["grouptitle"],
 			"creditsfrom":  u["creditshigher"],
 			"creditsto":    u["creditslower"],

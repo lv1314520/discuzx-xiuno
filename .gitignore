@@ -6,6 +6,6 @@ config.*.toml
 logs/
 dist/
 go.sum
-xiuno-tools*
+discuzx-xiuno*
 
 files/

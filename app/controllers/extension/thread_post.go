@@ -52,7 +52,7 @@ func (t *ThreadPost) fixThreadLastGroup() (err error) {
 
 	xiunoPre := database.GetPrefix("xiuno")
 	xiunoPostTable := xiunoPre + cfg.GetString("tables.xiuno.post.name")
-	xiunoThreadable := xiunoPre + cfg.GetString("tables.xiuno.thread.name")
+	xiunoThreadTable := xiunoPre + cfg.GetString("tables.xiuno.thread.name")
 	xiunoDB := database.GetXiunoDB()
 
 	fields := "max(pid) as max_pid"
@@ -97,15 +97,15 @@ func (t *ThreadPost) fixThreadLastGroup() (err error) {
 		}
 
 		var res2 sql.Result
-		if res2, err = xiunoDB.Table(xiunoThreadable).Data(d).Where(w).Update(); err != nil {
-			return fmt.Errorf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadable, err.Error())
+		if res2, err = xiunoDB.Table(xiunoThreadTable).Data(d).Where(w).Update(); err != nil {
+			return fmt.Errorf("表 %s 更新帖子的 lastuid 和 lastuid 失败, %s", xiunoThreadTable, err.Error())
 		}
 
 		c, _ := res2.RowsAffected()
 		count += c
 	}
 
-	llog.Log.Infof("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadable, count, time.Since(start))
+	llog.Log.Infof("表 %s 更新帖子的 lastuid 和 lastuid 成功, 本次更新: %d 条数据, 耗时: %v", xiunoThreadTable, count, time.Since(start))
 	return
 }
 

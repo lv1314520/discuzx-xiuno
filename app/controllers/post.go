@@ -36,6 +36,10 @@ func (t *Post) ToConvert() (err error) {
 
 	xiunoTable := xiunoPre + cfg.GetString("tables.xiuno.post.name")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Debugf("表 %s 无数据可以转换", xiunoTable)
+			return nil
+		}
 		llog.Log.Debugf("表 %s 数据查询失败, %s", xiunoTable, err.Error())
 	}
 

@@ -8,7 +8,6 @@ import (
 	"github.com/gogf/gf/os/gcfg"
 	"github.com/skiy/gfutils/lcfg"
 	"github.com/skiy/gfutils/llog"
-	"runtime"
 	"time"
 )
 
@@ -18,7 +17,8 @@ var (
 )
 
 const (
-	version = "2.0.2"
+	version = "2.0.3"
+	verDate = "2020/02/01"
 )
 
 // 配置初始化
@@ -60,12 +60,10 @@ func main() {
 :::
 ::: 执行过程中按 "Ctrl + Z" 结束本程序...
 :::
-::: Version: %s    Updated: 2019-10-30
+::: 版本: %s    时间: %s
 :::
 
-`, version)
-
-	runtime.GOMAXPROCS(runtime.NumCPU())
+`, version, verDate)
 
 	// 判断 MYSQL 连接是否正常
 	if err := checkConnectDB(); err != nil {
@@ -83,7 +81,7 @@ func main() {
 	fmt.Printf(`
 :::
 ::: 本项目开源地址: https://github.com/skiy/discuzx-xiuno
-::: 开发者 QQ: 869990770 技术支持论坛: https://bbs.jadehive.com
+::: 技术支持论坛: https://bbs.jadehive.com
 ::: 如需技术支持请加 QQ 群: 891844359
 :::
 ::: 如有意见和建议或者遇到 BUG，请到 GitHub 提 issue 。

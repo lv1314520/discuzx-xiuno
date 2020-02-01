@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/skiy/gfutils/lcfg"
 	"github.com/skiy/gfutils/llog"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/database/gdb"
@@ -30,7 +31,7 @@ func (t *Post) ToConvert() (err error) {
 
 	lastPid := cfg.GetInt("tables.xiuno.post.last_pid")
 
-	fields := "tid,pid,authorid,first,dateline,useip,message"
+	fields := "tid,pid,authorid,first,dateline,useip,message,attachment"
 	var r gdb.Result
 	r, err = database.GetDiscuzDB().Table(dxPostTable+" t").Where("pid >= ?", lastPid).OrderBy("pid ASC").Fields(fields).Select()
 
@@ -65,6 +66,11 @@ func (t *Post) ToConvert() (err error) {
 
 		if messageFmt != "" {
 			messageFmt = t.BBCodeToHTML(messageFmt) //处理message中的附件
+		}
+
+		// 添加图片附件到 messageFmt
+		if gconv.Int64(u["attachment"]) > 0 {
+			messageFmt += t.addImageToContent(gconv.Int64(u["pid"]))
 		}
 
 		d := gdb.Map{
@@ -258,4 +264,42 @@ func (t *Post) BBCodeToHTML(msg string) string {
 	})
 
 	return compiler.Compile(msg)
+}
+
+// addImageToContent 添加图片到内容里
+func (t *Post) addImageToContent(pid int64) string {
+	xiunoTable := database.GetPrefix("xiuno") + lcfg.Get().GetString("tables.xiuno.attach.name")
+	r, err := database.GetXiunoDB().Table(xiunoTable).Where("pid = ?", pid).OrderBy("create_date ASC").All()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			llog.Log.Debugf("表 %s 无帖子(%d)的附件", xiunoTable, pid)
+			return ""
+		}
+		llog.Log.Debugf("表 %s 查询帖子(%d)附件失败, %s", xiunoTable, pid, err.Error())
+		return ""
+	}
+
+	var imagesStrArr []string
+	var oriWidth, oriHeigth, proportion float64
+	var style string
+	for _, u := range r.List() {
+		imageURL := "upload/attach/" + gconv.String(u["filename"])
+
+		oriWidth = gconv.Float64(u["width"])
+		oriHeigth = gconv.Float64(u["height"])
+		if oriWidth == 0 {
+			oriWidth = 400
+		} else if oriWidth > 800 {
+			proportion = 800 / oriWidth
+			oriWidth = 800
+			oriHeigth = oriHeigth * proportion
+			style = " style=\"width: 800px; height: auto; cursor: pointer;\""
+		}
+
+		imageStr := fmt.Sprintf("<a href=\"%s\" target=\"_blank\" _href=\"%s\"><img src=\"%s\" width=\"%d\" height=\"%d\" %s></a>",
+			imageURL, imageURL, imageURL, int64(oriWidth), int64(oriHeigth), style)
+		imagesStrArr = append(imagesStrArr, imageStr)
+	}
+
+	return "<p class=\"imagelist\">" + strings.Join(imagesStrArr, "<br>") + "</p>"
 }

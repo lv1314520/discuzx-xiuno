@@ -269,13 +269,13 @@ func (t *Post) BBCodeToHTML(msg string) string {
 // addImageToContent 添加图片到内容里
 func (t *Post) addImageToContent(pid int64) string {
 	xiunoTable := database.GetPrefix("xiuno") + lcfg.Get().GetString("tables.xiuno.attach.name")
-	r, err := database.GetXiunoDB().Table(xiunoTable).Where("pid = ?", pid).OrderBy("create_date ASC").All()
+	r, err := database.GetXiunoDB().Table(xiunoTable).Where("pid = ? AND isimage = 1", pid).OrderBy("create_date ASC").All()
 	if err != nil {
 		if err == sql.ErrNoRows {
-			llog.Log.Debugf("表 %s 无帖子(%d)的附件", xiunoTable, pid)
+			llog.Log.Debugf("表 %s 无帖子(%d)的图片附件", xiunoTable, pid)
 			return ""
 		}
-		llog.Log.Debugf("表 %s 查询帖子(%d)附件失败, %s", xiunoTable, pid, err.Error())
+		llog.Log.Debugf("表 %s 查询帖子(%d)图片附件失败, %s", xiunoTable, pid, err.Error())
 		return ""
 	}
 

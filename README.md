@@ -9,7 +9,7 @@
 - 数据优化 ✔
 
 ### 编译指南
-- 拉取主项目 ```git clone https://github.com/skiy/discuzx-xiuno.git``` 
+- 拉取主项目 ```git clone https://github.com/xiulab/discuzx-xiuno.git``` 
 - 进入项目目录, 执行 ```go get```
 - 编译程序 ```go build```
 - 完成，文件在 ```当前目录(go build)``` 下
@@ -223,10 +223,6 @@
 - https://github.com/gogf/gf (基础框架)
 - https://github.com/frustra/bbcode (内容 BBCODE 转 HTML)
 
-### 作者
-Author: Skiychan   
-Email : dev@skiy.net   
-Link  : https://www.skiy.net    
 
 ### 开源协议
 MIT
